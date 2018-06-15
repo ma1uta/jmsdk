@@ -1,0 +1,35 @@
+jeon:
+  versions:
+    - r0.3.0
+  name: 'localhost'
+  macaroon: 'secretkey'
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: 'jdbc:postgresql://localhost/jeon-test'
+    username: "jeon"
+    password: "jeon"
+    data:
+      - 'classpath:/data.sql'
+      - 'classpath:/db/migration/V1__Create_schema.sql'
+     # - 'classpathL/sql/loginPassword.sql'
+    initialize: true
+    schema:
+      - 'classpath:/data.sql'
+      - 'classpath:/db/migration/V1__Create_schema.sql'
+      - 'classpath:/sql/loginPassword.sql'
+security:
+  basic:
+    enabled: false
+  user:
+    name: jeon
+    password: jeon
+logging:
+  level:
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG
+flyway:
+  enabled: false
+
+
