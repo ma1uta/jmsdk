@@ -192,23 +192,27 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         }
 
         while (true) {
-            LoopState nextState = loopAction.apply(sync);
+            try {
+                LoopState nextState = loopAction.apply(sync);
 
-            String nextBatch = sync.getNextBatch();
-            getHolder().runInTransaction((holder, dao) -> {
-                holder.getConfig().setNextBatch(nextBatch);
-                saveData(holder, dao);
-            });
+                String nextBatch = sync.getNextBatch();
+                getHolder().runInTransaction((holder, dao) -> {
+                    holder.getConfig().setNextBatch(nextBatch);
+                    saveData(holder, dao);
+                });
 
-            if (LoopState.NEXT_STATE.equals(nextState)) {
-                return LoopState.NEXT_STATE;
+                if (LoopState.NEXT_STATE.equals(nextState)) {
+                    return LoopState.NEXT_STATE;
+                }
+
+                if (Thread.currentThread().isInterrupted()) {
+                    return LoopState.EXIT;
+                }
+
+                sync = matrixClient.sync().sync(config.getFilterId(), nextBatch, false, null, config.getTimeout());
+            } catch (Exception e) {
+                LOGGER.error("Exception: ", e);
             }
-
-            if (Thread.currentThread().isInterrupted()) {
-                return LoopState.EXIT;
-            }
-
-            sync = matrixClient.sync().sync(config.getFilterId(), nextBatch, false, null, config.getTimeout());
         }
     }
 
