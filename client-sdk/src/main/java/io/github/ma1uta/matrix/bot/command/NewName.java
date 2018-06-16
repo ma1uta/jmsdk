@@ -40,18 +40,23 @@ public class NewName<C extends BotConfig, D extends BotDao<C>, S extends Persist
 
     @Override
     public void invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+        C config = holder.getConfig();
+        if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
+            return;
+        }
+
         MatrixClient matrixClient = holder.getMatrixClient();
         if (arguments == null || arguments.trim().isEmpty()) {
             matrixClient.event().sendNotice(roomId, "Usage: " + usage());
         } else {
             matrixClient.profile().setDisplayName(arguments);
-            holder.getConfig().setDisplayName(arguments);
+            config.setDisplayName(arguments);
         }
     }
 
     @Override
     public String help() {
-        return "set new name.";
+        return "set new name (invoked only by owner).";
     }
 
     @Override
