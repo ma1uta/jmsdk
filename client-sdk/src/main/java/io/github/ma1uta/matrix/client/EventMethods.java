@@ -49,7 +49,7 @@ public class EventMethods {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("roomId", roomId);
         pathParams.put("eventType", Event.EventType.ROOM_MESSAGE);
-        pathParams.put("txnId", Long.toString(getMatrixClient().getTxn().getAndIncrement()));
+        pathParams.put("txnId", Long.toString(System.currentTimeMillis()));
 
         Map<String, String> payload = new HashMap<>();
         payload.put("msgtype", Event.MessageType.NOTICE);
@@ -69,7 +69,7 @@ public class EventMethods {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("roomId", roomId);
         pathParams.put("eventType", Event.EventType.ROOM_MESSAGE);
-        pathParams.put("txnId", Long.toString(getMatrixClient().getTxn().getAndIncrement()));
+        pathParams.put("txnId", Long.toString(System.currentTimeMillis()));
 
         Map<String, String> payload = new HashMap<>();
         payload.put("msgtype", Event.MessageType.NOTICE);

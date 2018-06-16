@@ -81,12 +81,6 @@ public class BotConfig {
     private String nextBatch;
 
     /**
-     * Transaction id.
-     */
-    @Column(name = "txn_id")
-    private Long txnId = 0L;
-
-    /**
      * Bot's owner.
      */
     private String owner;
@@ -177,14 +171,6 @@ public class BotConfig {
 
     public void setNextBatch(String nextBatch) {
         this.nextBatch = nextBatch;
-    }
-
-    public Long getTxnId() {
-        return txnId;
-    }
-
-    public void setTxnId(Long txnId) {
-        this.txnId = txnId;
     }
 
     public BotState getState() {

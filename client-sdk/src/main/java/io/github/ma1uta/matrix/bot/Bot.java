@@ -35,8 +35,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -63,9 +65,11 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
     private final boolean exitOnEmptyRooms;
 
+    private final Set<String> skipTimelineRooms = new HashSet<>();
+
     public Bot(Client client, String homeserverUrl, String asToken, boolean addUserIdToRequests, boolean updateAccessToken,
                boolean exitOnEmptyRooms, C config, S service, List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        MatrixClient matrixClient = new MatrixClient(homeserverUrl, client, addUserIdToRequests, updateAccessToken, config.getTxnId());
+        MatrixClient matrixClient = new MatrixClient(homeserverUrl, client, addUserIdToRequests, updateAccessToken);
         matrixClient.setAccessToken(asToken);
         matrixClient.setUserId(config.getUserId());
         this.holder = new BotHolder<>(matrixClient, service, this);
@@ -100,6 +104,10 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
     public void setInitAction(BiConsumer<BotHolder<C, D, S, E>, D> initAction) {
         this.initAction = initAction;
+    }
+
+    public Set<String> getSkipTimelineRooms() {
+        return skipTimelineRooms;
     }
 
     @Override
@@ -365,7 +373,9 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         long lastOriginTs = 0;
         MatrixClient matrixClient = getHolder().getMatrixClient();
         for (Event event : events) {
-            processEvent(roomId, event);
+            if (!getSkipTimelineRooms().contains(roomId)) {
+                processEvent(roomId, event);
+            }
 
             if (event.getOriginServerTs() != null && event.getOriginServerTs() > lastOriginTs) {
                 lastOriginTs = event.getOriginServerTs();
@@ -375,6 +385,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         if (lastEvent != null) {
             matrixClient.receipt().sendReceipt(roomId, lastEvent);
         }
+        getSkipTimelineRooms().remove(roomId);
         return LoopState.RUN;
     }
 
@@ -429,7 +440,6 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             try {
                 getHolder().runInTransaction((holder, dao) -> {
                     processAction(roomId, event, body);
-                    config.setTxnId(matrixClient.getTxn().get());
                     saveData(holder, dao);
                 });
             } catch (Exception e) {

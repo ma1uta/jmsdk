@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.ws.rs.client.Client;
 
 /**
@@ -31,15 +30,12 @@ public class MatrixClient implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatrixClient.class);
 
-    private final AtomicLong txn;
-
     private final boolean updateAccessToken;
 
     private final RequestMethods requestMethods;
 
-    public MatrixClient(String homeserverUrl, Client client, boolean addUserIdToRequests, boolean updateAccessToken, Long txnId) {
+    public MatrixClient(String homeserverUrl, Client client, boolean addUserIdToRequests, boolean updateAccessToken) {
         this.updateAccessToken = updateAccessToken;
-        this.txn = new AtomicLong(txnId != null ? txnId : 0);
         this.requestMethods = new RequestMethods(client, homeserverUrl, addUserIdToRequests);
     }
 
@@ -58,10 +54,6 @@ public class MatrixClient implements Closeable {
 
     public boolean isUpdateAccessToken() {
         return updateAccessToken;
-    }
-
-    public AtomicLong getTxn() {
-        return txn;
     }
 
     public RequestMethods getRequestMethods() {
