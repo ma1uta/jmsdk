@@ -18,7 +18,6 @@ package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.AuthApi;
-import io.github.ma1uta.matrix.client.model.auth.AuthType;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import org.slf4j.Logger;
@@ -50,7 +49,7 @@ public class AuthMethods {
     public void login(String login, String password) {
         LOGGER.debug("Login with username: ''{}'' and password: ''<redacted>''", login);
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setType(AuthType.PASSWORD);
+        loginRequest.setType(AuthApi.AuthType.PASSWORD);
         loginRequest.setUser(login);
         loginRequest.setPassword(password);
 

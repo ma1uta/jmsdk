@@ -23,7 +23,6 @@ import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.RoomEventFilter;
 import io.github.ma1uta.matrix.client.model.filter.RoomFilter;
-import io.github.ma1uta.matrix.client.model.room.RoomId;
 import io.github.ma1uta.matrix.client.model.sync.InvitedRoom;
 import io.github.ma1uta.matrix.client.model.sync.JoinedRoom;
 import io.github.ma1uta.matrix.client.model.sync.LeftRoom;
@@ -336,18 +335,12 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
                 return Event.MembershipState.INVITE.equals(membership)
                     && Event.EventType.ROOM_MEMBER.equals(event.getType());
             }).findFirst().ifPresent(event -> {
-                RoomId response = holder.getMatrixClient().room().joinRoomByIdOrAlias(roomId);
+                holder.getMatrixClient().room().joinRoomByIdOrAlias(roomId);
 
-                if ((response.getErrcode() == null || response.getErrcode().trim().isEmpty())
-                    && (response.getError() == null || response.getError().trim().isEmpty())) {
-                    C config = holder.getConfig();
-                    config.setState(BotState.JOINED);
-                    config.setOwner(event.getSender());
-                    saveData(holder, dao);
-                } else {
-                    throw new RuntimeException(
-                        String.format("Failed join to room, errcode: ''%s'', error: ''%s''", response.getErrcode(), response.getError()));
-                }
+                C config = holder.getConfig();
+                config.setState(BotState.JOINED);
+                config.setOwner(event.getSender());
+                saveData(holder, dao);
             }));
         });
     }

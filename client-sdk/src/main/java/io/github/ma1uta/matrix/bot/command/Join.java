@@ -24,6 +24,8 @@ import io.github.ma1uta.matrix.bot.Command;
 import io.github.ma1uta.matrix.bot.PersistentService;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.model.room.RoomId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Join new room.
@@ -34,6 +36,8 @@ import io.github.ma1uta.matrix.client.model.room.RoomId;
  * @param <E> extra data.
  */
 public class Join<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> implements Command<C, D, S, E> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Join.class);
 
     @Override
     public String name() {
@@ -50,11 +54,13 @@ public class Join<C extends BotConfig, D extends BotDao<C>, S extends Persistent
         if (arguments == null || arguments.trim().isEmpty()) {
             matrixClient.event().sendNotice(roomId, "Usage: " + usage());
         } else {
-            RoomId result = matrixClient.room().joinRoomByIdOrAlias(arguments);
-            holder.getBot().getSkipTimelineRooms().add(result.getRoomId());
-            if (result.getError() != null && !result.getError().trim().isEmpty()
-                && result.getErrcode() != null && !result.getErrcode().trim().isEmpty()) {
-                matrixClient.event().sendNotice(roomId, String.format("Cannot join [%s]: %s", result.getErrcode(), result.getError()));
+            try {
+                RoomId result = matrixClient.room().joinRoomByIdOrAlias(arguments);
+                holder.getBot().getSkipTimelineRooms().add(result.getRoomId());
+            } catch (Exception e) {
+                String msg = String.format("Cannot join: %s", e.getMessage());
+                LOGGER.error(msg, e);
+                matrixClient.event().sendNotice(roomId, msg);
             }
         }
         return true;
