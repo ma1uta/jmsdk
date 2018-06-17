@@ -39,20 +39,21 @@ public class SetAccessPolicy<C extends BotConfig, D extends BotDao<C>, S extends
     }
 
     @Override
-    public void invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
         C config = holder.getConfig();
         if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
-            return;
+            return false;
         }
         if (arguments != null && !arguments.isEmpty()) {
             try {
                 config.setPolicy(AccessPolicy.valueOf(arguments.toUpperCase()));
-                return;
+                return true;
             } catch (IllegalArgumentException ignored) {
                 // wrong option.
             }
         }
         holder.getMatrixClient().event().sendNotice(roomId, "usage: !policy [all|owner]");
+        return true;
     }
 
     @Override

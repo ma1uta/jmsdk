@@ -40,7 +40,7 @@ public class Help<C extends BotConfig, D extends BotDao<C>, S extends Persistent
     }
 
     @Override
-    public void invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
         MatrixClient matrixClient = holder.getMatrixClient();
 
         String prefix = holder.getBot().getPrefix();
@@ -55,6 +55,7 @@ public class Help<C extends BotConfig, D extends BotDao<C>, S extends Persistent
         }).reduce(StringBuilder::append).map(StringBuilder::toString).orElse("");
 
         matrixClient.event().sendNotice(roomId, help);
+        return true;
     }
 
     @Override

@@ -39,10 +39,10 @@ public class NewName<C extends BotConfig, D extends BotDao<C>, S extends Persist
     }
 
     @Override
-    public void invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
         C config = holder.getConfig();
         if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
-            return;
+            return false;
         }
 
         MatrixClient matrixClient = holder.getMatrixClient();
@@ -52,6 +52,7 @@ public class NewName<C extends BotConfig, D extends BotDao<C>, S extends Persist
             matrixClient.profile().setDisplayName(arguments);
             config.setDisplayName(arguments);
         }
+        return true;
     }
 
     @Override

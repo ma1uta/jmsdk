@@ -376,9 +376,10 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         String lastEvent = null;
         long lastOriginTs = 0;
         MatrixClient matrixClient = getHolder().getMatrixClient();
+        boolean invoked = false;
         for (Event event : events) {
             if (!getSkipTimelineRooms().contains(roomId)) {
-                processEvent(roomId, event);
+                invoked = processEvent(roomId, event);
             }
 
             if (event.getOriginServerTs() != null && event.getOriginServerTs() > lastOriginTs) {
@@ -386,7 +387,10 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
                 lastEvent = event.getEventId();
             }
         }
-        if (lastEvent != null) {
+        C config = getHolder().getConfig();
+        boolean read = config.getReceiptPolicy() == null || ReceiptPolicy.READ.equals(config.getReceiptPolicy());
+        boolean executed = config.getReceiptPolicy() != null && ReceiptPolicy.EXECUTED.equals(config.getReceiptPolicy()) && invoked;
+        if (lastEvent != null && (read || executed)) {
             matrixClient.receipt().sendReceipt(roomId, lastEvent);
         }
         getSkipTimelineRooms().remove(roomId);
@@ -429,12 +433,14 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      *
      * @param roomId room id.
      * @param event  event.
+     * @return {@code true} if any command was invoked, else {@code false}.
      */
-    protected void processEvent(String roomId, Event event) {
+    protected boolean processEvent(String roomId, Event event) {
         MatrixClient matrixClient = getHolder().getMatrixClient();
         C config = getHolder().getConfig();
         Map<String, Object> content = event.getContent();
         String body = (String) content.get("body");
+        boolean invoked = false;
         if (Event.EventType.ROOM_MESSAGE.equals(event.getType())
             && !matrixClient.getUserId().equals(event.getSender())
             && Event.MessageType.TEXT.equals(content.get("msgtype"))
@@ -442,14 +448,16 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             && (body.trim().startsWith(getPrefix()) || (config.getDefaultCommand() != null && !config.getDefaultCommand().trim()
             .isEmpty()))) {
             try {
-                getHolder().runInTransaction((holder, dao) -> {
-                    processAction(roomId, event, body);
+                invoked = getHolder().runInTransaction((holder, dao) -> {
+                    boolean processed = processAction(roomId, event, body);
                     saveData(holder, dao);
+                    return processed;
                 });
             } catch (Exception e) {
                 LOGGER.error(String.format("Cannot perform action '%s'", body), e);
             }
         }
+        return invoked;
     }
 
     /**
@@ -482,8 +490,9 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @param roomId  room id.
      * @param event   event.
      * @param content command.
+     * @return {@code true} if invoked command, else {@code false}.
      */
-    protected void processAction(String roomId, Event event, String content) {
+    protected boolean processAction(String roomId, Event event, String content) {
         String contentWithoutPrefix = content.trim().substring(getPrefix().length());
         String[] arguments = contentWithoutPrefix.trim().split("\\s");
         String commandName = arguments[0];
@@ -496,9 +505,10 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             argument = content;
         }
         if (command != null) {
-            command.invoke(getHolder(), roomId, event, argument);
+            return command.invoke(getHolder(), roomId, event, argument);
         } else {
             getHolder().getMatrixClient().event().sendNotice(roomId, "Unknown command: " + commandName);
+            return false;
         }
     }
 }

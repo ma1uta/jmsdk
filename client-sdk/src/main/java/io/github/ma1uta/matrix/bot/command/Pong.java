@@ -39,8 +39,9 @@ public class Pong<C extends BotConfig, D extends BotDao<C>, S extends Persistent
     }
 
     @Override
-    public void invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
         holder.getMatrixClient().event().sendNotice(roomId, "pong");
+        return true;
     }
 
     @Override

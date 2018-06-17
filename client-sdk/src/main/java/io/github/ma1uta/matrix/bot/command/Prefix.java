@@ -40,11 +40,11 @@ public class Prefix<C extends BotConfig, D extends BotDao<C>, S extends Persiste
     }
 
     @Override
-    public void invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
         C config = holder.getConfig();
         MatrixClient matrixClient = holder.getMatrixClient();
         if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
-            return;
+            return false;
         }
         if (arguments == null || arguments.trim().isEmpty()) {
             String prefix = config.getPrefix();
@@ -52,6 +52,7 @@ public class Prefix<C extends BotConfig, D extends BotDao<C>, S extends Persiste
         } else {
             config.setPrefix(arguments);
         }
+        return true;
     }
 
     @Override

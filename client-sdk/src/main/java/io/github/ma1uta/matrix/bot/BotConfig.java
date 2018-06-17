@@ -117,6 +117,11 @@ public class BotConfig {
      */
     private Boolean skipInitialSync;
 
+    /**
+     * When send receipt.
+     */
+    private ReceiptPolicy receiptPolicy;
+
     public Long getId() {
         return id;
     }
@@ -227,6 +232,14 @@ public class BotConfig {
 
     public void setSkipInitialSync(Boolean skipInitialSync) {
         this.skipInitialSync = skipInitialSync;
+    }
+
+    public ReceiptPolicy getReceiptPolicy() {
+        return receiptPolicy;
+    }
+
+    public void setReceiptPolicy(ReceiptPolicy receiptPolicy) {
+        this.receiptPolicy = receiptPolicy;
     }
 
     @Override
