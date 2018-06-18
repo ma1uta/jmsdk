@@ -224,6 +224,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      */
     public LoopState newState() {
         getHolder().runInTransaction((holder, dao) -> {
+            LOGGER.debug("Start registration.");
             BotConfig config = holder.getConfig();
 
             RegisterRequest registerRequest = new RegisterRequest();
@@ -233,6 +234,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
             MatrixClient matrixClient = holder.getMatrixClient();
             matrixClient.account().register(registerRequest);
+            LOGGER.debug("Set new display name: {}", config.getDisplayName());
             matrixClient.profile().setDisplayName(config.getDisplayName());
 
             RoomEventFilter roomEventFilter = new RoomEventFilter();
@@ -242,10 +244,12 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             FilterData filter = new FilterData();
             filter.setRoom(roomFilter);
             config.setFilterId(matrixClient.filter().uploadFilter(filter).getFilterId());
+            LOGGER.debug("Set new filter: {}", config.getFilterId());
 
             config.setState(BotState.REGISTERED);
 
             saveData(holder, dao);
+            LOGGER.debug("Finish registration.");
         });
         return LoopState.NEXT_STATE;
     }
@@ -267,6 +271,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     }
 
     protected LoopState registeredState(Map<String, List<Event>> eventMap) {
+        LOGGER.debug("Wait for invite");
         if (!eventMap.isEmpty()) {
             joinRoom(eventMap);
             return LoopState.NEXT_STATE;
@@ -330,17 +335,24 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      */
     public void joinRoom(Map<String, List<Event>> eventMap) {
         getHolder().runInTransaction((holder, dao) -> {
+            LOGGER.debug("Start joining.");
             eventMap.forEach((roomId, events) -> events.stream().filter(event -> {
                 Object membership = event.getContent().get("membership");
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Membership: {}", membership);
+                    LOGGER.debug("Event type: {}", event.getType());
+                }
                 return Event.MembershipState.INVITE.equals(membership)
                     && Event.EventType.ROOM_MEMBER.equals(event.getType());
             }).findFirst().ifPresent(event -> {
+                LOGGER.debug("Join to room {}", roomId);
                 holder.getMatrixClient().room().joinRoomByIdOrAlias(roomId);
 
                 C config = holder.getConfig();
                 config.setState(BotState.JOINED);
                 config.setOwner(event.getSender());
                 saveData(holder, dao);
+                LOGGER.debug("Finish joining");
             }));
         });
     }
@@ -352,6 +364,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      */
     public LoopState deletedState() {
         getHolder().runInTransaction((holder, dao) -> {
+            LOGGER.debug("Delete bot");
             holder.getMatrixClient().account().deactivate();
             dao.delete(holder.getConfig());
         });
@@ -372,7 +385,10 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         boolean invoked = false;
         for (Event event : events) {
             if (!getSkipTimelineRooms().contains(roomId)) {
+                LOGGER.debug("Process events");
                 invoked = processEvent(roomId, event);
+            } else {
+                LOGGER.debug("Skip timelines");
             }
 
             if (event.getOriginServerTs() != null && event.getOriginServerTs() > lastOriginTs) {
@@ -383,7 +399,12 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         C config = getHolder().getConfig();
         boolean read = config.getReceiptPolicy() == null || ReceiptPolicy.READ.equals(config.getReceiptPolicy());
         boolean executed = config.getReceiptPolicy() != null && ReceiptPolicy.EXECUTED.equals(config.getReceiptPolicy()) && invoked;
+
+        LOGGER.debug("Read: {}", read);
+        LOGGER.debug("Executed: {}", executed);
+        LOGGER.debug("Last event: {}", lastEvent);
         if (lastEvent != null && (read || executed)) {
+            LOGGER.debug("send receipt");
             matrixClient.receipt().sendReceipt(roomId, lastEvent);
         }
         getSkipTimelineRooms().remove(roomId);
@@ -397,6 +418,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      */
     public void send(Event event) {
         LoopState state = LoopState.RUN;
+        LOGGER.debug("State: {}", state);
         switch (getHolder().getConfig().getState()) {
             case NEW:
                 state = newState();
@@ -434,10 +456,17 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         Map<String, Object> content = event.getContent();
         String body = (String) content.get("body");
         boolean invoked = false;
+        boolean permit = permit(event);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Event type: {}", event.getType());
+            LOGGER.debug("Sender: {}", event.getSender());
+            LOGGER.debug("Msgtype: {}", content.get("msgtype"));
+            LOGGER.debug("Permit: {}", permit);
+        }
         if (Event.EventType.ROOM_MESSAGE.equals(event.getType())
             && !matrixClient.getUserId().equals(event.getSender())
             && Event.MessageType.TEXT.equals(content.get("msgtype"))
-            && permit(event)
+            && permit
             && (body.trim().startsWith(getPrefix()) || (config.getDefaultCommand() != null && !config.getDefaultCommand().trim()
             .isEmpty()))) {
             try {
@@ -498,6 +527,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             argument = content;
         }
         if (command != null) {
+            LOGGER.debug("invoke command: {}", command.getClass());
             return command.invoke(getHolder(), roomId, event, argument);
         } else {
             getHolder().getMatrixClient().event().sendNotice(roomId, "Unknown command: " + commandName);

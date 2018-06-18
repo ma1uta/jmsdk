@@ -131,25 +131,36 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
      * @return {@code true} if event was processed, else {@code false}.
      */
     public boolean send(String roomId, Event event) {
+        LOGGER.debug("Receive event in the room: {0}", roomId);
         if (RunState.APPLICATION_SERVICE.equals(getRunState())) {
             Optional<Bot<C, D, S, E>> bot = getBotMap().entrySet().stream()
                 .filter(entry -> {
                     BotHolder<C, D, S, E> holder = entry.getValue().getHolder();
                     List<String> joinedRooms = holder.getMatrixClient().room().joinedRooms();
-                    C config = holder.getConfig();
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Bot \"{}\"", holder.getConfig().getUserId());
+                        joinedRooms.forEach(joinedRoom -> LOGGER.debug("Room: {}", joinedRoom));
+                    }
                     if (joinedRooms.contains(roomId)) {
                         return true;
                     }
                     Object membership = event.getContent().get("membership");
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Membership: {}", membership);
+                        LOGGER.debug("Event type: {}", event.getType());
+                        LOGGER.debug("State key: {}", event.getStateKey());
+                    }
                     return Event.MembershipState.INVITE.equals(membership)
                         && Event.EventType.ROOM_MEMBER.equals(event.getType())
-                        && config.getUserId().equals(event.getStateKey());
+                        && holder.getConfig().getUserId().equals(event.getStateKey());
                 }).map(Map.Entry::getValue).findFirst();
 
             if (bot.isPresent()) {
+                LOGGER.debug("Bot \"{}\" is found.", bot.get().getHolder().getConfig().getUserId());
                 bot.get().send(event);
                 return true;
             } else {
+                LOGGER.debug("Bot isn't found.");
                 return false;
             }
         } else {
