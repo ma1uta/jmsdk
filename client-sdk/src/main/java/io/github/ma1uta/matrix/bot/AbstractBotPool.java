@@ -136,9 +136,17 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
             Optional<Bot<C, D, S, E>> bot = getBotMap().entrySet().stream()
                 .filter(entry -> {
                     BotHolder<C, D, S, E> holder = entry.getValue().getHolder();
-                    List<String> joinedRooms = holder.getMatrixClient().room().joinedRooms();
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Bot \"{}\"", holder.getConfig().getUserId());
+                    }
+                    List<String> joinedRooms;
+                    try {
+                        joinedRooms = holder.getMatrixClient().room().joinedRooms();
+                    } catch (Exception e) {
+                        LOGGER.error("Cannot retrieve joined rooms.", e);
+                        return false;
+                    }
+                    if (LOGGER.isDebugEnabled()) {
                         joinedRooms.forEach(joinedRoom -> LOGGER.debug("Room: {}", joinedRoom));
                     }
                     if (joinedRooms.contains(roomId)) {
