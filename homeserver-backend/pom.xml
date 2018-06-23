@@ -22,34 +22,26 @@
     <parent>
         <groupId>io.github.ma1uta</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
     </parent>
     <artifactId>homeserver-backend</artifactId>
 
     <properties>
         <commons.lang3.version>3.7</commons.lang3.version>
+        <client.api.version>0.4</client.api.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.github.ma1uta</groupId>
             <artifactId>client-api</artifactId>
-            <version>${jeon.version}</version>
+            <version>${client.api.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons.lang3.version}</version>
-        </dependency>
-         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet.api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 </project>

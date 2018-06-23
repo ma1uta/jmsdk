@@ -15,27 +15,34 @@
   ~ limitations under the License.
   -->
 
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>io.github.ma1uta</groupId>
         <artifactId>jmsdk</artifactId>
         <version>0.3</version>
     </parent>
-    <artifactId>common-backend</artifactId>
-    <version>0.2</version>
+    <artifactId>bot-sdk</artifactId>
+    <version>0.1-SNAPSHOT</version>
 
     <properties>
-        <common.api.version>0.4</common.api.version>
+        <client.sdk.version>0.3-SNAPSHOT</client.sdk.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.github.ma1uta</groupId>
-            <artifactId>common-api</artifactId>
-            <version>${common.api.version}</version>
+            <artifactId>client-sdk</artifactId>
+            <version>${client.sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <version>${hibernate.jpa.api.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -22,10 +22,10 @@
     <parent>
         <groupId>io.github.ma1uta</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
     </parent>
     <artifactId>identity-backend</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
 
     <properties>
         <commons.lang3.version>3.7</commons.lang3.version>
@@ -34,14 +34,11 @@
         <bcprov.ext.jdk15on.version>1.59</bcprov.ext.jdk15on.version>
         <eddsa.version>0.2.0</eddsa.version>
         <common.backend.version>0.1</common.backend.version>
+        <identity.api.version>0.4</identity.api.version>
+        <server.api.version>0.4</server.api.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>io.github.ma1uta</groupId>
-            <artifactId>common-api</artifactId>
-            <version>${jeon.version}</version>
-        </dependency>
         <dependency>
             <groupId>io.github.ma1uta</groupId>
             <artifactId>common-backend</artifactId>
@@ -50,18 +47,14 @@
         <dependency>
             <groupId>io.github.ma1uta</groupId>
             <artifactId>identity-api</artifactId>
-            <version>${jeon.version}</version>
+            <version>${identity.api.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.ma1uta</groupId>
             <artifactId>server-api</artifactId>
-            <version>${jeon.version}</version>
+            <version>${server.api.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -86,11 +79,6 @@
             <groupId>net.i2p.crypto</groupId>
             <artifactId>eddsa</artifactId>
             <version>${eddsa.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet.api.version}</version>
         </dependency>
     </dependencies>
 </project>
