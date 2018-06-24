@@ -119,6 +119,15 @@ public class MatrixClient implements Closeable {
     }
 
     /**
+     * Client config methods.
+     *
+     * @return client config methods.
+     */
+    public ClientConfigMethods clientConfig() {
+        return new ClientConfigMethods(this);
+    }
+
+    /**
      * Profile methods.
      *
      * @return profile methods.
