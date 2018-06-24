@@ -84,7 +84,7 @@ public class AccountMethods {
      * Request validation tokens.
      */
     public void passwordRequestToken() {
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "passwordRequestToken", null, null, new Object(), EmptyResponse.class);
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "passwordRequestToken", null, null, "", EmptyResponse.class);
     }
 
     /**
@@ -130,7 +130,7 @@ public class AccountMethods {
      * Proxies the identity server API validate/email/requestToken.
      */
     public void threePidRequestToken() {
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "threePidRequestToken", null, null, new Object(), EmptyResponse.class);
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "threePidRequestToken", null, null, "", EmptyResponse.class);
     }
 
     /**

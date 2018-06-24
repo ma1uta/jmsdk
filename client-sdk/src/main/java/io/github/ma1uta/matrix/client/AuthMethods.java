@@ -79,4 +79,15 @@ public class AuthMethods {
             requestMethods.setAccessToken(null);
         }
     }
+
+    /**
+     * Logout from all devices and invalidate all access tokens.
+     */
+    public void logoutAll() {
+        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
+        requestMethods.post(AuthApi.class, "logoutAll", null, null, "", EmptyResponse.class);
+        if (getMatrixClient().isUpdateAccessToken()) {
+            requestMethods.setAccessToken(null);
+        }
+    }
 }
