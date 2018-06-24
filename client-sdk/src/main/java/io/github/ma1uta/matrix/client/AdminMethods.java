@@ -19,9 +19,6 @@ package io.github.ma1uta.matrix.client;
 import io.github.ma1uta.matrix.client.api.AdminApi;
 import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Admin methods.
  */
@@ -45,8 +42,7 @@ public class AdminMethods {
      * @return user information.
      */
     public AdminResponse whois(String userId) {
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("userId", userId);
-        return getMatrixClient().getRequestMethods().get(AdminApi.class, "whois", pathParams, null, AdminResponse.class);
+        RequestParams params = new RequestParams().pathParam("userId", userId);
+        return getMatrixClient().getRequestMethods().get(AdminApi.class, "whois", params, AdminResponse.class);
     }
 }

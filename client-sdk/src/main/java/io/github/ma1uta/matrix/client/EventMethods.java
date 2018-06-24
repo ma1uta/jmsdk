@@ -46,15 +46,13 @@ public class EventMethods {
      * @return sent event id.
      */
     public SendEventResponse sendNotice(String roomId, String text) {
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("roomId", roomId);
-        pathParams.put("eventType", Event.EventType.ROOM_MESSAGE);
-        pathParams.put("txnId", Long.toString(System.currentTimeMillis()));
-
         Map<String, String> payload = new HashMap<>();
         payload.put("msgtype", Event.MessageType.NOTICE);
         payload.put("body", text);
-        return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEvent", pathParams, null, payload, SendEventResponse.class);
+
+        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", Event.EventType.ROOM_MESSAGE)
+            .pathParam("txnId", Long.toString(System.currentTimeMillis()));
+        return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEvent", params, payload, SendEventResponse.class);
     }
 
     /**
@@ -66,16 +64,14 @@ public class EventMethods {
      * @return sent event id.
      */
     public SendEventResponse sendFormattedNotice(String roomId, String text, String formattedText) {
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("roomId", roomId);
-        pathParams.put("eventType", Event.EventType.ROOM_MESSAGE);
-        pathParams.put("txnId", Long.toString(System.currentTimeMillis()));
-
         Map<String, String> payload = new HashMap<>();
         payload.put("msgtype", Event.MessageType.NOTICE);
         payload.put("body", text);
         payload.put("formatted_body", formattedText);
         payload.put("format", "org.matrix.custom.html");
-        return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEvent", pathParams, null, payload, SendEventResponse.class);
+
+        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", Event.EventType.ROOM_MESSAGE)
+            .pathParam("txnId", Long.toString(System.currentTimeMillis()));
+        return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEvent", params, payload, SendEventResponse.class);
     }
 }

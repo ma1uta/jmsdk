@@ -20,9 +20,6 @@ import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.ProfileApi;
 import io.github.ma1uta.matrix.client.model.profile.DisplayName;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Profile methods.
  */
@@ -44,11 +41,10 @@ public class ProfileMethods {
      * @param displayName display name.
      */
     public void setDisplayName(String displayName) {
-        Map<String, String> params = new HashMap<>();
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        params.put("userId", requestMethods.getUserId());
+        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId());
         DisplayName request = new DisplayName();
         request.setDisplayname(displayName);
-        requestMethods.put(ProfileApi.class, "setDisplayName", params, null, request, EmptyResponse.class);
+        requestMethods.put(ProfileApi.class, "setDisplayName", params, request, EmptyResponse.class);
     }
 }

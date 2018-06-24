@@ -20,9 +20,6 @@ import io.github.ma1uta.matrix.client.api.FilterApi;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.FilterResponse;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Filter methods.
  */
@@ -45,10 +42,9 @@ public class FilterMethods {
      * @return filter id.
      */
     public FilterResponse uploadFilter(FilterData filter) {
-        Map<String, String> pathParams = new HashMap<>();
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        pathParams.put("userId", requestMethods.getUserId());
-        return requestMethods.post(FilterApi.class, "uploadFilter", pathParams, null, filter, FilterResponse.class);
+        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId());
+        return requestMethods.post(FilterApi.class, "uploadFilter", params, filter, FilterResponse.class);
     }
 
     /**
@@ -58,10 +54,8 @@ public class FilterMethods {
      * @return filter.
      */
     public FilterData getFilter(String filterId) {
-        Map<String, String> pathParams = new HashMap<>();
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        pathParams.put("userId", requestMethods.getUserId());
-        pathParams.put("filterId", filterId);
-        return requestMethods.get(FilterApi.class, "getFilter", pathParams, null, FilterData.class);
+        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId()).pathParam("filterId", filterId);
+        return requestMethods.get(FilterApi.class, "getFilter", params, FilterData.class);
     }
 }

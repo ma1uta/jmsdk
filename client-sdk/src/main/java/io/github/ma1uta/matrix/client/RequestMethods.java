@@ -111,23 +111,18 @@ public class RequestMethods {
         this.accessToken = accessToken;
     }
 
-    protected Invocation.Builder prepare(Class<?> apiClass, String apiMethod, Map<String, String> pathParams,
-                                         Map<String, String> queryParams, String requestType) {
+    protected Invocation.Builder buildRequest(Class<?> apiClass, String apiMethod, RequestParams params, String requestType) {
         UriBuilder builder = UriBuilder.fromResource(apiClass).path(apiClass, apiMethod);
         Map<String, String> encoded = new HashMap<>();
-        if (pathParams != null) {
-            for (Map.Entry<String, String> entry : pathParams.entrySet()) {
-                encoded.put(entry.getKey(), encode(entry.getValue()));
-            }
+        for (Map.Entry<String, String> entry : params.getPathParams().entrySet()) {
+            encoded.put(entry.getKey(), encode(entry.getValue()));
         }
         URI uri = builder.buildFromEncodedMap(encoded);
 
         WebTarget path;
         path = getClient().target(getHomeserverUrl()).path(uri.toString());
-        if (queryParams != null) {
-            for (Map.Entry<String, String> entry : queryParams.entrySet()) {
-                path = path.queryParam(entry.getKey(), entry.getValue());
-            }
+        for (Map.Entry<String, String> entry : params.getQueryParams().entrySet()) {
+            path = path.queryParam(entry.getKey(), entry.getValue());
         }
         if (isAddUserIdToRequests()) {
             path = path.queryParam("user_id", encode(getUserId()));
@@ -135,6 +130,9 @@ public class RequestMethods {
         Invocation.Builder request = path.request(requestType);
         if (getAccessToken() != null) {
             request = request.header("Authorization", "Bearer " + getAccessToken());
+        }
+        for (Map.Entry<String, String> entry : params.getHeaderParams().entrySet()) {
+            request.header(entry.getKey(), encode(entry.getValue()));
         }
         return request;
     }
@@ -182,22 +180,29 @@ public class RequestMethods {
         }
     }
 
-    protected <T, R> R post(Class<?> apiClass, String apiMethod, Map<String, String> pathParams, Map<String, String> queryParams, T payload,
+    protected <T, R> R post(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
                             Class<R> responseClass) {
-        return post(apiClass, apiMethod, pathParams, queryParams, payload, responseClass, MediaType.APPLICATION_JSON);
+        return post(apiClass, apiMethod, params, payload, responseClass, MediaType.APPLICATION_JSON);
     }
 
-    protected <T, R> R post(Class<?> apiClass, String apiMethod, Map<String, String> pathParams, Map<String, String> queryParams, T payload,
+    protected <T, R> R post(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
                             Class<R> responseClass, String requestType) {
-        return extractResponseModel(() -> prepare(apiClass, apiMethod, pathParams, queryParams, requestType).post(Entity.json(payload)),
-            responseClass);
+        return extractResponseModel(
+            () -> buildRequest(apiClass, apiMethod, params, requestType).post(Entity.entity(payload, requestType)), responseClass);
     }
 
-    protected <R> R get(Class<?> apiClass, String apiMethod, Map<String, String> pathParams, Map<String, String> queryParams,
-                        Class<R> responseClass) {
+    protected <R> R get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass) {
+        return extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).get(), responseClass);
+    }
+
+    protected <R> R get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass, String requestType) {
+        return extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, requestType).get(), responseClass);
+    }
+
+    protected <R> R asyncGet(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass) {
         return extractResponseModel(() -> {
             try {
-                return prepare(apiClass, apiMethod, pathParams, queryParams, MediaType.APPLICATION_JSON).async().get().get();
+                return buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async().get().get();
             } catch (InterruptedException | ExecutionException e) {
                 String msg = "Failed invoke get request";
                 LOGGER.error(msg, e);
@@ -206,16 +211,15 @@ public class RequestMethods {
         }, responseClass);
     }
 
-    protected <T, R> R put(Class<?> apiClass, String apiMethod, Map<String, String> pathParams, Map<String, String> queryParams, T payload,
+    protected <T, R> R put(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
                            Class<R> responseClass) {
         return extractResponseModel(
-            () -> prepare(apiClass, apiMethod, pathParams, queryParams, MediaType.APPLICATION_JSON).put(Entity.json(payload)),
+            () -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).put(Entity.json(payload)),
             responseClass);
     }
 
-    protected <T, R> R delete(Class<?> apiClass, String apiMethod, Map<String, String> pathParams, Map<String, String> queryParams,
-                              Class<R> responseClass) {
-        return extractResponseModel(() -> prepare(apiClass, apiMethod, pathParams, queryParams, MediaType.APPLICATION_JSON).delete(),
+    protected <T, R> R delete(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass) {
+        return extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).delete(),
             responseClass);
     }
 }

@@ -28,9 +28,6 @@ import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Account methods.
  */
@@ -52,10 +49,9 @@ public class AccountMethods {
      * @param request registration request.
      */
     public void register(RegisterRequest request) {
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("kind", AccountApi.RegisterType.USER);
+        RequestParams params = new RequestParams().queryParam("kind", AccountApi.RegisterType.USER);
         LoginResponse registered = getMatrixClient().getRequestMethods()
-            .post(AccountApi.class, "register", null, queryParams, request, LoginResponse.class);
+            .post(AccountApi.class, "register", params, request, LoginResponse.class);
 
         getMatrixClient().updateCredentials(registered);
     }
@@ -66,7 +62,8 @@ public class AccountMethods {
      * @param requestToken request token.
      */
     public void requestToken(RequestToken requestToken) {
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "requestToken", null, null, requestToken, EmptyResponse.class);
+        getMatrixClient().getRequestMethods()
+            .post(AccountApi.class, "requestToken", new RequestParams(), requestToken, EmptyResponse.class);
     }
 
     /**
@@ -77,14 +74,14 @@ public class AccountMethods {
     public void password(String password) {
         PasswordRequest request = new PasswordRequest();
         request.setNewPassword(password);
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "password", null, null, request, EmptyResponse.class);
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "password", new RequestParams(), request, EmptyResponse.class);
     }
 
     /**
      * Request validation tokens.
      */
     public void passwordRequestToken() {
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "passwordRequestToken", null, null, "", EmptyResponse.class);
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "passwordRequestToken", new RequestParams(), "", EmptyResponse.class);
     }
 
     /**
@@ -92,7 +89,7 @@ public class AccountMethods {
      */
     public void deactivate() {
         getMatrixClient().getRequestMethods()
-            .post(AccountApi.class, "deactivate", null, null, new DeactivateRequest(), EmptyResponse.class);
+            .post(AccountApi.class, "deactivate", new RequestParams(), new DeactivateRequest(), EmptyResponse.class);
     }
 
     /**
@@ -102,10 +99,8 @@ public class AccountMethods {
      * @return {@code} if available, else {@code false}.
      */
     public boolean available(String username) {
-        Map<String, String> queryParams = new HashMap<>();
-        queryParams.put("username", username);
-        return getMatrixClient().getRequestMethods().get(AccountApi.class, "available", null, queryParams, AvailableResponse.class)
-            .getAvailable();
+        RequestParams params = new RequestParams().queryParam("username", username);
+        return getMatrixClient().getRequestMethods().get(AccountApi.class, "available", params, AvailableResponse.class).getAvailable();
     }
 
     /**
@@ -114,7 +109,7 @@ public class AccountMethods {
      * @return third party identifiers.
      */
     public ThreePidResponse showThreePid() {
-        return getMatrixClient().getRequestMethods().get(AccountApi.class, "showThreePid", null, null, ThreePidResponse.class);
+        return getMatrixClient().getRequestMethods().get(AccountApi.class, "showThreePid", new RequestParams(), ThreePidResponse.class);
     }
 
     /**
@@ -123,14 +118,14 @@ public class AccountMethods {
      * @param request new contact information.
      */
     public void updateThreePid(ThreePidRequest request) {
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "updateThreePid", null, null, request, EmptyResponse.class);
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "updateThreePid", new RequestParams(), request, EmptyResponse.class);
     }
 
     /**
      * Proxies the identity server API validate/email/requestToken.
      */
     public void threePidRequestToken() {
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "threePidRequestToken", null, null, "", EmptyResponse.class);
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "threePidRequestToken", new RequestParams(), "", EmptyResponse.class);
     }
 
     /**
@@ -139,6 +134,6 @@ public class AccountMethods {
      * @return information about the owner of a given access token.
      */
     public WhoamiResponse whoami() {
-        return getMatrixClient().getRequestMethods().get(AccountApi.class, "whoami", null, null, WhoamiResponse.class);
+        return getMatrixClient().getRequestMethods().get(AccountApi.class, "whoami", new RequestParams(), WhoamiResponse.class);
     }
 }

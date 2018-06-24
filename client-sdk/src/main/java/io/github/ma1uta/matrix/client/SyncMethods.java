@@ -19,9 +19,6 @@ package io.github.ma1uta.matrix.client;
 import io.github.ma1uta.matrix.client.api.SyncApi;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Sync method.
  */
@@ -48,22 +45,13 @@ public class SyncMethods {
      * @return sync data.
      */
     public SyncResponse sync(String filter, String since, boolean fullState, String presence, Long timeout) {
-        Map<String, String> queryParams = new HashMap<>();
-        if (filter != null) {
-            queryParams.put("filter", filter);
-        }
-        if (since != null) {
-            queryParams.put("since", since);
-        }
-        queryParams.put("fullState", Boolean.toString(fullState));
-        if (presence != null) {
-            queryParams.put("presence", presence);
-        }
+        RequestParams params = new RequestParams().queryParam("filter", filter)
+            .queryParam("since", since)
+            .queryParam("fullState", Boolean.toString(fullState))
+            .queryParam("presence", presence);
         if (timeout != null) {
-            queryParams.put("timeout", Long.toString(timeout));
+            params.queryParam("timeout", Long.toString(timeout));
         }
-        return getMatrixClient().getRequestMethods().get(SyncApi.class, "sync", null, queryParams, SyncResponse.class);
+        return getMatrixClient().getRequestMethods().asyncGet(SyncApi.class, "sync", params, SyncResponse.class);
     }
-
-
 }

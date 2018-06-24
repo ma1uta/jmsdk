@@ -63,7 +63,7 @@ public class AuthMethods {
      */
     public void login(LoginRequest loginRequest) {
         LoginResponse loginResponse = getMatrixClient().getRequestMethods()
-            .post(AuthApi.class, "login", null, null, loginRequest, LoginResponse.class, null);
+            .post(AuthApi.class, "login", new RequestParams(), loginRequest, LoginResponse.class);
 
         getMatrixClient().updateCredentials(loginResponse);
     }
@@ -74,7 +74,7 @@ public class AuthMethods {
     public void logout() {
         LOGGER.debug("Logout");
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        requestMethods.post(AuthApi.class, "logout", null, null, "", EmptyResponse.class, null);
+        requestMethods.post(AuthApi.class, "logout", new RequestParams(), "", EmptyResponse.class);
         if (getMatrixClient().isUpdateAccessToken()) {
             requestMethods.setAccessToken(null);
         }
@@ -85,7 +85,7 @@ public class AuthMethods {
      */
     public void logoutAll() {
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        requestMethods.post(AuthApi.class, "logoutAll", null, null, "", EmptyResponse.class);
+        requestMethods.post(AuthApi.class, "logoutAll", new RequestParams(), "", EmptyResponse.class);
         if (getMatrixClient().isUpdateAccessToken()) {
             requestMethods.setAccessToken(null);
         }

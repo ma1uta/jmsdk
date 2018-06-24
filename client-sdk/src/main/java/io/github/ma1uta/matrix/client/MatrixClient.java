@@ -128,6 +128,15 @@ public class MatrixClient implements Closeable {
     }
 
     /**
+     * Content methods.
+     *
+     * @return content methods.
+     */
+    public ContentMethods content() {
+        return new ContentMethods(this);
+    }
+
+    /**
      * Profile methods.
      *
      * @return profile methods.

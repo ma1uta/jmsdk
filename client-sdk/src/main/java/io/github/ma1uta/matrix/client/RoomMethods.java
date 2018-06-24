@@ -22,9 +22,7 @@ import io.github.ma1uta.matrix.client.model.room.JoinRequest;
 import io.github.ma1uta.matrix.client.model.room.JoinedRoomsResponse;
 import io.github.ma1uta.matrix.client.model.room.RoomId;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Room api.
@@ -48,10 +46,8 @@ public class RoomMethods {
      * @return room id.
      */
     public RoomId joinRoomByIdOrAlias(String idOrAlias) {
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("roomIdOrAlias", idOrAlias);
-        return getMatrixClient().getRequestMethods()
-            .post(RoomApi.class, "joinByIdOrAlias", pathParams, null, new JoinRequest(), RoomId.class);
+        RequestParams params = new RequestParams().pathParam("roomIdOrAlias", idOrAlias);
+        return getMatrixClient().getRequestMethods().post(RoomApi.class, "joinByIdOrAlias", params, new JoinRequest(), RoomId.class);
     }
 
     /**
@@ -60,7 +56,7 @@ public class RoomMethods {
      * @return joined room ids.
      */
     public List<String> joinedRooms() {
-        return getMatrixClient().getRequestMethods().get(RoomApi.class, "joinedRooms", null, null, JoinedRoomsResponse.class)
+        return getMatrixClient().getRequestMethods().get(RoomApi.class, "joinedRooms", new RequestParams(), JoinedRoomsResponse.class)
             .getJoinedRooms();
     }
 
@@ -70,8 +66,7 @@ public class RoomMethods {
      * @param roomId room id.
      */
     public void leaveRoom(String roomId) {
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("roomId", roomId);
-        getMatrixClient().getRequestMethods().post(RoomApi.class, "leave", pathParams, null, "", EmptyResponse.class);
+        RequestParams params = new RequestParams().pathParam("roomId", roomId);
+        getMatrixClient().getRequestMethods().post(RoomApi.class, "leave", params, "", EmptyResponse.class);
     }
 }

@@ -19,9 +19,6 @@ package io.github.ma1uta.matrix.client;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.ReceiptApi;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Receipt method.
  */
@@ -44,10 +41,8 @@ public class ReceiptMethods {
      * @param eventId event id.
      */
     public void sendReceipt(String roomId, String eventId) {
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("roomId", roomId);
-        pathParams.put("eventId", eventId);
-        pathParams.put("receiptType", "m.read");
-        getMatrixClient().getRequestMethods().post(ReceiptApi.class, "receipt", pathParams, null, "", EmptyResponse.class);
+        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId)
+            .pathParam("receiptType", ReceiptApi.Receipt.READ);
+        getMatrixClient().getRequestMethods().post(ReceiptApi.class, "receipt", params, "", EmptyResponse.class);
     }
 }

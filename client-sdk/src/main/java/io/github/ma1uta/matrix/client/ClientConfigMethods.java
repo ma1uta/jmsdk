@@ -19,7 +19,6 @@ package io.github.ma1uta.matrix.client;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.ClientConfigApi;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -41,32 +40,27 @@ public class ClientConfigMethods {
      * Set some account_data for the client. This config is only visible to the user that set the account_data. The config will be
      * synced to clients in the top-level account_data.
      *
-     * @param userId      The id of the user to set account_data for. The access token must be authorized to make requests for this user id.
      * @param type        The event type of the account_data to set. Custom types should be namespaced to avoid clashes.
      * @param accountData account data.
      */
-    public void addConfig(String userId, String type, Map<String, String> accountData) {
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("userId", userId);
-        pathParams.put("type", type);
-        getMatrixClient().getRequestMethods().put(ClientConfigApi.class, "addConfig", pathParams, null, accountData, EmptyResponse.class);
+    public void addConfig(String type, Map<String, String> accountData) {
+        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
+        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId()).pathParam("type", type);
+        requestMethods.put(ClientConfigApi.class, "addConfig", params, accountData, EmptyResponse.class);
     }
 
     /**
      * Set some account_data for the client. This config is only visible to the user that set the account_data. The config will be
      * synced to clients in the top-level account_data.
      *
-     * @param userId      The id of the user to set account_data for. The access token must be authorized to make requests for this user id.
      * @param roomId      The id of the room to set account_data on.
      * @param type        The event type of the account_data to set. Custom types should be namespaced to avoid clashes.
      * @param accountData account data.
      */
-    public void addRoomConfig(String userId, String roomId, String type, Map<String, String> accountData) {
-        Map<String, String> pathParams = new HashMap<>();
-        pathParams.put("userId", userId);
-        pathParams.put("roomId", roomId);
-        pathParams.put("type", type);
-        getMatrixClient().getRequestMethods()
-            .put(ClientConfigApi.class, "addRoomConfig", pathParams, null, accountData, EmptyResponse.class);
+    public void addRoomConfig(String roomId, String type, Map<String, String> accountData) {
+        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
+        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId()).pathParam("roomId", roomId)
+            .pathParam("type", type);
+        requestMethods.put(ClientConfigApi.class, "addRoomConfig", params, accountData, EmptyResponse.class);
     }
 }
