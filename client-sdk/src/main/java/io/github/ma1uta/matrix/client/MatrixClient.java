@@ -92,21 +92,30 @@ public class MatrixClient implements Closeable {
     }
 
     /**
-     * Auth methods.
-     *
-     * @return auth methods.
-     */
-    public AuthMethods auth() {
-        return new AuthMethods(this);
-    }
-
-    /**
      * Account methods.
      *
      * @return account methods.
      */
     public AccountMethods account() {
         return new AccountMethods(this);
+    }
+
+    /**
+     * Admin methods.
+     *
+     * @return admin methods.
+     */
+    public AdminMethods admin() {
+        return new AdminMethods(this);
+    }
+
+    /**
+     * Auth methods.
+     *
+     * @return auth methods.
+     */
+    public AuthMethods auth() {
+        return new AuthMethods(this);
     }
 
     /**
