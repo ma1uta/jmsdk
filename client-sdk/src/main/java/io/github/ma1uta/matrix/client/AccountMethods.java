@@ -18,8 +18,14 @@ package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.AccountApi;
+import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
 import io.github.ma1uta.matrix.client.model.account.DeactivateRequest;
+import io.github.ma1uta.matrix.client.model.account.PasswordRequest;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
+import io.github.ma1uta.matrix.client.model.account.RequestToken;
+import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
+import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
+import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 
 import java.util.HashMap;
@@ -55,10 +61,84 @@ public class AccountMethods {
     }
 
     /**
+     * Request token.
+     *
+     * @param requestToken request token.
+     */
+    public void requestToken(RequestToken requestToken) {
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "requestToken", null, null, requestToken, EmptyResponse.class);
+    }
+
+    /**
+     * Change password.
+     *
+     * @param password new password.
+     */
+    public void password(String password) {
+        PasswordRequest request = new PasswordRequest();
+        request.setNewPassword(password);
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "password", null, null, request, EmptyResponse.class);
+    }
+
+    /**
+     * Request validation tokens.
+     */
+    public void passwordRequestToken() {
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "passwordRequestToken", null, null, new Object(), EmptyResponse.class);
+    }
+
+    /**
      * Deactivate user.
      */
     public void deactivate() {
         getMatrixClient().getRequestMethods()
             .post(AccountApi.class, "deactivate", null, null, new DeactivateRequest(), EmptyResponse.class);
+    }
+
+    /**
+     * Checks to see if a username is available, and valid, for the server.
+     *
+     * @param username checked username.
+     * @return {@code} if available, else {@code false}.
+     */
+    public boolean available(String username) {
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("username", username);
+        return getMatrixClient().getRequestMethods().get(AccountApi.class, "available", null, queryParams, AvailableResponse.class)
+            .getAvailable();
+    }
+
+    /**
+     * Gets a list of the third party identifiers that the homeserver has associated with the user's account.
+     *
+     * @return third party identifiers.
+     */
+    public ThreePidResponse showThreePid() {
+        return getMatrixClient().getRequestMethods().get(AccountApi.class, "showThreePid", null, null, ThreePidResponse.class);
+    }
+
+    /**
+     * Adds contact information to the user's account.
+     *
+     * @param request new contact information.
+     */
+    public void updateThreePid(ThreePidRequest request) {
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "updateThreePid", null, null, request, EmptyResponse.class);
+    }
+
+    /**
+     * Proxies the identity server API validate/email/requestToken.
+     */
+    public void threePidRequestToken() {
+        getMatrixClient().getRequestMethods().post(AccountApi.class, "threePidRequestToken", null, null, new Object(), EmptyResponse.class);
+    }
+
+    /**
+     * Gets information about the owner of a given access token.
+     *
+     * @return information about the owner of a given access token.
+     */
+    public WhoamiResponse whoami() {
+        return getMatrixClient().getRequestMethods().get(AccountApi.class, "whoami", null, null, WhoamiResponse.class);
     }
 }
