@@ -18,6 +18,7 @@ package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.jeon.exception.MatrixException;
 import io.github.ma1uta.jeon.exception.RateLimitedException;
+import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -218,9 +219,10 @@ public class RequestMethods {
             responseClass);
     }
 
-    protected <T, R> R delete(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass) {
-        return extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).delete(),
-            responseClass);
+    protected <T> void delete(Class<?> apiClass, String apiMethod, RequestParams params, T payload) {
+        extractResponseModel(
+            () -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).build("DELETE", Entity.json(payload)).invoke(),
+            EmptyResponse.class);
     }
 }
 
