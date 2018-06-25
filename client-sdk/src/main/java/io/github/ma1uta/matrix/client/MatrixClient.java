@@ -138,10 +138,20 @@ public class MatrixClient implements Closeable {
 
     /**
      * Device methods.
+     *
      * @return device methods.
      */
     public DeviceMethods device() {
         return new DeviceMethods(this);
+    }
+
+    /**
+     * Encryption methods.
+     *
+     * @return encryption methods.
+     */
+    public EncryptionMethods encryption() {
+        return new EncryptionMethods(this);
     }
 
     /**
