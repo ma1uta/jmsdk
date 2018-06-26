@@ -191,6 +191,15 @@ public class MatrixClient implements Closeable {
     }
 
     /**
+     * The report method.
+     *
+     * @return the report method.
+     */
+    public ReportMethods report() {
+        return new ReportMethods(this);
+    }
+
+    /**
      * Sync method.
      *
      * @return sync method.
