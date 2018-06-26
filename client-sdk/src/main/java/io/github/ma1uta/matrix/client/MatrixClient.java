@@ -155,6 +155,15 @@ public class MatrixClient implements Closeable {
     }
 
     /**
+     * Event context method.
+     *
+     * @return event context method.
+     */
+    public EventContextMethods eventContext() {
+        return new EventContextMethods(this);
+    }
+
+    /**
      * Profile methods.
      *
      * @return profile methods.
