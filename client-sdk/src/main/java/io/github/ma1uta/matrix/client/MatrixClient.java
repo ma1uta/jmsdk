@@ -261,4 +261,13 @@ public class MatrixClient implements Closeable {
     public TagMethods tag() {
         return new TagMethods(this);
     }
+
+    /**
+     * Typing methods.
+     *
+     * @return typing methods.
+     */
+    public TypingMethods typing() {
+        return new TypingMethods(this);
+    }
 }
