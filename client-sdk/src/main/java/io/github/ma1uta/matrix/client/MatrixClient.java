@@ -200,6 +200,15 @@ public class MatrixClient implements Closeable {
     }
 
     /**
+     * The search method.
+     *
+     * @return the search method.
+     */
+    public SearchMethods search() {
+        return new SearchMethods(this);
+    }
+
+    /**
      * Sync method.
      *
      * @return sync method.
