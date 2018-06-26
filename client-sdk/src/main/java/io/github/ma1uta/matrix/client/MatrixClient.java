@@ -164,6 +164,15 @@ public class MatrixClient implements Closeable {
     }
 
     /**
+     * Presence methods.
+     *
+     * @return presence methods.
+     */
+    public PresenceMethods presence() {
+        return new PresenceMethods(this);
+    }
+
+    /**
      * Profile methods.
      *
      * @return profile methods.
