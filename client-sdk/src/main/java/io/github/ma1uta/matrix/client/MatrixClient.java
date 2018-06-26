@@ -209,6 +209,15 @@ public class MatrixClient implements Closeable {
     }
 
     /**
+     * The send to device method.
+     *
+     * @return the send to device method.
+     */
+    public SendToDeviceMethods sendToDevice() {
+        return new SendToDeviceMethods(this);
+    }
+
+    /**
      * Sync method.
      *
      * @return sync method.
