@@ -252,4 +252,13 @@ public class MatrixClient implements Closeable {
     public RoomMethods room() {
         return new RoomMethods(this);
     }
+
+    /**
+     * Tag methods.
+     *
+     * @return tag methods.
+     */
+    public TagMethods tag() {
+        return new TagMethods(this);
+    }
 }
