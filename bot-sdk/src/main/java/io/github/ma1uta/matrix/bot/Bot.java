@@ -294,7 +294,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             for (Map.Entry<String, LeftRoom> roomEntry : rooms.getLeave().entrySet()) {
                 String leftRoom = roomEntry.getKey();
                 if (joinedRooms.contains(leftRoom)) {
-                    matrixClient.room().leaveRoom(leftRoom);
+                    matrixClient.room().leave(leftRoom);
                 }
             }
 
@@ -346,7 +346,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
                     && Event.EventType.ROOM_MEMBER.equals(event.getType());
             }).findFirst().ifPresent(event -> {
                 LOGGER.debug("Join to room {}", roomId);
-                holder.getMatrixClient().room().joinRoomByIdOrAlias(roomId);
+                holder.getMatrixClient().room().joinByIdOrAlias(roomId);
 
                 C config = holder.getConfig();
                 config.setState(BotState.JOINED);
