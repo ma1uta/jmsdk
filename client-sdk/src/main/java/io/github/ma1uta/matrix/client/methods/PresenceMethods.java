@@ -24,6 +24,7 @@ import io.github.ma1uta.matrix.client.model.presence.PresenceList;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
 
 import java.util.List;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Presence methods.
@@ -81,9 +82,9 @@ public class PresenceMethods {
      * @param userId The user whose presence list should be retrieved.
      * @return A list of presence events for this list.
      */
-    @SuppressWarnings("unchecked")
     public List<Event> getPresenceList(String userId) {
         RequestParams params = new RequestParams().pathParam("userId", userId);
-        return getMatrixClient().getRequestMethods().get(PresenceApi.class, "getPresenceList", params, List.class);
+        return getMatrixClient().getRequestMethods().get(PresenceApi.class, "getPresenceList", params, new GenericType<List<Event>>() {
+        });
     }
 }

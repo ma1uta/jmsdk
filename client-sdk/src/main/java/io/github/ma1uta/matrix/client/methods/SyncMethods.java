@@ -22,6 +22,8 @@ import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.SyncApi;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 
+import javax.ws.rs.core.GenericType;
+
 /**
  * Sync method.
  */
@@ -68,12 +70,12 @@ public class SyncMethods {
      * @param roomId  The room ID for which events should be returned.
      * @return The events received, which may be none.
      */
-    @SuppressWarnings("unchecked")
     public Page<Event> events(String from, Long timeout, String roomId) {
         RequestParams params = new RequestParams().queryParam("from", from).queryParam("roomId", roomId);
         if (timeout != null) {
             params.queryParam("timeout", Long.toString(timeout));
         }
-        return getMatrixClient().getRequestMethods().get(SyncApi.class, "events", params, Page.class);
+        return getMatrixClient().getRequestMethods().get(SyncApi.class, "events", params, new GenericType<Page<Event>>() {
+        });
     }
 }

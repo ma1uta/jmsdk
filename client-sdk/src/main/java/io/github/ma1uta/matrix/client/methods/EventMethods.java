@@ -28,6 +28,7 @@ import io.github.ma1uta.matrix.client.model.event.SendEventResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.GenericType;
 
 /**
  * EventMethods api.
@@ -66,11 +67,12 @@ public class EventMethods {
      * @param stateKey  The key of the state to look up.
      * @return The content of the state event.
      */
-    @SuppressWarnings("unchecked")
     public Map<String, Object> eventContent(String roomId, String eventType, String stateKey) {
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType)
             .pathParam("stateKey", stateKey);
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "eventsForRoomWithTypeAndState", params, Map.class);
+        return getMatrixClient().getRequestMethods()
+            .get(EventApi.class, "eventsForRoomWithTypeAndState", params, new GenericType<Map<String, Object>>() {
+            });
     }
 
     /**
@@ -81,10 +83,11 @@ public class EventMethods {
      * @param eventType The type of state to look up.
      * @return The content of the state event.
      */
-    @SuppressWarnings("unchecked")
     public Map<String, Object> eventContent(String roomId, String eventType) {
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType);
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "eventsForRoomWithType", params, Map.class);
+        return getMatrixClient().getRequestMethods()
+            .get(EventApi.class, "eventsForRoomWithType", params, new GenericType<Map<String, Object>>() {
+            });
     }
 
     /**
@@ -93,10 +96,10 @@ public class EventMethods {
      * @param roomId The room to look up the state for.
      * @return The current state of the room.
      */
-    @SuppressWarnings("unchecked")
     public List<Event> events(String roomId) {
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "eventForRoom", params, List.class);
+        return getMatrixClient().getRequestMethods().get(EventApi.class, "eventForRoom", params, new GenericType<List<Event>>() {
+        });
     }
 
     /**
@@ -132,7 +135,6 @@ public class EventMethods {
      * @param filter A JSON RoomEventFilter to filter returned events with.
      * @return A list of messages with a new token to request more.
      */
-    @SuppressWarnings("unchecked")
     public Page<Event> messages(String roomId, String from, String to, String dir, Integer limit, String filter) {
         RequestParams params = new RequestParams().pathParam("roomId", roomId)
             .queryParam("from", from)
@@ -142,7 +144,8 @@ public class EventMethods {
         if (limit != null) {
             params.queryParam("limit", Integer.toString(limit));
         }
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "messages", params, Page.class);
+        return getMatrixClient().getRequestMethods().get(EventApi.class, "messages", params, new GenericType<Page<Event>>() {
+        });
     }
 
     /**
