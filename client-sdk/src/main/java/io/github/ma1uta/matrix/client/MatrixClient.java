@@ -297,4 +297,13 @@ public class MatrixClient implements Closeable {
     public VoipMethods turnServers() {
         return new VoipMethods(this);
     }
+
+    /**
+     * The push methods.
+     *
+     * @return the push methods.
+     */
+    public PushMethods push() {
+        return new PushMethods(this);
+    }
 }

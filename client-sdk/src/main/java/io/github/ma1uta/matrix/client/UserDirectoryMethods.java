@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.client;
 
-import io.github.ma1uta.matrix.client.api.UserDirectory;
+import io.github.ma1uta.matrix.client.api.UserDirectoryApi;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchRequest;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchResponse;
 
@@ -44,6 +44,6 @@ public class UserDirectoryMethods {
      */
     public SearchResponse search(SearchRequest request) {
         return getMatrixClient().getRequestMethods()
-            .post(UserDirectory.class, "searchUsers", new RequestParams(), request, SearchResponse.class);
+            .post(UserDirectoryApi.class, "searchUsers", new RequestParams(), request, SearchResponse.class);
     }
 }

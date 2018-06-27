@@ -57,6 +57,20 @@ public class RequestParams {
     }
 
     /**
+     * Add a query parameter.
+     *
+     * @param paramName  name of the parameter.
+     * @param paramValue value of the parameter.
+     * @return parameters.
+     */
+    public RequestParams queryParam(String paramName, Long paramValue) {
+        if (paramValue != null) {
+            queryParams.put(paramName, Long.toString(paramValue));
+        }
+        return this;
+    }
+
+    /**
      * Add a header parameter.
      *
      * @param paramName  name of the parameter.
