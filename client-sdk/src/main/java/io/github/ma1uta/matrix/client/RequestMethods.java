@@ -30,11 +30,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -153,15 +155,27 @@ public class RequestMethods {
         }
     }
 
-    protected <R> R extractResponseModel(Supplier<Response> action, Class<R> responseClass) {
-        return extractResponseModel(action, responseClass, INITIAL_TIMEOUT);
+    protected <R> Function<Response, R> extractor(GenericType<R> genericType) {
+        return response -> response.readEntity(genericType);
     }
 
-    protected <R> R extractResponseModel(Supplier<Response> action, Class<R> responseClass, long timeout) {
+    protected <R> Function<Response, R> extractor(Class<R> responseClass) {
+        return response -> response.readEntity(responseClass);
+    }
+
+    protected <R> R extractResponseModel(Supplier<Response> action, GenericType<R> genericType) {
+        return extractResponseModel(action, INITIAL_TIMEOUT, extractor(genericType));
+    }
+
+    protected <R> R extractResponseModel(Supplier<Response> action, Class<R> responseClass) {
+        return extractResponseModel(action, INITIAL_TIMEOUT, extractor(responseClass));
+    }
+
+    protected <R> R extractResponseModel(Supplier<Response> action, long timeout, Function<Response, R> extractor) {
         Response response = action.get();
         switch (response.getStatus()) {
             case SUCCESS:
-                return response.readEntity(responseClass);
+                return extractor.apply(response);
             case RATE_LIMITED:
                 try {
                     long newTimeout = timeout * TIMEOUT_FACTOR;
@@ -169,7 +183,7 @@ public class RequestMethods {
                         throw new RateLimitedException("Cannot send request, maximum timeout was reached.");
                     } else {
                         Thread.sleep(newTimeout);
-                        return extractResponseModel(action, responseClass, newTimeout);
+                        return extractResponseModel(action, newTimeout, extractor);
                     }
                 } catch (InterruptedException e) {
                     LOGGER.error("Interrupted", e);
@@ -181,15 +195,24 @@ public class RequestMethods {
         }
     }
 
-    protected <T, R> R post(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
-                            Class<R> responseClass) {
+    protected <T, R> R post(Class<?> apiClass, String apiMethod, RequestParams params, T payload, Class<R> responseClass) {
         return post(apiClass, apiMethod, params, payload, responseClass, MediaType.APPLICATION_JSON);
     }
 
-    protected <T, R> R post(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
-                            Class<R> responseClass, String requestType) {
+    protected <T, R> R post(Class<?> apiClass, String apiMethod, RequestParams params, T payload, Class<R> responseClass,
+                            String requestType) {
         return extractResponseModel(
             () -> buildRequest(apiClass, apiMethod, params, requestType).post(Entity.entity(payload, requestType)), responseClass);
+    }
+
+    protected <T, R> R post(Class<?> apiClass, String apiMethod, RequestParams params, T payload, GenericType<R> genericType) {
+        return post(apiClass, apiMethod, params, payload, genericType, MediaType.APPLICATION_JSON);
+    }
+
+    protected <T, R> R post(Class<?> apiClass, String apiMethod, RequestParams params, T payload, GenericType<R> genericType,
+                            String requestType) {
+        return extractResponseModel(
+            () -> buildRequest(apiClass, apiMethod, params, requestType).post(Entity.entity(payload, requestType)), genericType);
     }
 
     protected <R> R get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass) {
@@ -198,6 +221,14 @@ public class RequestMethods {
 
     protected <R> R get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass, String requestType) {
         return extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, requestType).get(), responseClass);
+    }
+
+    protected <R> R get(Class<?> apiClass, String apiMethod, RequestParams params, GenericType<R> genericType) {
+        return extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).get(), genericType);
+    }
+
+    protected <R> R get(Class<?> apiClass, String apiMethod, RequestParams params, GenericType<R> genericType, String requestType) {
+        return extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, requestType).get(), genericType);
     }
 
     protected <R> R asyncGet(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass) {
@@ -212,11 +243,15 @@ public class RequestMethods {
         }, responseClass);
     }
 
-    protected <T, R> R put(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
-                           Class<R> responseClass) {
+    protected <T, R> R put(Class<?> apiClass, String apiMethod, RequestParams params, T payload, Class<R> responseClass) {
         return extractResponseModel(
             () -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).put(Entity.json(payload)),
             responseClass);
+    }
+
+    protected <T, R> R put(Class<?> apiClass, String apiMethod, RequestParams params, T payload, GenericType<R> genericType) {
+        return extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).put(Entity.json(payload)),
+            genericType);
     }
 
     protected <T> void delete(Class<?> apiClass, String apiMethod, RequestParams params, T payload) {

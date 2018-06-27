@@ -270,4 +270,31 @@ public class MatrixClient implements Closeable {
     public TypingMethods typing() {
         return new TypingMethods(this);
     }
+
+    /**
+     * User directory method.
+     *
+     * @return user directory method.
+     */
+    public UserDirectoryMethods userDirectory() {
+        return new UserDirectoryMethods(this);
+    }
+
+    /**
+     * The versions method.
+     *
+     * @return the versions method.
+     */
+    public VersionMethods versions() {
+        return new VersionMethods(this);
+    }
+
+    /**
+     * The voip methods.
+     *
+     * @return the voip methods.
+     */
+    public VoipMethods turnServers() {
+        return new VoipMethods(this);
+    }
 }

@@ -185,7 +185,7 @@ public class EventMethods {
      */
     public String sendEvent(String roomId, String eventType, Map<String, Object> eventContent) {
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType)
-            .pathParam("txntId", Long.toString(System.currentTimeMillis()));
+            .pathParam("txnId", Long.toString(System.currentTimeMillis()));
         return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEvent", params, eventContent, SendEventResponse.class)
             .getEventId();
     }
@@ -219,7 +219,7 @@ public class EventMethods {
         payload.put("msgtype", messageType);
         payload.put("body", text);
 
-        return sendEvent(roomId, Event.EventType.ROOM_MEMBER, payload);
+        return sendEvent(roomId, Event.EventType.ROOM_MESSAGE, payload);
     }
 
     /**
