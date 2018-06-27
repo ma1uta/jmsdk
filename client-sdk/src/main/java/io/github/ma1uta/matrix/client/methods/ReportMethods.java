@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ReportApi;
 import io.github.ma1uta.matrix.client.model.report.ReportRequest;
 
@@ -27,7 +28,7 @@ public class ReportMethods {
 
     private final MatrixClient matrixClient;
 
-    ReportMethods(MatrixClient matrixClient) {
+    public ReportMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

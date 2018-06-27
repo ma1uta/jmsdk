@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.Event;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.PresenceApi;
 import io.github.ma1uta.matrix.client.model.presence.PresenceList;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
@@ -31,7 +32,7 @@ public class PresenceMethods {
 
     private final MatrixClient matrixClient;
 
-    PresenceMethods(MatrixClient matrixClient) {
+    public PresenceMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

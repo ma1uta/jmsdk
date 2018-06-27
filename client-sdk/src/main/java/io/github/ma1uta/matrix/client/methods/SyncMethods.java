@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.Page;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.SyncApi;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 
@@ -28,7 +29,7 @@ public class SyncMethods {
 
     private final MatrixClient matrixClient;
 
-    SyncMethods(MatrixClient matrixClient) {
+    public SyncMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

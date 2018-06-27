@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.RoomApi;
 import io.github.ma1uta.matrix.client.model.room.CreateRoomRequest;
 import io.github.ma1uta.matrix.client.model.room.InviteRequest;
@@ -37,7 +38,7 @@ public class RoomMethods {
 
     private final MatrixClient matrixClient;
 
-    RoomMethods(MatrixClient matrixClient) {
+    public RoomMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

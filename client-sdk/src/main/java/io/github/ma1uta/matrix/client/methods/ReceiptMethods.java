@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.api.VoipApi;
-import io.github.ma1uta.matrix.client.model.voip.VoipResponse;
+import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
+import io.github.ma1uta.matrix.client.api.ReceiptApi;
 
 /**
- * Voip methods.
+ * Receipt method.
  */
-public class VoipMethods {
+public class ReceiptMethods {
 
     private final MatrixClient matrixClient;
 
-    VoipMethods(MatrixClient matrixClient) {
+    public ReceiptMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 
@@ -35,11 +36,14 @@ public class VoipMethods {
     }
 
     /**
-     * This API provides credentials for the client to use when initiating calls.
+     * Send receipt to specified event.
      *
-     * @return The TURN server credentials.
+     * @param roomId  room id.
+     * @param eventId event id.
      */
-    public VoipResponse turnServers() {
-        return getMatrixClient().getRequestMethods().get(VoipApi.class, "turnServer", new RequestParams(), VoipResponse.class);
+    public void sendReceipt(String roomId, String eventId) {
+        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId)
+            .pathParam("receiptType", ReceiptApi.Receipt.READ);
+        getMatrixClient().getRequestMethods().post(ReceiptApi.class, "receipt", params, "", EmptyResponse.class);
     }
 }

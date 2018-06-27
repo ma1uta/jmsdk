@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ClientConfigApi;
 
 import java.util.Map;
@@ -28,7 +29,7 @@ public class ClientConfigMethods {
 
     private final MatrixClient matrixClient;
 
-    ClientConfigMethods(MatrixClient matrixClient) {
+    public ClientConfigMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

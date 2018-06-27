@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ProfileApi;
 import io.github.ma1uta.matrix.client.model.profile.AvatarUrl;
 import io.github.ma1uta.matrix.client.model.profile.DisplayName;
@@ -29,7 +30,7 @@ public class ProfileMethods {
 
     private final MatrixClient matrixClient;
 
-    ProfileMethods(MatrixClient matrixClient) {
+    public ProfileMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

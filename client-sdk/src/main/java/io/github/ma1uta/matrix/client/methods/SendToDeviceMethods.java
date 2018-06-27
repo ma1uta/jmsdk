@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.SendToDeviceApi;
 import io.github.ma1uta.matrix.client.model.sendtodevice.SendToDeviceRequest;
 
@@ -27,7 +28,7 @@ public class SendToDeviceMethods {
 
     private final MatrixClient matrixClient;
 
-    SendToDeviceMethods(MatrixClient matrixClient) {
+    public SendToDeviceMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AdminApi;
 import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
 
@@ -26,7 +27,7 @@ public class AdminMethods {
 
     private final MatrixClient matrixClient;
 
-    AdminMethods(MatrixClient matrixClient) {
+    public AdminMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

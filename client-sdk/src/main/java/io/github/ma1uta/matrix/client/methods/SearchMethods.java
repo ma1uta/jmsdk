@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.SearchApi;
 import io.github.ma1uta.matrix.client.model.search.SearchRequest;
 import io.github.ma1uta.matrix.client.model.search.SearchResponse;
@@ -27,7 +28,7 @@ public class SearchMethods {
 
     private final MatrixClient matrixClient;
 
-    SearchMethods(MatrixClient matrixClient) {
+    public SearchMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

@@ -29,7 +29,7 @@
     <version>0.3-SNAPSHOT</version>
 
     <properties>
-        <client.api.version>0.4</client.api.version>
+        <client.api.version>0.4.1-SNAPSHOT</client.api.version>
         <common.backend.version>0.2</common.backend.version>
     </properties>
 

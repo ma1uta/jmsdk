@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.DeviceApi;
 import io.github.ma1uta.matrix.client.model.device.Device;
 import io.github.ma1uta.matrix.client.model.device.DeviceDeleteRequest;
@@ -33,7 +34,7 @@ public class DeviceMethods {
 
     private final MatrixClient matrixClient;
 
-    DeviceMethods(MatrixClient matrixClient) {
+    public DeviceMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

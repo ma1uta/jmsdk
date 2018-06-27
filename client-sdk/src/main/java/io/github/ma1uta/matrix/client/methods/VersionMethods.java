@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.VersionApi;
 import io.github.ma1uta.matrix.client.model.version.VersionsResponse;
 
@@ -26,7 +27,7 @@ public class VersionMethods {
 
     private final MatrixClient matrixClient;
 
-    VersionMethods(MatrixClient matrixClient) {
+    public VersionMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

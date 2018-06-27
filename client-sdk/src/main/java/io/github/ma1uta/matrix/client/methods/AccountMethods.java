@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AccountApi;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
 import io.github.ma1uta.matrix.client.model.account.DeactivateRequest;
@@ -35,7 +36,7 @@ public class AccountMethods {
 
     private final MatrixClient matrixClient;
 
-    AccountMethods(MatrixClient matrixClient) {
+    public AccountMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

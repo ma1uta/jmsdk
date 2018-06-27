@@ -16,6 +16,31 @@
 
 package io.github.ma1uta.matrix.client;
 
+import io.github.ma1uta.matrix.client.methods.AccountMethods;
+import io.github.ma1uta.matrix.client.methods.AdminMethods;
+import io.github.ma1uta.matrix.client.methods.AuthMethods;
+import io.github.ma1uta.matrix.client.methods.ClientConfigMethods;
+import io.github.ma1uta.matrix.client.methods.ContentMethods;
+import io.github.ma1uta.matrix.client.methods.DeviceMethods;
+import io.github.ma1uta.matrix.client.methods.EncryptionMethods;
+import io.github.ma1uta.matrix.client.methods.EventContextMethods;
+import io.github.ma1uta.matrix.client.methods.EventMethods;
+import io.github.ma1uta.matrix.client.methods.FilterMethods;
+import io.github.ma1uta.matrix.client.methods.PresenceMethods;
+import io.github.ma1uta.matrix.client.methods.ProfileMethods;
+import io.github.ma1uta.matrix.client.methods.PushMethods;
+import io.github.ma1uta.matrix.client.methods.ReceiptMethods;
+import io.github.ma1uta.matrix.client.methods.ReportMethods;
+import io.github.ma1uta.matrix.client.methods.RequestMethods;
+import io.github.ma1uta.matrix.client.methods.RoomMethods;
+import io.github.ma1uta.matrix.client.methods.SearchMethods;
+import io.github.ma1uta.matrix.client.methods.SendToDeviceMethods;
+import io.github.ma1uta.matrix.client.methods.SyncMethods;
+import io.github.ma1uta.matrix.client.methods.TagMethods;
+import io.github.ma1uta.matrix.client.methods.TypingMethods;
+import io.github.ma1uta.matrix.client.methods.UserDirectoryMethods;
+import io.github.ma1uta.matrix.client.methods.VersionMethods;
+import io.github.ma1uta.matrix.client.methods.VoipMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,11 +103,16 @@ public class MatrixClient implements Closeable {
         getRequestMethods().setAccessToken(accessToken);
     }
 
-    protected void updateCredentials(LoginResponse registered) {
+    /**
+     * Update the user ID and the access token.
+     *
+     * @param credentials user ID and the access token.
+     */
+    public void updateCredentials(LoginResponse credentials) {
         if (isUpdateAccessToken()) {
-            getRequestMethods().setAccessToken(registered.getAccessToken());
+            getRequestMethods().setAccessToken(credentials.getAccessToken());
         }
-        getRequestMethods().setUserId(registered.getUserId());
+        getRequestMethods().setUserId(credentials.getUserId());
     }
 
 

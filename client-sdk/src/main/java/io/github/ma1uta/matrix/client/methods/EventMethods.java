@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.Page;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.EventApi;
 import io.github.ma1uta.matrix.client.model.event.JoinedMembersResponse;
 import io.github.ma1uta.matrix.client.model.event.MembersResponse;
@@ -35,7 +36,7 @@ public class EventMethods {
 
     private final MatrixClient matrixClient;
 
-    EventMethods(MatrixClient matrixClient) {
+    public EventMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

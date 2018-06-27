@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
@@ -32,7 +33,7 @@ public class AuthMethods {
 
     private final MatrixClient matrixClient;
 
-    AuthMethods(MatrixClient matrixClient) {
+    public AuthMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 

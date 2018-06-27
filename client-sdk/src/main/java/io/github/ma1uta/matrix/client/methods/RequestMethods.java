@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.jeon.exception.MatrixException;
 import io.github.ma1uta.jeon.exception.RateLimitedException;

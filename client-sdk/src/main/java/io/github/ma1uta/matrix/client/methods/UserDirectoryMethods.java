@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client;
+package io.github.ma1uta.matrix.client.methods;
 
+import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.UserDirectoryApi;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchRequest;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchResponse;
@@ -27,7 +28,7 @@ public class UserDirectoryMethods {
 
     private final MatrixClient matrixClient;
 
-    UserDirectoryMethods(MatrixClient matrixClient) {
+    public UserDirectoryMethods(MatrixClient matrixClient) {
         this.matrixClient = matrixClient;
     }
 
