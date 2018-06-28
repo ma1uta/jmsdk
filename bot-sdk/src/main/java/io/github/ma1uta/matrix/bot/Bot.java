@@ -365,7 +365,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     public LoopState deletedState() {
         getHolder().runInTransaction((holder, dao) -> {
             LOGGER.debug("Delete bot");
-            holder.getMatrixClient().account().deactivate();
+            holder.getMatrixClient().account().deactivate(null);
             dao.delete(holder.getConfig());
         });
         return LoopState.EXIT;
