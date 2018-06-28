@@ -68,10 +68,9 @@ public class ContentMethods {
     public OutputStream download(String serverName, String mediaId, Boolean allowRemote) {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("serverName", serverName).pathParam("mediaId", mediaId);
-        if (allowRemote != null) {
-            params.queryParam("allowRemote", Boolean.toString(allowRemote));
-        }
+        RequestParams params = new RequestParams().pathParam("serverName", serverName)
+            .pathParam("mediaId", mediaId)
+            .queryParam("allowRemote", allowRemote);
         return getMatrixClient().getRequestMethods().get(ContentApi.class, "download", params, OutputStream.class);
     }
 

@@ -153,10 +153,8 @@ public class EventMethods {
             .queryParam("from", from)
             .queryParam("to", to)
             .queryParam("dir", dir)
-            .queryParam("filter", filter);
-        if (limit != null) {
-            params.queryParam("limit", Integer.toString(limit));
-        }
+            .queryParam("filter", filter)
+            .queryParam("limit", limit);
         return getMatrixClient().getRequestMethods().get(EventApi.class, "messages", params, new GenericType<Page<Event>>() {
         });
     }

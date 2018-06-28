@@ -63,9 +63,37 @@ public class RequestParams {
      * @param paramValue value of the parameter.
      * @return parameters.
      */
+    public RequestParams queryParam(String paramName, Boolean paramValue) {
+        if (paramValue != null) {
+            queryParams.put(paramName, Boolean.toString(paramValue));
+        }
+        return this;
+    }
+
+    /**
+     * Add a query parameter.
+     *
+     * @param paramName  name of the parameter.
+     * @param paramValue value of the parameter.
+     * @return parameters.
+     */
     public RequestParams queryParam(String paramName, Long paramValue) {
         if (paramValue != null) {
             queryParams.put(paramName, Long.toString(paramValue));
+        }
+        return this;
+    }
+
+    /**
+     * Add a query parameter.
+     *
+     * @param paramName  name of the parameter.
+     * @param paramValue value of the parameter.
+     * @return parameters.
+     */
+    public RequestParams queryParam(String paramName, Integer paramValue) {
+        if (paramValue != null) {
+            queryParams.put(paramName, Integer.toString(paramValue));
         }
         return this;
     }

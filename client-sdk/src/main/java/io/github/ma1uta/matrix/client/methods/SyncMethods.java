@@ -53,10 +53,8 @@ public class SyncMethods {
         RequestParams params = new RequestParams().queryParam("filter", filter)
             .queryParam("since", since)
             .queryParam("fullState", Boolean.toString(fullState))
-            .queryParam("presence", presence);
-        if (timeout != null) {
-            params.queryParam("timeout", Long.toString(timeout));
-        }
+            .queryParam("presence", presence)
+            .queryParam("timeout", timeout);
         return getMatrixClient().getRequestMethods().asyncGet(SyncApi.class, "sync", params, SyncResponse.class);
     }
 
@@ -71,10 +69,9 @@ public class SyncMethods {
      * @return The events received, which may be none.
      */
     public Page<Event> events(String from, Long timeout, String roomId) {
-        RequestParams params = new RequestParams().queryParam("from", from).queryParam("roomId", roomId);
-        if (timeout != null) {
-            params.queryParam("timeout", Long.toString(timeout));
-        }
+        RequestParams params = new RequestParams().queryParam("from", from)
+            .queryParam("roomId", roomId)
+            .queryParam("timeout", timeout);
         return getMatrixClient().getRequestMethods().get(SyncApi.class, "events", params, new GenericType<Page<Event>>() {
         });
     }

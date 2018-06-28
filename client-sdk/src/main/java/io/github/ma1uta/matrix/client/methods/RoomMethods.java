@@ -255,10 +255,9 @@ public class RoomMethods {
      * @return A list of the rooms on the server.
      */
     public PublicRoomsResponse showPublicRooms(Long limit, String since, String server) {
-        RequestParams params = new RequestParams().queryParam("since", since).queryParam("server", server);
-        if (limit != null) {
-            params.queryParam("limit", Long.toString(limit));
-        }
+        RequestParams params = new RequestParams().queryParam("since", since)
+            .queryParam("server", server)
+            .queryParam("limit", limit);
         return getMatrixClient().getRequestMethods().get(RoomApi.class, "showPublicRooms", params, PublicRoomsResponse.class);
     }
 

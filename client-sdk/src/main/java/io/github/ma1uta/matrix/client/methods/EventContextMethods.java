@@ -49,10 +49,9 @@ public class EventContextMethods {
     public EventContextResponse context(String roomId, String eventId, Integer limit) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId);
-        if (limit != null) {
-            params.queryParam("limit", Integer.toString(limit));
-        }
+        RequestParams params = new RequestParams().pathParam("roomId", roomId)
+            .pathParam("eventId", eventId)
+            .queryParam("limit", limit);
         return getMatrixClient().getRequestMethods().get(EventContextApi.class, "context", params, EventContextResponse.class);
     }
 }
