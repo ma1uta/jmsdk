@@ -9,7 +9,7 @@ Based on [Jeon API](https://github.com/ma1uta/jeon).
 
 Matrix client with the full support of the Client-Server API.
 
-### [bot-sdk](https://github.com/ma1uta/mjsdk/blob/master/docs/Bot-sdk.md)
+### [bot-sdk](https://github.com/ma1uta/jmsdk/blob/master/docs/Bot-sdk.md)
 
 Core classes to write bots and appservice. (WIP)
 
