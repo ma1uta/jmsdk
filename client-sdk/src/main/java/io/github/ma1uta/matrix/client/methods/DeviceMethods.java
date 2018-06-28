@@ -26,6 +26,7 @@ import io.github.ma1uta.matrix.client.model.device.DevicesDeleteRequest;
 import io.github.ma1uta.matrix.client.model.device.DevicesResponse;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Admin methods.
@@ -59,6 +60,7 @@ public class DeviceMethods {
      * @return device information.
      */
     public Device device(String deviceId) {
+        Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("deviceId", deviceId);
         return getMatrixClient().getRequestMethods().get(DeviceApi.class, "device", params, Device.class);
     }
@@ -70,6 +72,7 @@ public class DeviceMethods {
      * @param displayName new device display name.
      */
     public void update(String deviceId, String displayName) {
+        Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("deviceId", deviceId);
         DeviceUpdateRequest request = new DeviceUpdateRequest();
         request.setDisplayName(displayName);
@@ -83,6 +86,7 @@ public class DeviceMethods {
      * @param request  authentication request.
      */
     public void delete(String deviceId, DeviceDeleteRequest request) {
+        Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
         RequestParams params = new RequestParams().pathParam("deviceId", deviceId);
         requestMethods.delete(DeviceApi.class, "deleteDevice", params, request);
@@ -94,6 +98,11 @@ public class DeviceMethods {
      * @param request Devices to delete and additional authentication data.
      */
     public void deleteDevices(DevicesDeleteRequest request) {
+        String error = "Devices cannot be empty.";
+        Objects.requireNonNull(request.getDevices(), error);
+        if (request.getDevices().isEmpty()) {
+            throw new NullPointerException(error);
+        }
         getMatrixClient().getRequestMethods().post(DeviceApi.class, "deleteDevices", new RequestParams(), request, EmptyResponse.class);
     }
 }

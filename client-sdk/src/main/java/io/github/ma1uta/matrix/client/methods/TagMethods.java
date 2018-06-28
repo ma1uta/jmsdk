@@ -22,6 +22,7 @@ import io.github.ma1uta.matrix.client.api.TagApi;
 import io.github.ma1uta.matrix.client.model.tag.Tags;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Tag methods.
@@ -46,6 +47,8 @@ public class TagMethods {
      */
     public Tags show(String roomId) {
         String userId = getMatrixClient().getUserId();
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId);
         return getMatrixClient().getRequestMethods().get(TagApi.class, "showTags", params, Tags.class);
     }
@@ -59,6 +62,9 @@ public class TagMethods {
      */
     public void add(String roomId, String tag, Map<String, String> tagData) {
         String userId = getMatrixClient().getUserId();
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
+        Objects.requireNonNull(tag, "Tag cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId).pathParam("tag", tag);
         getMatrixClient().getRequestMethods().put(TagApi.class, "addTag", params, tagData, EmptyResponse.class);
     }
@@ -71,6 +77,9 @@ public class TagMethods {
      */
     public void delete(String roomId, String tag) {
         String userId = getMatrixClient().getUserId();
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
+        Objects.requireNonNull(tag, "Tag cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId).pathParam("tag", tag);
         getMatrixClient().getRequestMethods().delete(TagApi.class, "deleteTag", params, "");
     }

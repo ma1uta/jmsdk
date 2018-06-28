@@ -24,6 +24,7 @@ import io.github.ma1uta.matrix.client.model.presence.PresenceList;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
 
 import java.util.List;
+import java.util.Objects;
 import javax.ws.rs.core.GenericType;
 
 /**
@@ -50,6 +51,8 @@ public class PresenceMethods {
      */
     public void setPresenceStatus(PresenceStatus status) {
         String userId = getMatrixClient().getUserId();
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
+        Objects.requireNonNull(status.getPresence(), "Presence cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         getMatrixClient().getRequestMethods().put(PresenceApi.class, "setPresenceStatus", params, status, EmptyResponse.class);
     }
@@ -61,6 +64,7 @@ public class PresenceMethods {
      * @return The presence state for this user.
      */
     public PresenceStatus getPresenceStatus(String userId) {
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         return getMatrixClient().getRequestMethods().get(PresenceApi.class, "getPresenceStatus", params, PresenceStatus.class);
     }
@@ -72,6 +76,7 @@ public class PresenceMethods {
      */
     public void setPresenceList(PresenceList presenceList) {
         String userId = getMatrixClient().getUserId();
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         getMatrixClient().getRequestMethods().post(PresenceApi.class, "setPresenceList", params, presenceList, EmptyResponse.class);
     }
@@ -83,6 +88,7 @@ public class PresenceMethods {
      * @return A list of presence events for this list.
      */
     public List<Event> getPresenceList(String userId) {
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         return getMatrixClient().getRequestMethods().get(PresenceApi.class, "getPresenceList", params, new GenericType<List<Event>>() {
         });

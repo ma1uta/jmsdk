@@ -21,6 +21,8 @@ import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.TypingApi;
 import io.github.ma1uta.matrix.client.model.typing.TypingRequest;
 
+import java.util.Objects;
+
 /**
  * Typing methods.
  */
@@ -46,6 +48,9 @@ public class TypingMethods {
      */
     public void typing(String roomId, Boolean typing, Long timeout) {
         String userId = getMatrixClient().getUserId();
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
+        Objects.requireNonNull(typing, "Typing cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId);
         TypingRequest request = new TypingRequest();
         request.setTyping(typing);

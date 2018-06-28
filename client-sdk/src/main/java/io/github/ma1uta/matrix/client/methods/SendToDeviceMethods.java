@@ -21,6 +21,8 @@ import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.SendToDeviceApi;
 import io.github.ma1uta.matrix.client.model.sendtodevice.SendToDeviceRequest;
 
+import java.util.Objects;
+
 /**
  * Send to device method.
  */
@@ -43,6 +45,7 @@ public class SendToDeviceMethods {
      * @param request   sending data.
      */
     public void sendToDevice(String eventType, SendToDeviceRequest request) {
+        Objects.requireNonNull(eventType, "RoomId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("eventType", eventType)
             .pathParam("txnId", Long.toString(System.currentTimeMillis()));
         getMatrixClient().getRequestMethods().put(SendToDeviceApi.class, "send", params, request, EmptyResponse.class);

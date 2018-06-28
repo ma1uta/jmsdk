@@ -26,6 +26,8 @@ import io.github.ma1uta.matrix.client.model.encryption.QueryResponse;
 import io.github.ma1uta.matrix.client.model.encryption.UploadRequest;
 import io.github.ma1uta.matrix.client.model.encryption.UploadResponse;
 
+import java.util.Objects;
+
 /**
  * Admin methods.
  */
@@ -59,6 +61,9 @@ public class EncryptionMethods {
      * @return query result.
      */
     public QueryResponse query(QueryRequest request) {
+        if (request.getDeviceKeys() == null || request.getDeviceKeys().isEmpty()) {
+            throw new NullPointerException("DeviceKeys cannot be empty.");
+        }
         return getMatrixClient().getRequestMethods().post(EncryptionApi.class, "query", new RequestParams(), request, QueryResponse.class);
     }
 
@@ -69,6 +74,9 @@ public class EncryptionMethods {
      * @return claim response.
      */
     public ClaimResponse claim(ClaimRequest request) {
+        if (request.getOneTimeKeys().isEmpty()) {
+            throw new NullPointerException("OneTimeKeys cannot be empty.");
+        }
         return getMatrixClient().getRequestMethods().post(EncryptionApi.class, "claim", new RequestParams(), request, ClaimResponse.class);
     }
 
@@ -84,6 +92,8 @@ public class EncryptionMethods {
      * @return The list of users who updated their devices.
      */
     public ChangesResponse changes(String from, String to) {
+        Objects.requireNonNull(from, "From cannot be empty.");
+        Objects.requireNonNull(to, "To cannot be empty.");
         RequestParams params = new RequestParams().queryParam("from", from).queryParam("to", to);
         return getMatrixClient().getRequestMethods().get(EncryptionApi.class, "changes", params, ChangesResponse.class);
     }

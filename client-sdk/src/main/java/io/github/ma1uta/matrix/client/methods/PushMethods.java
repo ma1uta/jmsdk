@@ -31,6 +31,7 @@ import io.github.ma1uta.matrix.client.model.push.PushersResponse;
 import io.github.ma1uta.matrix.client.model.push.Ruleset;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Push methods.
@@ -101,6 +102,9 @@ public class PushMethods {
      *     actions and conditions if set.
      */
     public PushRule pushRule(String scope, String kind, String ruleId) {
+        Objects.requireNonNull(scope, "Scope cannot be empty.");
+        Objects.requireNonNull(kind, "Kind cannot be empty.");
+        Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("scope", scope).pathParam("kind", kind).pathParam("ruleId", ruleId);
         return getMatrixClient().getRequestMethods().get(PushApi.class, "pushRule", params, PushRule.class);
     }
@@ -113,6 +117,9 @@ public class PushMethods {
      * @param ruleId The identifier for the rule.
      */
     public void deleteRule(String scope, String kind, String ruleId) {
+        Objects.requireNonNull(scope, "Scope cannot be empty.");
+        Objects.requireNonNull(kind, "Kind cannot be empty.");
+        Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("scope", scope).pathParam("kind", kind).pathParam("ruleId", ruleId);
         getMatrixClient().getRequestMethods().delete(PushApi.class, "deleteRule", params, EmptyResponse.class);
     }
@@ -131,6 +138,12 @@ public class PushMethods {
      * @param request The rule data.
      */
     public void updateRule(String scope, String kind, String ruleId, String before, String after, PushUpdateRequest request) {
+        Objects.requireNonNull(scope, "Scope cannot be empty.");
+        Objects.requireNonNull(kind, "Kind cannot be empty.");
+        Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
+        if (request.getActions() == null || request.getActions().isEmpty()) {
+            throw new NullPointerException("Actions cannot be empty.");
+        }
         RequestParams params = new RequestParams().pathParam("scope", scope).pathParam("kind", kind).pathParam("ruleId", ruleId)
             .queryParam("before", before).queryParam("after", after);
         getMatrixClient().getRequestMethods().put(PushApi.class, "updateRule", params, request, EmptyResponse.class);
@@ -145,6 +158,9 @@ public class PushMethods {
      * @return Whether the push rule is enabled.
      */
     public Boolean getEnabled(String scope, String kind, String ruleId) {
+        Objects.requireNonNull(scope, "Scope cannot be empty.");
+        Objects.requireNonNull(kind, "Kind cannot be empty.");
+        Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("scope", scope).pathParam("kind", kind).pathParam("ruleId", ruleId);
         return getMatrixClient().getRequestMethods().get(PushApi.class, "getEnabled", params, PushEnable.class).getEnabled();
     }
@@ -158,6 +174,9 @@ public class PushMethods {
      * @param enabled Whether the push rule is enabled or not.
      */
     public void setEnabled(String scope, String kind, String ruleId, boolean enabled) {
+        Objects.requireNonNull(scope, "Scope cannot be empty.");
+        Objects.requireNonNull(kind, "Kind cannot be empty.");
+        Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("scope", scope).pathParam("kind", kind).pathParam("ruleId", ruleId);
         PushEnable request = new PushEnable();
         request.setEnabled(enabled);
@@ -173,6 +192,9 @@ public class PushMethods {
      * @return The actions for this push rule.
      */
     public List<String> getActions(String scope, String kind, String ruleId) {
+        Objects.requireNonNull(scope, "Scope cannot be empty.");
+        Objects.requireNonNull(kind, "Kind cannot be empty.");
+        Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("scope", scope).pathParam("kind", kind).pathParam("ruleId", ruleId);
         return getMatrixClient().getRequestMethods().get(PushApi.class, "getActions", params, PushActions.class).getActions();
     }
@@ -186,6 +208,9 @@ public class PushMethods {
      * @param actions The actions for this push rule.
      */
     public void setActions(String scope, String kind, String ruleId, List<String> actions) {
+        Objects.requireNonNull(scope, "Scope cannot be empty.");
+        Objects.requireNonNull(kind, "Kind cannot be empty.");
+        Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("scope", scope).pathParam("kind", kind).pathParam("ruleId", ruleId);
         PushActions request = new PushActions();
         request.setActions(actions);

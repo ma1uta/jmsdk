@@ -19,6 +19,7 @@ package io.github.ma1uta.matrix.client.methods;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AccountApi;
+import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
 import io.github.ma1uta.matrix.client.model.account.DeactivateRequest;
 import io.github.ma1uta.matrix.client.model.account.PasswordRequest;
@@ -28,6 +29,8 @@ import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+
+import java.util.Objects;
 
 /**
  * Account methods.
@@ -63,6 +66,9 @@ public class AccountMethods {
      * @param requestToken request token.
      */
     public void requestToken(RequestToken requestToken) {
+        Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
+        Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
+        Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
         getMatrixClient().getRequestMethods()
             .post(AccountApi.class, "requestToken", new RequestParams(), requestToken, EmptyResponse.class);
     }
@@ -73,6 +79,7 @@ public class AccountMethods {
      * @param password new password.
      */
     public void password(String password) {
+        Objects.requireNonNull(password, "Password cannot be empty.");
         PasswordRequest request = new PasswordRequest();
         request.setNewPassword(password);
         getMatrixClient().getRequestMethods().post(AccountApi.class, "password", new RequestParams(), request, EmptyResponse.class);
@@ -87,8 +94,10 @@ public class AccountMethods {
 
     /**
      * Deactivate user.
+     *
+     * @param auth authentication data.
      */
-    public void deactivate() {
+    public void deactivate(AuthenticationData auth) {
         getMatrixClient().getRequestMethods()
             .post(AccountApi.class, "deactivate", new RequestParams(), new DeactivateRequest(), EmptyResponse.class);
     }
@@ -100,6 +109,7 @@ public class AccountMethods {
      * @return {@code} if available, else {@code false}.
      */
     public boolean available(String username) {
+        Objects.requireNonNull(username, "Username cannot be empty");
         RequestParams params = new RequestParams().queryParam("username", username);
         return getMatrixClient().getRequestMethods().get(AccountApi.class, "available", params, AvailableResponse.class).getAvailable();
     }
@@ -119,6 +129,11 @@ public class AccountMethods {
      * @param request new contact information.
      */
     public void updateThreePid(ThreePidRequest request) {
+        String error = "Threepids cannot be empty.";
+        Objects.requireNonNull(request.getThreePidCreds(), error);
+        if (request.getThreePidCreds().length == 0) {
+            throw new NullPointerException(error);
+        }
         getMatrixClient().getRequestMethods().post(AccountApi.class, "updateThreePid", new RequestParams(), request, EmptyResponse.class);
     }
 

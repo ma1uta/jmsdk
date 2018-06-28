@@ -30,6 +30,7 @@ import io.github.ma1uta.matrix.client.model.room.RoomId;
 import io.github.ma1uta.matrix.client.model.room.RoomVisibility;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Room api.
@@ -63,6 +64,8 @@ public class RoomMethods {
      * @param alias  The room alias to set.
      */
     public void newAlias(RoomId roomId, String alias) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(alias, "Alias cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomAlias", alias);
         getMatrixClient().getRequestMethods().put(RoomApi.class, "newAlias", params, roomId, EmptyResponse.class);
     }
@@ -74,6 +77,7 @@ public class RoomMethods {
      * @return The room ID and other information for this alias.
      */
     public RoomId resolve(String alias) {
+        Objects.requireNonNull(alias, "Alias cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomAlias", alias);
         return getMatrixClient().getRequestMethods().get(RoomApi.class, "resolve", params, RoomId.class);
     }
@@ -84,6 +88,7 @@ public class RoomMethods {
      * @param alias The room alias to remove.
      */
     public void delete(String alias) {
+        Objects.requireNonNull(alias, "Alias cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomAlias", alias);
         getMatrixClient().getRequestMethods().delete(RoomApi.class, "delete", params, EmptyResponse.class);
     }
@@ -106,6 +111,11 @@ public class RoomMethods {
      * @param request The invite information.
      */
     public void invite(String roomId, InviteRequest request) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(request.getIdServer(), "IdServer cannot be empty.");
+        Objects.requireNonNull(request.getAddress(), "Address cannot be empty.");
+        Objects.requireNonNull(request.getMedium(), "Medium cannot be empty.");
+        Objects.requireNonNull(request.getUserId(), "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         getMatrixClient().getRequestMethods().post(RoomApi.class, "invite", params, request, EmptyResponse.class);
     }
@@ -118,6 +128,7 @@ public class RoomMethods {
      * @return The room has been joined. The joined room ID must be returned in the room_id field.
      */
     public RoomId join(String roomId, JoinRequest request) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         return getMatrixClient().getRequestMethods().post(RoomApi.class, "join", params, request, RoomId.class);
     }
@@ -129,6 +140,7 @@ public class RoomMethods {
      * @return room id.
      */
     public RoomId joinByIdOrAlias(String idOrAlias) {
+        Objects.requireNonNull(idOrAlias, "IdOrAlias cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomIdOrAlias", idOrAlias);
         return getMatrixClient().getRequestMethods().post(RoomApi.class, "joinByIdOrAlias", params, new JoinRequest(), RoomId.class);
     }
@@ -139,6 +151,7 @@ public class RoomMethods {
      * @param roomId room id.
      */
     public void leave(String roomId) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         getMatrixClient().getRequestMethods().post(RoomApi.class, "leave", params, "", EmptyResponse.class);
     }
@@ -149,6 +162,7 @@ public class RoomMethods {
      * @param roomId The room identifier to forget.
      */
     public void forget(String roomId) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         getMatrixClient().getRequestMethods().post(RoomApi.class, "forget", params, "", EmptyResponse.class);
     }
@@ -161,6 +175,8 @@ public class RoomMethods {
      * @param reason The reason the user has been baned.
      */
     public void kick(String roomId, String userId, String reason) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         KickRequest request = new KickRequest();
         request.setUserId(userId);
@@ -176,6 +192,8 @@ public class RoomMethods {
      * @param reason The reason the user has been kicked.
      */
     public void ban(String roomId, String userId, String reason) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         KickRequest request = new KickRequest();
         request.setUserId(userId);
@@ -192,6 +210,8 @@ public class RoomMethods {
      * @param reason The reason the user has been unbaned.
      */
     public void unban(String roomId, String userId, String reason) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         KickRequest request = new KickRequest();
         request.setUserId(userId);
@@ -206,6 +226,7 @@ public class RoomMethods {
      * @return The visibility of the room in the directory.
      */
     public String getVisibility(String roomId) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         return getMatrixClient().getRequestMethods().get(RoomApi.class, "getVisibility", params, RoomVisibility.class).getVisibility();
     }
@@ -217,6 +238,7 @@ public class RoomMethods {
      * @param visibility The visibility of the room in the directory. One of: ["private", "public"].
      */
     public void setVisibility(String roomId, String visibility) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId);
         RoomVisibility request = new RoomVisibility();
         request.setVisibility(visibility);

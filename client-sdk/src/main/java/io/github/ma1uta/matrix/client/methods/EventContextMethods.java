@@ -20,6 +20,8 @@ import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.EventContextApi;
 import io.github.ma1uta.matrix.client.model.eventcontext.EventContextResponse;
 
+import java.util.Objects;
+
 /**
  * Event context methods.
  */
@@ -45,6 +47,8 @@ public class EventContextMethods {
      * @return The events and state surrounding the requested event.
      */
     public EventContextResponse context(String roomId, String eventId, Integer limit) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(eventId, "EventId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId);
         if (limit != null) {
             params.queryParam("limit", Integer.toString(limit));

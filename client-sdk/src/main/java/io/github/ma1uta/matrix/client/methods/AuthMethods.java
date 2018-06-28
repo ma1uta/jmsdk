@@ -24,6 +24,8 @@ import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 /**
  * Authentication methods.
  */
@@ -63,6 +65,7 @@ public class AuthMethods {
      * @param loginRequest request.
      */
     public void login(LoginRequest loginRequest) {
+        Objects.requireNonNull(loginRequest.getType(), "Type cannot be empty.");
         LoginResponse loginResponse = getMatrixClient().getRequestMethods()
             .post(AuthApi.class, "login", new RequestParams(), loginRequest, LoginResponse.class);
 

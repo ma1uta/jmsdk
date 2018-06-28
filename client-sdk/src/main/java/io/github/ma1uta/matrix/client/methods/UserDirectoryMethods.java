@@ -21,6 +21,8 @@ import io.github.ma1uta.matrix.client.api.UserDirectoryApi;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchRequest;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchResponse;
 
+import java.util.Objects;
+
 /**
  * User directory methods.
  */
@@ -44,6 +46,7 @@ public class UserDirectoryMethods {
      * @return the result of the search.
      */
     public SearchResponse search(SearchRequest request) {
+        Objects.requireNonNull(request.getSearchTerm(), "SearchTerm cannot be empty.");
         return getMatrixClient().getRequestMethods()
             .post(UserDirectoryApi.class, "searchUsers", new RequestParams(), request, SearchResponse.class);
     }

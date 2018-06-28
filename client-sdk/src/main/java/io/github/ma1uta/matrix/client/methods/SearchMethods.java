@@ -21,6 +21,8 @@ import io.github.ma1uta.matrix.client.api.SearchApi;
 import io.github.ma1uta.matrix.client.model.search.SearchRequest;
 import io.github.ma1uta.matrix.client.model.search.SearchResponse;
 
+import java.util.Objects;
+
 /**
  * Search methods.
  */
@@ -45,6 +47,7 @@ public class SearchMethods {
      * @return Results of the search.
      */
     public SearchResponse search(SearchRequest request, String nextBatch) {
+        Objects.requireNonNull(request.getSearchCategories(), "Search categories cannot be empty.");
         RequestParams params = new RequestParams().queryParam("nextBatch", nextBatch);
         return getMatrixClient().getRequestMethods().post(SearchApi.class, "search", params, request, SearchResponse.class);
     }

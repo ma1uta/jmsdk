@@ -20,6 +20,8 @@ import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ReceiptApi;
 
+import java.util.Objects;
+
 /**
  * Receipt method.
  */
@@ -42,6 +44,8 @@ public class ReceiptMethods {
      * @param eventId event id.
      */
     public void sendReceipt(String roomId, String eventId) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(eventId, "EventId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId)
             .pathParam("receiptType", ReceiptApi.Receipt.READ);
         getMatrixClient().getRequestMethods().post(ReceiptApi.class, "receipt", params, "", EmptyResponse.class);

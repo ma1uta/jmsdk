@@ -23,6 +23,7 @@ import io.github.ma1uta.matrix.client.model.content.ContentUri;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Objects;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
@@ -65,6 +66,8 @@ public class ContentMethods {
      * @return The content that was previously uploaded.
      */
     public OutputStream download(String serverName, String mediaId, Boolean allowRemote) {
+        Objects.requireNonNull(serverName, "ServerName cannot be empty.");
+        Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("serverName", serverName).pathParam("mediaId", mediaId);
         if (allowRemote != null) {
             params.queryParam("allowRemote", Boolean.toString(allowRemote));
@@ -85,10 +88,12 @@ public class ContentMethods {
      * @return The content that was previously uploaded.
      */
     public OutputStream thumbnail(String serverName, String mediaId, Long width, Long height, String method, Boolean allowRemote) {
+        Objects.requireNonNull(serverName, "ServerName cannot be empty.");
+        Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("serverName", serverName)
             .pathParam("mediaId", mediaId)
-            .queryParam("width", Long.toString(width))
-            .queryParam("height", Long.toString(height))
+            .queryParam("width", width)
+            .queryParam("height", height)
             .queryParam("method", method)
             .queryParam("allowRemote", Boolean.toString(allowRemote));
         return getMatrixClient().getRequestMethods().get(ContentApi.class, "thumbnail", params, OutputStream.class);
@@ -103,6 +108,7 @@ public class ContentMethods {
      * @return The content that was previously uploaded.
      */
     public Map<String, String> previewInfo(String url, String ts) {
+        Objects.requireNonNull(url, "Url cannot be empty.");
         RequestParams params = new RequestParams().queryParam("url", url).queryParam("ts", ts);
         return getMatrixClient().getRequestMethods().get(ContentApi.class, "previewUrl", params, new GenericType<Map<String, String>>() {
         });

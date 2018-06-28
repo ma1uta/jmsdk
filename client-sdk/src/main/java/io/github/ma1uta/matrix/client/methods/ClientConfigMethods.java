@@ -21,6 +21,7 @@ import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ClientConfigApi;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Client config methods.
@@ -46,6 +47,8 @@ public class ClientConfigMethods {
      */
     public void addConfig(String type, Map<String, String> accountData) {
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
+        Objects.requireNonNull(type, "Type cannot be empty.");
+        Objects.requireNonNull(requestMethods.getUserId(), "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId()).pathParam("type", type);
         requestMethods.put(ClientConfigApi.class, "addConfig", params, accountData, EmptyResponse.class);
     }
@@ -60,6 +63,9 @@ public class ClientConfigMethods {
      */
     public void addRoomConfig(String roomId, String type, Map<String, String> accountData) {
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(type, "Type cannot be empty");
+        Objects.requireNonNull(requestMethods.getUserId(), "UserId cannot be empty");
         RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId()).pathParam("roomId", roomId)
             .pathParam("type", type);
         requestMethods.put(ClientConfigApi.class, "addRoomConfig", params, accountData, EmptyResponse.class);

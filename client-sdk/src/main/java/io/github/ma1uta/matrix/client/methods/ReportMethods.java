@@ -21,6 +21,8 @@ import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ReportApi;
 import io.github.ma1uta.matrix.client.model.report.ReportRequest;
 
+import java.util.Objects;
+
 /**
  * Report methods.
  */
@@ -45,6 +47,10 @@ public class ReportMethods {
      * @param score   The score to rate this content as where -100 is most offensive and 0 is inoffensive.
      */
     public void report(String roomId, String eventId, String reason, Integer score) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(eventId, "EventId cannot be empty.");
+        Objects.requireNonNull(reason, "Reason cannot be empty.");
+        Objects.requireNonNull(score, "Score cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId);
         ReportRequest request = new ReportRequest();
         request.setReason(reason);

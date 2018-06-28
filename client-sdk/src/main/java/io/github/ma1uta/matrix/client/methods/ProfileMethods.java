@@ -23,6 +23,8 @@ import io.github.ma1uta.matrix.client.model.profile.AvatarUrl;
 import io.github.ma1uta.matrix.client.model.profile.DisplayName;
 import io.github.ma1uta.matrix.client.model.profile.Profile;
 
+import java.util.Objects;
+
 /**
  * Profile methods.
  */
@@ -45,7 +47,9 @@ public class ProfileMethods {
      */
     public void setDisplayName(String displayName) {
         RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId());
+        String userId = requestMethods.getUserId();
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
+        RequestParams params = new RequestParams().pathParam("userId", userId);
         DisplayName request = new DisplayName();
         request.setDisplayname(displayName);
         requestMethods.put(ProfileApi.class, "setDisplayName", params, request, EmptyResponse.class);
@@ -59,6 +63,7 @@ public class ProfileMethods {
      * @return The display name for this user.
      */
     public String showDisplayName(String userId) {
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         return getMatrixClient().getRequestMethods().get(ProfileApi.class, "showDisplayName", params, DisplayName.class).getDisplayname();
     }
@@ -71,6 +76,7 @@ public class ProfileMethods {
      */
     public void setAvaterUrl(String avatarUrl) {
         String userId = getMatrixClient().getUserId();
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         AvatarUrl request = new AvatarUrl();
         request.setAvatarUrl(avatarUrl);
@@ -85,6 +91,7 @@ public class ProfileMethods {
      * @return The avatar URL for this user.
      */
     public String showAvatarUrl(String userId) {
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         return getMatrixClient().getRequestMethods().get(ProfileApi.class, "showAvatarUrl", params, AvatarUrl.class).getAvatarUrl();
     }
@@ -97,6 +104,7 @@ public class ProfileMethods {
      * @return The profile info for this user.
      */
     public Profile profile(String userId) {
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         return getMatrixClient().getRequestMethods().get(ProfileApi.class, "profile", params, Profile.class);
     }

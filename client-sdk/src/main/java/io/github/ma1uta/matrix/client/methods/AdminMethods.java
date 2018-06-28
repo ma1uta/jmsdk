@@ -20,6 +20,8 @@ import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AdminApi;
 import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
 
+import java.util.Objects;
+
 /**
  * Admin methods.
  */
@@ -43,6 +45,7 @@ public class AdminMethods {
      * @return user information.
      */
     public AdminResponse whois(String userId) {
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId);
         return getMatrixClient().getRequestMethods().get(AdminApi.class, "whois", params, AdminResponse.class);
     }
