@@ -20,9 +20,7 @@ import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.BotHolder;
-import io.github.ma1uta.matrix.bot.Command;
 import io.github.ma1uta.matrix.bot.PersistentService;
-import io.github.ma1uta.matrix.client.MatrixClient;
 
 /**
  * Set new prefix or show current.
@@ -32,7 +30,7 @@ import io.github.ma1uta.matrix.client.MatrixClient;
  * @param <S> bot service.
  * @param <E> extra data.
  */
-public class Prefix<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> implements Command<C, D, S, E> {
+public class Prefix<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> extends OwnerCommand<C, D, S, E> {
 
     @Override
     public String name() {
@@ -40,15 +38,11 @@ public class Prefix<C extends BotConfig, D extends BotDao<C>, S extends Persiste
     }
 
     @Override
-    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+    public boolean ownerInvoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
         C config = holder.getConfig();
-        MatrixClient matrixClient = holder.getMatrixClient();
-        if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
-            return false;
-        }
         if (arguments == null || arguments.trim().isEmpty()) {
             String prefix = config.getPrefix();
-            matrixClient.event().sendNotice(roomId, prefix == null ? "!" : prefix);
+            holder.getMatrixClient().event().sendNotice(roomId, prefix == null ? "!" : prefix);
         } else {
             config.setPrefix(arguments);
         }

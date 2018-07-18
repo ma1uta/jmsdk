@@ -17,47 +17,32 @@
 package io.github.ma1uta.matrix.bot.command;
 
 import io.github.ma1uta.matrix.Event;
-import io.github.ma1uta.matrix.bot.AccessPolicy;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.BotHolder;
+import io.github.ma1uta.matrix.bot.Command;
 import io.github.ma1uta.matrix.bot.PersistentService;
 
 /**
- * Set new access policy.
+ * Provide checking that current command was invoked by owner.
  *
  * @param <C> bot configuration.
  * @param <D> bot dao.
  * @param <S> bot service.
  * @param <E> extra data.
  */
-public class SetAccessPolicy<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> extends OwnerCommand<C, D, S, E> {
-    @Override
-    public String name() {
-        return "policy";
-    }
+public abstract class OwnerCommand<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> implements
+    Command<C, D, S, E> {
 
     @Override
-    public boolean ownerInvoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
-        if (arguments != null && !arguments.isEmpty()) {
-            try {
-                holder.getConfig().setPolicy(AccessPolicy.valueOf(arguments.toUpperCase()));
-                return true;
-            } catch (IllegalArgumentException ignored) {
-                // wrong option.
-            }
+    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+        C config = holder.getConfig();
+        if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
+            return false;
         }
-        holder.getMatrixClient().event().sendNotice(roomId, "usage: " + usage());
-        return true;
+
+        return ownerInvoke(holder, roomId, event, arguments);
     }
 
-    @Override
-    public String help() {
-        return "who can invoke commands (invoked only by owner).";
-    }
-
-    @Override
-    public String usage() {
-        return "policy [all|owner]";
-    }
+    protected abstract boolean ownerInvoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments);
 }

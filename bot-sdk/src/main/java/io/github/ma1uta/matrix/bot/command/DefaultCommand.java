@@ -20,9 +20,7 @@ import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.BotHolder;
-import io.github.ma1uta.matrix.bot.Command;
 import io.github.ma1uta.matrix.bot.PersistentService;
-import io.github.ma1uta.matrix.client.MatrixClient;
 
 /**
  * Set or show default command.
@@ -32,7 +30,7 @@ import io.github.ma1uta.matrix.client.MatrixClient;
  * @param <S> bot service.
  * @param <E> extra data.
  */
-public class DefaultCommand<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> implements Command<C, D, S, E> {
+public class DefaultCommand<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> extends OwnerCommand<C, D, S, E> {
 
     @Override
     public String name() {
@@ -40,13 +38,7 @@ public class DefaultCommand<C extends BotConfig, D extends BotDao<C>, S extends 
     }
 
     @Override
-    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
-        C config = holder.getConfig();
-        MatrixClient matrixClient = holder.getMatrixClient();
-        if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
-            return false;
-        }
-
+    public boolean ownerInvoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
         if (arguments == null || arguments.trim().isEmpty()) {
             holder.getConfig().setDefaultCommand(null);
             return true;
@@ -54,7 +46,7 @@ public class DefaultCommand<C extends BotConfig, D extends BotDao<C>, S extends 
             holder.getConfig().setDefaultCommand(arguments);
             return true;
         } else {
-            matrixClient.event().sendNotice(roomId, "Unknown command: " + arguments);
+            holder.getMatrixClient().event().sendNotice(roomId, "Unknown command: " + arguments);
             return false;
         }
     }

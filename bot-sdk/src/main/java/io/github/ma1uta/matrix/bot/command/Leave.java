@@ -20,7 +20,6 @@ import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.BotHolder;
-import io.github.ma1uta.matrix.bot.Command;
 import io.github.ma1uta.matrix.bot.PersistentService;
 
 /**
@@ -31,20 +30,16 @@ import io.github.ma1uta.matrix.bot.PersistentService;
  * @param <S> bot service.
  * @param <E> extra data.
  */
-public class Leave<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> implements Command<C, D, S, E> {
+public class Leave<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> extends OwnerCommand<C, D, S, E> {
     @Override
     public String name() {
         return "leave";
     }
 
     @Override
-    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
-        BotConfig config = holder.getConfig();
-        if (config.getOwner() == null || config.getOwner().equals(event.getSender())) {
-            holder.getMatrixClient().room().leave(roomId);
-            return true;
-        }
-        return false;
+    public boolean ownerInvoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+        holder.getMatrixClient().room().leave(roomId);
+        return true;
     }
 
     @Override

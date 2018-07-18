@@ -20,7 +20,6 @@ import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.BotHolder;
-import io.github.ma1uta.matrix.bot.Command;
 import io.github.ma1uta.matrix.bot.PersistentService;
 import io.github.ma1uta.matrix.client.MatrixClient;
 
@@ -32,25 +31,20 @@ import io.github.ma1uta.matrix.client.MatrixClient;
  * @param <S> bot service.
  * @param <E> extra data.
  */
-public class NewName<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> implements Command<C, D, S, E> {
+public class NewName<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> extends OwnerCommand<C, D, S, E> {
     @Override
     public String name() {
         return "name";
     }
 
     @Override
-    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
-        C config = holder.getConfig();
-        if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
-            return false;
-        }
-
+    public boolean ownerInvoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
         MatrixClient matrixClient = holder.getMatrixClient();
         if (arguments == null || arguments.trim().isEmpty()) {
             matrixClient.event().sendNotice(roomId, "Usage: " + usage());
         } else {
             matrixClient.profile().setDisplayName(arguments);
-            config.setDisplayName(arguments);
+            holder.getConfig().setDisplayName(arguments);
         }
         return true;
     }

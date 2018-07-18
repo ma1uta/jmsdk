@@ -28,6 +28,9 @@ import io.github.ma1uta.matrix.client.model.sync.JoinedRoom;
 import io.github.ma1uta.matrix.client.model.sync.LeftRoom;
 import io.github.ma1uta.matrix.client.model.sync.Rooms;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
+import io.github.ma1uta.matrix.events.RoomMember;
+import io.github.ma1uta.matrix.events.RoomMessage;
+import io.github.ma1uta.matrix.events.messages.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -336,14 +339,17 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     public void joinRoom(Map<String, List<Event>> eventMap) {
         getHolder().runInTransaction((holder, dao) -> {
             LOGGER.debug("Start joining.");
-            eventMap.forEach((roomId, events) -> events.stream().filter(event -> {
-                Object membership = event.getContent().get("membership");
+            eventMap.forEach((roomId, events) -> events.stream().peek(event -> {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Membership: {}", membership);
                     LOGGER.debug("Event type: {}", event.getType());
                 }
-                return Event.MembershipState.INVITE.equals(membership)
-                    && Event.EventType.ROOM_MEMBER.equals(event.getType());
+            }).filter(event -> {
+                if (event.getContent() instanceof RoomMember) {
+                    RoomMember content = (RoomMember) event.getContent();
+                    LOGGER.debug("Membership: {}", content.getMembership());
+                    return Event.MembershipState.INVITE.equals(content.getMembership());
+                }
+                return false;
             }).findFirst().ifPresent(event -> {
                 LOGGER.debug("Join to room {}", roomId);
                 holder.getMatrixClient().room().joinByIdOrAlias(roomId);
@@ -390,7 +396,6 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             } else {
                 LOGGER.debug("Skip timelines");
             }
-
             if (event.getOriginServerTs() != null && event.getOriginServerTs() > lastOriginTs) {
                 lastOriginTs = event.getOriginServerTs();
                 lastEvent = event.getEventId();
@@ -453,30 +458,30 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     protected boolean processEvent(String roomId, Event event) {
         MatrixClient matrixClient = getHolder().getMatrixClient();
         C config = getHolder().getConfig();
-        Map<String, Object> content = event.getContent();
-        String body = (String) content.get("body");
         boolean invoked = false;
-        boolean permit = permit(event);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Event type: {}", event.getType());
-            LOGGER.debug("Sender: {}", event.getSender());
-            LOGGER.debug("Msgtype: {}", content.get("msgtype"));
-            LOGGER.debug("Permit: {}", permit);
-        }
-        if (Event.EventType.ROOM_MESSAGE.equals(event.getType())
-            && !matrixClient.getUserId().equals(event.getSender())
-            && Event.MessageType.TEXT.equals(content.get("msgtype"))
-            && permit
-            && (body.trim().startsWith(getPrefix()) || (config.getDefaultCommand() != null && !config.getDefaultCommand().trim()
-            .isEmpty()))) {
-            try {
-                invoked = getHolder().runInTransaction((holder, dao) -> {
-                    boolean processed = processAction(roomId, event, body);
-                    saveData(holder, dao);
-                    return processed;
-                });
-            } catch (Exception e) {
-                LOGGER.error(String.format("Cannot perform action '%s'", body), e);
+        if (event.getContent() instanceof RoomMessage) {
+            RoomMessage content = (RoomMessage) event.getContent();
+            String body = content.getBody();
+            boolean permit = permit(event);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Sender: {}", event.getSender());
+                LOGGER.debug("Msgtype: {}", content.getClass().toString());
+                LOGGER.debug("Permit: {}", permit);
+            }
+            if (!matrixClient.getUserId().equals(event.getSender())
+                && content instanceof Text
+                && permit
+                && (body.trim().startsWith(getPrefix()) || (config.getDefaultCommand() != null && !config.getDefaultCommand().trim()
+                .isEmpty()))) {
+                try {
+                    invoked = getHolder().runInTransaction((holder, dao) -> {
+                        boolean processed = processAction(roomId, event, body);
+                        saveData(holder, dao);
+                        return processed;
+                    });
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Cannot perform action '%s'", body), e);
+                }
             }
         }
         return invoked;
