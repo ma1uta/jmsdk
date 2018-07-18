@@ -21,9 +21,12 @@ import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import io.github.ma1uta.matrix.client.model.auth.LoginType;
+import io.github.ma1uta.matrix.client.model.auth.SupportedLoginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -93,5 +96,15 @@ public class AuthMethods {
         if (getMatrixClient().isUpdateAccessToken()) {
             requestMethods.setAccessToken(null);
         }
+    }
+
+    /**
+     * Get supported login types.
+     *
+     * @return supported login types.
+     */
+    public List<LoginType> loginTypes() {
+        return getMatrixClient().getRequestMethods()
+            .get(AuthApi.class, "supportedLoginTypes", new RequestParams(), SupportedLoginResponse.class).getFlows();
     }
 }

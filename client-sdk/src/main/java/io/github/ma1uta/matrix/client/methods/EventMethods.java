@@ -17,6 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.Event;
+import io.github.ma1uta.matrix.EventContent;
 import io.github.ma1uta.matrix.Page;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.EventApi;
@@ -24,8 +25,10 @@ import io.github.ma1uta.matrix.client.model.event.JoinedMembersResponse;
 import io.github.ma1uta.matrix.client.model.event.MembersResponse;
 import io.github.ma1uta.matrix.client.model.event.RedactRequest;
 import io.github.ma1uta.matrix.client.model.event.SendEventResponse;
+import io.github.ma1uta.matrix.events.messages.FormattedBody;
+import io.github.ma1uta.matrix.events.messages.Notice;
+import io.github.ma1uta.matrix.events.messages.Text;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -75,7 +78,7 @@ public class EventMethods {
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
         Objects.requireNonNull(stateKey, "StateKey cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType)
-             .pathParam("stateKey", stateKey);
+            .pathParam("stateKey", stateKey);
         return getMatrixClient().getRequestMethods()
             .get(EventApi.class, "eventsForRoomWithTypeAndState", params, new GenericType<Map<String, Object>>() {
             });
@@ -173,7 +176,7 @@ public class EventMethods {
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
         Objects.requireNonNull(stateKey, "StateKey cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType)
-             .pathParam("stateKey", stateKey);
+            .pathParam("stateKey", stateKey);
         return getMatrixClient().getRequestMethods()
             .put(EventApi.class, "sendEventWithTypeAndState", params, eventContent, SendEventResponse.class).getEventId();
     }
@@ -203,7 +206,7 @@ public class EventMethods {
      * @param eventContent Event content.
      * @return An ID for the sent event.
      */
-    public String sendEvent(String roomId, String eventType, Map<String, Object> eventContent) {
+    public String sendEvent(String roomId, String eventType, EventContent eventContent) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType)
@@ -233,28 +236,12 @@ public class EventMethods {
     /**
      * Send message.
      *
-     * @param roomId      room id.
-     * @param text        message.
-     * @param messageType message type.
-     * @return sent event id.
-     */
-    public String sendMessage(String roomId, String text, String messageType) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("msgtype", messageType);
-        payload.put("body", text);
-
-        return sendEvent(roomId, Event.EventType.ROOM_MESSAGE, payload);
-    }
-
-    /**
-     * Send message.
-     *
      * @param roomId room id.
      * @param text   message.
      * @return sent event id.
      */
     public String sendMessage(String roomId, String text) {
-        return sendMessage(roomId, text, Event.MessageType.TEXT);
+        return sendFormattedMessage(roomId, text, null);
     }
 
     /**
@@ -265,7 +252,7 @@ public class EventMethods {
      * @return sent event id.
      */
     public String sendNotice(String roomId, String text) {
-        return sendMessage(roomId, text, Event.MessageType.NOTICE);
+        return sendFormattedNotice(roomId, text, null);
     }
 
     /**
@@ -276,16 +263,15 @@ public class EventMethods {
      * @param formattedText formatted message.
      * @return sent event id.
      */
-    public SendEventResponse sendFormattedMessage(String roomId, String text, String formattedText) {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("msgtype", Event.MessageType.TEXT);
-        payload.put("body", text);
-        payload.put("formatted_body", formattedText);
-        payload.put("format", "org.matrix.custom.html");
+    public String sendFormattedMessage(String roomId, String text, String formattedText) {
+        Text payload = new Text();
+        payload.setBody(text);
+        payload.setFormattedBody(formattedText);
+        if (formattedText != null) {
+            payload.setFormat(FormattedBody.Format.ORG_MATRIX_CUSTOM_HTML);
+        }
 
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", Event.EventType.ROOM_MESSAGE)
-            .pathParam("txnId", Long.toString(System.currentTimeMillis()));
-        return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEvent", params, payload, SendEventResponse.class);
+        return sendEvent(roomId, Event.EventType.ROOM_MESSAGE, payload);
     }
 
     /**
@@ -296,15 +282,14 @@ public class EventMethods {
      * @param formattedText formatted message.
      * @return sent event id.
      */
-    public SendEventResponse sendFormattedNotice(String roomId, String text, String formattedText) {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("msgtype", Event.MessageType.NOTICE);
-        payload.put("body", text);
-        payload.put("formatted_body", formattedText);
-        payload.put("format", "org.matrix.custom.html");
+    public String sendFormattedNotice(String roomId, String text, String formattedText) {
+        Notice payload = new Notice();
+        payload.setBody(text);
+        payload.setFormattedBody(formattedText);
+        if (formattedText != null) {
+            payload.setFormat(FormattedBody.Format.ORG_MATRIX_CUSTOM_HTML);
+        }
 
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", Event.EventType.ROOM_MESSAGE)
-            .pathParam("txnId", Long.toString(System.currentTimeMillis()));
-        return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEvent", params, payload, SendEventResponse.class);
+        return sendEvent(roomId, Event.EventType.ROOM_MESSAGE, payload);
     }
 }

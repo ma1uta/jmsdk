@@ -18,6 +18,7 @@ package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ContentApi;
+import io.github.ma1uta.matrix.client.model.content.ContentConfig;
 import io.github.ma1uta.matrix.client.model.content.ContentUri;
 
 import java.io.InputStream;
@@ -111,5 +112,15 @@ public class ContentMethods {
         RequestParams params = new RequestParams().queryParam("url", url).queryParam("ts", ts);
         return getMatrixClient().getRequestMethods().get(ContentApi.class, "previewUrl", params, new GenericType<Map<String, String>>() {
         });
+    }
+
+    /**
+     * Get supported upload size.
+     *
+     * @return supported upload size.
+     */
+    public Long getUploadSize() {
+        return getMatrixClient().getRequestMethods().get(ContentApi.class, "config", new RequestParams(), ContentConfig.class)
+            .getUploadSize();
     }
 }

@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Tag methods.
+ * TagInfo methods.
  */
 public class TagMethods {
 
@@ -64,7 +64,7 @@ public class TagMethods {
         String userId = getMatrixClient().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        Objects.requireNonNull(tag, "Tag cannot be empty.");
+        Objects.requireNonNull(tag, "TagInfo cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId).pathParam("tag", tag);
         getMatrixClient().getRequestMethods().put(TagApi.class, "addTag", params, tagData, EmptyResponse.class);
     }
@@ -79,7 +79,7 @@ public class TagMethods {
         String userId = getMatrixClient().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        Objects.requireNonNull(tag, "Tag cannot be empty.");
+        Objects.requireNonNull(tag, "TagInfo cannot be empty.");
         RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId).pathParam("tag", tag);
         getMatrixClient().getRequestMethods().delete(TagApi.class, "deleteTag", params, "");
     }

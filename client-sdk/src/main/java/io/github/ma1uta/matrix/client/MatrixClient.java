@@ -284,7 +284,7 @@ public class MatrixClient implements Closeable {
     }
 
     /**
-     * Tag methods.
+     * TagInfo methods.
      *
      * @return tag methods.
      */
