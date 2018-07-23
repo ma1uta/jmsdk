@@ -178,7 +178,8 @@ public class RequestMethods {
                 return extractor.apply(response);
             case RATE_LIMITED:
                 try {
-                    long newTimeout = timeout * TIMEOUT_FACTOR;
+                    ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
+                    long newTimeout = errorResponse.getRetryAfterMs() != null ? errorResponse.getRetryAfterMs() : timeout * TIMEOUT_FACTOR;
                     if (newTimeout > MAX_TIMEOUT) {
                         throw new RateLimitedException("Cannot send request, maximum timeout was reached.");
                     } else {
