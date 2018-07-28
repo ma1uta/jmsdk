@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.github.ma1uta</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.3</version>
+        <version>0.4-SNAPSHOT</version>
     </parent>
     <artifactId>bot-sdk</artifactId>
     <version>0.1-SNAPSHOT</version>

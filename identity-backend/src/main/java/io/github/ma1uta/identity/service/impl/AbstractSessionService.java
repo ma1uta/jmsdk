@@ -35,19 +35,19 @@ import java.util.UUID;
 
 /**
  * Default implementation.
- * <p/>
+ * <br>
  * There are default implementation for all methods of the {@link SessionService}.
- * <p/>
+ * <br>
  * You can create you own class for example with annotation @Transactional (jpa) or another and invoke the same method
  * with suffix "Internal".
  * <pre>
- * {@code
- *     @literal @Service
+ * <code>
+ *     {@literal @}Service
  *     public class MySessionService extends AbstractSessionService {
  *         ...
- *         @literal @Override
- *         @literal @Transactional
- *         @literal @MyFavouriteAnnotation
+ *         {@literal @}Override
+ *         {@literal @}Transactional
+ *         {@literal @}MyFavouriteAnnotation
  *         public String create(String clientSecret, String email, Long sendAttempt, String nextLink) {
  *             // wrap next link to transaction via annotation or code.
  *             SessionDao dao = ...
@@ -55,7 +55,7 @@ import java.util.UUID;
  *         }
  *         ...
  *     }
- * }
+ * </code>
  * </pre>
  */
 public abstract class AbstractSessionService implements SessionService {
@@ -94,8 +94,16 @@ public abstract class AbstractSessionService implements SessionService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link SessionService#create}.
+     *
+     * @param dao          dao.
+     * @param clientSecret client secret.
+     * @param address      3pid address.
+     * @param medium       address type.
+     * @param nextLink     url to redirect.
+     * @param sendAttempt  sent attempt.
+     * @return session id.
      */
     protected String createInternal(String clientSecret, String address, String medium, Long sendAttempt, String nextLink, SessionDao dao) {
         boolean create = true;
@@ -119,8 +127,14 @@ public abstract class AbstractSessionService implements SessionService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link SessionService#validate}
+     *
+     * @param sid          session id.
+     * @param clientSecret client secret.
+     * @param token        secret token.
+     * @param dao          dao.
+     * @return url to redirect or null.
      */
     protected String validateInternal(String token, String clientSecret, String sid, SessionDao dao) {
         List<Session> sessionList = dao.findBySecretSidToken(clientSecret, sid, token);
@@ -137,8 +151,13 @@ public abstract class AbstractSessionService implements SessionService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link SessionService#getSession}
+     *
+     * @param sid          session id.
+     * @param clientSecret client secret.
+     * @param dao          dao.
+     * @return found session.
      */
     protected Session getSessionInternal(String sid, String clientSecret, SessionDao dao) {
         List<Session> sessionList = dao.findBySecretSid(clientSecret, sid);
@@ -155,8 +174,14 @@ public abstract class AbstractSessionService implements SessionService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link SessionService#publish}
+     *
+     * @param mxid         owner of the 3pid.
+     * @param dao          dao.
+     * @param clientSecret client secret.
+     * @param sid          session id.
+     * @return true if the invite was sent.
      */
     protected boolean publishInternal(String sid, String clientSecret, String mxid, SessionDao dao) {
         List<Session> sessionList = dao.findBySecretSid(clientSecret, sid);
@@ -175,8 +200,10 @@ public abstract class AbstractSessionService implements SessionService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link SessionService#cleanup}
+     *
+     * @param dao dao.
      */
     protected void cleanupInternal(SessionDao dao) {
         dao.deleteOldest();

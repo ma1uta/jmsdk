@@ -22,7 +22,7 @@ import java.util.Optional;
 
 /**
  * Service to manipulate keys.
- * <p/>
+ * <br>
  * Used to store keys, create new keys and sign some string.
  */
 public interface KeyService {
@@ -59,7 +59,7 @@ public interface KeyService {
      * Sign content.
      *
      * @param content content.
-     * @return map { "hostname" -> { "key": "signature" } }
+     * @return map { "hostname" -&gt; { "key": "signature" } }
      */
     Map<String, Map<String, String>> sign(String content);
 

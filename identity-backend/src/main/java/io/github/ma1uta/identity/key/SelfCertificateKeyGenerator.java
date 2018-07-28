@@ -54,7 +54,7 @@ import java.util.Date;
 
 /**
  * Generator for new keys.
- * <p/>
+ * <br>
  * Also generate certificate for new key pair and store they in the key store.
  */
 public class SelfCertificateKeyGenerator implements KeyGenerator {

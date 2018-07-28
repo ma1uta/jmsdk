@@ -22,9 +22,10 @@
     <parent>
         <groupId>io.github.ma1uta</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.3</version>
+        <version>0.4-SNAPSHOT</version>
     </parent>
     <artifactId>homeserver-backend</artifactId>
+    <version>0.1-SNAPSHOT</version>
 
     <properties>
         <commons.lang3.version>3.7</commons.lang3.version>

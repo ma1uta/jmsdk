@@ -31,26 +31,26 @@ import java.util.Optional;
 
 /**
  * Default implementation.
- * <p/>
+ * <br>
  * There are default implementation for all methods of the {@link KeyService}.
- * <p/>
+ * <br>
  * You can create you own class for example with annotation @Transactional (jpa) or another and invoke the same method
  * with suffix "Internal".
  * <pre>
- * {@code
- *     @literal @Service
+ * <code>
+ *     {@literal @}Service
  *     public class MyKeyService extends AbstractKeyService {
  *         ...
- *         @literal @Override
- *         @literal @Transactional
- *         @literal @MyFavouriteAnnotation
+ *         {@literal @}Override
+ *         {@literal @}Transactional
+ *         {@literal @}MyFavouriteAnnotation
  *         public String init() {
  *             // wrap next link to transaction via annotation or code.
  *             return super.initInternal();
  *         }
  *         ...
  *     }
- * }
+ * </code>
  * </pre>
  */
 public abstract class AbstractKeyService implements KeyService {
@@ -85,7 +85,7 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#init()}
      */
     protected void initInternal() {
@@ -95,8 +95,11 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#key(String)}
+     *
+     * @param key key to retrieve.
+     * @return certificate of the key or empty.
      */
     protected Optional<Certificate> keyInternal(String key) {
         return getLongTermProvider().key(key);
@@ -104,8 +107,11 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#validLongTerm(String)}
+     *
+     * @param publicKey public key.
+     * @return true if valid else false.
      */
     protected boolean validLongTermInternal(String publicKey) {
         return getLongTermProvider().valid(publicKey);
@@ -113,8 +119,11 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#validShortTerm(String)}
+     *
+     * @param publicKey public key.
+     * @return true if valid else false.
      */
     protected boolean validShortTermInternal(String publicKey) {
         return getShortTermProvider().valid(publicKey);
@@ -122,8 +131,11 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#sign(String)}
+     *
+     * @param content content to sign.
+     * @return {hostname -&gt; (key id; signature)}.
      */
     protected Map<String, Map<String, String>> signInternal(String content) {
         Pair<String, String> pair = getLongTermProvider().sign(content);
@@ -136,7 +148,7 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#retrieveLongTermKey()}
      *
      * @return key alias.
@@ -149,7 +161,7 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#generateShortTermKey()}
      *
      * @return key alias.
@@ -161,7 +173,7 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#generateLongTermKey()}
      */
     protected void generateLongTermKeyInternal() {
@@ -170,7 +182,7 @@ public abstract class AbstractKeyService implements KeyService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link KeyService#cleanKeyStores()}
      */
     protected void cleanKeyStoresInternal() {

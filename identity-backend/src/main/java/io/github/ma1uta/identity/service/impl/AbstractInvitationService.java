@@ -28,9 +28,9 @@ import io.github.ma1uta.identity.service.SerializerService;
 import io.github.ma1uta.jeon.exception.MatrixException;
 import io.github.ma1uta.matrix.ErrorResponse;
 import io.github.ma1uta.matrix.Id;
+import io.github.ma1uta.matrix.Signed;
 import io.github.ma1uta.matrix.server.model.bind.Invite;
 import io.github.ma1uta.matrix.server.model.bind.OnBindRequest;
-import io.github.ma1uta.matrix.server.model.bind.Signed;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
@@ -45,19 +45,19 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Default implementation.
- * <p/>
+ * <br>
  * There are default implementation for all methods of the {@link InvitationService}.
- * <p/>
+ * <br>
  * You can create you own class for example with annotation @Transactional (jpa) or another and invoke the same method
  * with suffix "Internal".
  * <pre>
- * {@code
- *     @literal @Service
+ * <code>
+ *     {@literal @}Service
  *     public class MyInvitationService extends AbstractInvitationService {
  *         ...
- *         @literal @Override
- *         @literal @Transactional
- *         @literal @MyFavouriteAnnotation
+ *         {@literal @}Override
+ *         {@literal @}Transactional
+ *         {@literal @}MyFavouriteAnnotation
  *         public String create(String address, String medium, String roomId, String sender) {
  *             // wrap next link to transaction via annotation or code.
  *             InvitationDao dao = ...
@@ -65,7 +65,7 @@ import javax.servlet.http.HttpServletResponse;
  *         }
  *         ...
  *     }
- * }
+ * </code>
  * </pre>
  */
 public abstract class AbstractInvitationService implements InvitationService {
@@ -109,8 +109,15 @@ public abstract class AbstractInvitationService implements InvitationService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link InvitationService#create(String, String, String, String)}
+     *
+     * @param address 3pid address.
+     * @param medium  address type.
+     * @param dao     dao.
+     * @param roomId  room MXID.
+     * @param sender  sender MXID.
+     * @return (displayName, token, [ephemeralKey, longTermKey]
      */
     protected Triple<String, String, List<String>> createInternal(String address, String medium, String roomId, String sender,
                                                                   InvitationDao dao) {
@@ -140,8 +147,13 @@ public abstract class AbstractInvitationService implements InvitationService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link InvitationService#sendInvite(String, String, String)}
+     *
+     * @param dao     dao.
+     * @param medium  address type.
+     * @param address 3pid address.
+     * @param mxid    owner of the 3pid address.
      */
     protected void sendInviteInternal(String address, String medium, String mxid, InvitationDao dao) {
 

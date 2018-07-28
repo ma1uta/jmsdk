@@ -33,7 +33,7 @@ public class BotConfig {
 
     /**
      * Default timeout.
-     * <p/>
+     * <br>
      * 10 second in milliseconds.
      */
     public static final long TIMEOUT = 10L * 1000L;

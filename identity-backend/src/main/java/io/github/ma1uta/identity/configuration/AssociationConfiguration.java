@@ -23,14 +23,14 @@ public class AssociationConfiguration {
 
     /**
      * Default time to live of the association.
-     * <p/>
+     * <br>
      * 60 seconds * 60 minutes * 24 hours * 30 days * 12 month * 10 years.
      */
     public static final long DEFAULT_ASSOCIATION_TTL = 60 * 60 * 24 * 30 * 12 * 10;
 
     /**
      * Time to live in seconds of the association.
-     * <p/>
+     * <br>
      * Default value is 10 years (60 seconds * 60 minutes * 24 hours * 30 days * 12 month * 10 years).
      */
     private long associationTTL = DEFAULT_ASSOCIATION_TTL;

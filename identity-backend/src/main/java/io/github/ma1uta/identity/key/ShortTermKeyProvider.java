@@ -31,7 +31,7 @@ import java.util.Optional;
 
 /**
  * Key store provider for the short-term keys.
- * <p/>
+ * <br>
  * After post next available key, this key moved to another key store.
  */
 public class ShortTermKeyProvider extends AbstractKeyProvider {

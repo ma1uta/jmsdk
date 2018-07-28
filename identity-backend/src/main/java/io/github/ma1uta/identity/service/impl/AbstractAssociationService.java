@@ -34,19 +34,19 @@ import java.util.stream.Collectors;
 
 /**
  * Default implementation.
- * <p/>
+ * <br>
  * There are default implementation for all methods of the {@link AssociationService}.
- * <p/>
+ * <br>
  * You can create you own class for example with annotation @Transactional (jpa) or another and invoke the same
  * method with suffix "Internal".
  * <pre>
- * {@code
- *     @literal @Service
+ * <code>
+ *     {@literal @}Service
  *     public class MyAssociationService extends AbstractAssociationService {
  *         ...
- *         @literal @Override
- *         @literal @Transactional
- *         @literal @MyFavouriteAnnotation
+ *         {@literal @}Override
+ *         {@literal @}Transactional
+ *         {@literal @}MyFavouriteAnnotation
  *         public void expire() {
  *             // wrap next link to transaction via annotation or code.
  *             Association dao = ...;
@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
  *         }
  *         ...
  *     }
- * }
+ * </code>
  * </pre>
  */
 public abstract class AbstractAssociationService implements AssociationService {
@@ -81,8 +81,13 @@ public abstract class AbstractAssociationService implements AssociationService {
 
     /**
      * Default implementation for lookup method.
-     * <p/>
+     * <br>
      * {@link AssociationService#lookup(String, String)}
+     *
+     * @param medium  address type.
+     * @param address 3pid address.
+     * @param dao     dao.
+     * @return found associations.
      */
     protected Optional<Association> lookupInternal(String address, String medium, AssociationDao dao) {
         List<Association> associationList = dao.findByAddressMedium(address, medium);
@@ -97,8 +102,12 @@ public abstract class AbstractAssociationService implements AssociationService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link AssociationService#lookup(List)}
+     *
+     * @param threepids 3pids.
+     * @param dao       dao.
+     * @return found associations.
      */
     protected List<List<String>> lookupInternal(List<List<String>> threepids, AssociationDao dao) {
         return threepids.stream().map(list -> lookupInternal(list.get(0), list.get(1), dao))
@@ -109,8 +118,12 @@ public abstract class AbstractAssociationService implements AssociationService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link AssociationService#create(Session, String)}
+     *
+     * @param session session.
+     * @param dao     session's dao.
+     * @param mxid    owner of the session.
      */
     protected void createInternal(Session session, String mxid, AssociationDao dao) {
         LocalDateTime expired = LocalDateTime.now().plusSeconds(getConfiguration().getAssociationTTL());
@@ -119,8 +132,10 @@ public abstract class AbstractAssociationService implements AssociationService {
 
     /**
      * Default implementation.
-     * <p/>
+     * <br>
      * {@link AssociationService#expire()}
+     *
+     * @param dao dao.
      */
     protected void expireInternal(AssociationDao dao) {
         dao.expire();

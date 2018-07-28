@@ -165,7 +165,8 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     /**
      * Save bot's config.
      *
-     * @param dao DAO.
+     * @param dao    DAO.
+     * @param holder bot's holder.
      */
     protected void saveData(BotHolder<C, D, S, E> holder, D dao) {
         C oldConfig = holder.getConfig();
@@ -220,7 +221,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
     /**
      * Register a new bot.
-     * <p/>
+     * <br>
      * After registration setup a filter to receive only message events.
      *
      * @return {@link LoopState#NEXT_STATE} always. Move to the next state.

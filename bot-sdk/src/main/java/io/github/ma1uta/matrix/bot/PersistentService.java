@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 /**
  * Persistent operations with bot data.
- * <p/>
+ * <br>
  *
  * @param <D> Dao type.
  */
