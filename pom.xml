@@ -19,7 +19,7 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.ma1uta</groupId>
+    <groupId>io.github.ma1uta.matrix</groupId>
     <artifactId>jmsdk</artifactId>
     <version>0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -267,11 +267,11 @@
     </dependencyManagement>
 
     <modules>
-        <module>common-backend</module>
-        <module>homeserver-backend</module>
+        <module>common-sdk</module>
+        <module>homeserver-sdk</module>
         <module>client-sdk</module>
         <module>bot-sdk</module>
-        <module>identity-backend</module>
+        <module>identity-sdk</module>
     </modules>
 
     <profiles>

@@ -20,29 +20,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.ma1uta</groupId>
+        <groupId>io.github.ma1uta.matrix</groupId>
         <artifactId>jmsdk</artifactId>
         <version>0.4-SNAPSHOT</version>
     </parent>
-    <artifactId>homeserver-backend</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <artifactId>common-sdk</artifactId>
+    <version>0.3-SNAPSHOT</version>
 
     <properties>
-        <commons.lang3.version>3.7</commons.lang3.version>
-        <client.api.version>0.4</client.api.version>
+        <common.api.version>0.4.1-SNAPSHOT</common.api.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>io.github.ma1uta</groupId>
-            <artifactId>client-api</artifactId>
-            <version>${client.api.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons.lang3.version}</version>
+            <groupId>io.github.ma1uta.matrix</groupId>
+            <artifactId>common-api</artifactId>
+            <version>${common.api.version}</version>
         </dependency>
     </dependencies>
 </project>
