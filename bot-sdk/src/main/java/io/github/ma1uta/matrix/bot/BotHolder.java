@@ -95,6 +95,7 @@ public class BotHolder<C extends BotConfig, D extends BotDao<C>, S extends Persi
         synchronized (monitor) {
             getService().invoke(dao -> {
                 action.accept(this, dao);
+                setConfig(dao.save(getConfig()));
             });
         }
     }
@@ -109,7 +110,9 @@ public class BotHolder<C extends BotConfig, D extends BotDao<C>, S extends Persi
     public <R> R runInTransaction(BiFunction<BotHolder<C, D, S, E>, D, R> action) {
         synchronized (monitor) {
             return getService().invoke(dao -> {
-                return action.apply(this, dao);
+                R result = action.apply(this, dao);
+                setConfig(dao.save(getConfig()));
+                return result;
             });
         }
     }

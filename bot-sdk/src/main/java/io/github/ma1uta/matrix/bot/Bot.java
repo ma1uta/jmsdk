@@ -23,11 +23,6 @@ import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.RoomEventFilter;
 import io.github.ma1uta.matrix.client.model.filter.RoomFilter;
-import io.github.ma1uta.matrix.client.model.sync.InvitedRoom;
-import io.github.ma1uta.matrix.client.model.sync.JoinedRoom;
-import io.github.ma1uta.matrix.client.model.sync.LeftRoom;
-import io.github.ma1uta.matrix.client.model.sync.Rooms;
-import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 import io.github.ma1uta.matrix.events.RoomMember;
 import io.github.ma1uta.matrix.events.RoomMessage;
 import io.github.ma1uta.matrix.events.messages.Text;
@@ -42,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 
@@ -55,7 +48,7 @@ import javax.ws.rs.client.Client;
  * @param <S> service.
  * @param <E> extra data.
  */
-public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> implements Runnable {
+public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Bot.class);
 
@@ -76,8 +69,8 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         matrixClient.setUserId(config.getUserId());
         this.holder = new BotHolder<>(matrixClient, service, this);
         this.holder.setConfig(config);
-        this.commands = new HashMap<>(commandsClasses.size());
         this.exitOnEmptyRooms = exitOnEmptyRooms;
+        this.commands = new HashMap<>(commandsClasses.size());
         commandsClasses.forEach(cl -> {
             try {
                 Command<C, D, S, E> command = cl.newInstance();
@@ -112,39 +105,6 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         return skipTimelineRooms;
     }
 
-    @Override
-    public void run() {
-        try {
-            init();
-
-            LoopState state = LoopState.RUN;
-            while (!LoopState.EXIT.equals(state)) {
-                switch (getHolder().getConfig().getState()) {
-                    case NEW:
-                        state = newState();
-                        break;
-                    case REGISTERED:
-                        state = registeredState();
-                        break;
-                    case JOINED:
-                        state = joinedState();
-                        break;
-                    case DELETED:
-                        state = deletedState();
-                        break;
-                    default:
-                        LOGGER.error("Unknown state: " + getHolder().getConfig().getState());
-                }
-            }
-
-        } catch (Throwable e) {
-            LOGGER.error("Exception:", e);
-            throw e;
-        }
-
-        getHolder().getShutdownListeners().forEach(Supplier::get);
-    }
-
     /**
      * Run startup action.
      */
@@ -159,63 +119,6 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             holder.runInTransaction((txHolder, dao) -> {
                 getInitAction().accept(txHolder, dao);
             });
-        }
-    }
-
-    /**
-     * Save bot's config.
-     *
-     * @param dao    DAO.
-     * @param holder bot's holder.
-     */
-    protected void saveData(BotHolder<C, D, S, E> holder, D dao) {
-        C oldConfig = holder.getConfig();
-        C newConfig = dao.save(oldConfig);
-        holder.setConfig(newConfig);
-    }
-
-    /**
-     * Main loop.
-     *
-     * @param loopAction state action.
-     * @return next loop state.
-     */
-    protected LoopState loop(Function<SyncResponse, LoopState> loopAction) {
-        C config = getHolder().getConfig();
-        MatrixClient matrixClient = getHolder().getMatrixClient();
-        SyncResponse sync = matrixClient.sync().sync(config.getFilterId(), config.getNextBatch(), false, null, null);
-
-        String initialBatch = sync.getNextBatch();
-        if (config.getNextBatch() == null && config.getSkipInitialSync() != null && config.getSkipInitialSync()) {
-            getHolder().runInTransaction((holder, dao) -> {
-                holder.getConfig().setNextBatch(initialBatch);
-                saveData(holder, dao);
-            });
-            sync = matrixClient.sync().sync(config.getFilterId(), initialBatch, false, null, config.getTimeout());
-        }
-
-        while (true) {
-            try {
-                LoopState nextState = loopAction.apply(sync);
-
-                String nextBatch = sync.getNextBatch();
-                getHolder().runInTransaction((holder, dao) -> {
-                    holder.getConfig().setNextBatch(nextBatch);
-                    saveData(holder, dao);
-                });
-
-                if (LoopState.NEXT_STATE.equals(nextState)) {
-                    return LoopState.NEXT_STATE;
-                }
-
-                if (Thread.currentThread().isInterrupted()) {
-                    return LoopState.EXIT;
-                }
-
-                sync = matrixClient.sync().sync(config.getFilterId(), nextBatch, false, null, config.getTimeout());
-            } catch (Exception e) {
-                LOGGER.error("Exception: ", e);
-            }
         }
     }
 
@@ -252,115 +155,57 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
             config.setState(BotState.REGISTERED);
 
-            saveData(holder, dao);
             LOGGER.debug("Finish registration.");
         });
         return LoopState.NEXT_STATE;
     }
 
-    /**
-     * Waiting to join.
-     *
-     * @return next loop state.
-     */
-    protected LoopState registeredState() {
-        return loop(sync -> {
-            Map<String, InvitedRoom> invite = sync.getRooms().getInvite();
-            Map<String, List<Event>> eventMap = new HashMap<>();
-            for (Map.Entry<String, InvitedRoom> entry : invite.entrySet()) {
-                eventMap.put(entry.getKey(), entry.getValue().getInviteState().getEvents());
-            }
-            return registeredState(eventMap);
-        });
-    }
-
     protected LoopState registeredState(Map<String, List<Event>> eventMap) {
         LOGGER.debug("Wait for invite");
         if (!eventMap.isEmpty()) {
-            joinRoom(eventMap);
-            return LoopState.NEXT_STATE;
+            return joinRoom(eventMap) ? LoopState.NEXT_STATE : LoopState.RUN;
         }
 
         return LoopState.RUN;
     }
 
     /**
-     * Logic of the joined state.
-     *
-     * @return next loop state.
-     */
-    protected LoopState joinedState() {
-        return loop(sync -> {
-            Rooms rooms = sync.getRooms();
-
-            MatrixClient matrixClient = getHolder().getMatrixClient();
-            List<String> joinedRooms = matrixClient.room().joinedRooms();
-            for (Map.Entry<String, LeftRoom> roomEntry : rooms.getLeave().entrySet()) {
-                String leftRoom = roomEntry.getKey();
-                if (joinedRooms.contains(leftRoom)) {
-                    matrixClient.room().leave(leftRoom);
-                }
-            }
-
-            LoopState nextState = LoopState.RUN;
-            for (Map.Entry<String, JoinedRoom> joinedRoomEntry : rooms.getJoin().entrySet()) {
-                LoopState state = processJoinedRoom(joinedRoomEntry.getKey(), joinedRoomEntry.getValue().getTimeline().getEvents());
-                switch (state) {
-                    case EXIT:
-                        nextState = LoopState.EXIT;
-                        break;
-                    case NEXT_STATE:
-                        if (!LoopState.EXIT.equals(nextState)) {
-                            nextState = LoopState.NEXT_STATE;
-                        }
-                        break;
-                    case RUN:
-                    default:
-                        // nothing to do
-                        break;
-                }
-            }
-
-            if (getHolder().getMatrixClient().room().joinedRooms().isEmpty()) {
-                getHolder().runInTransaction((holder, dao) -> {
-                    holder.getConfig().setState(isExitOnEmptyRooms() ? BotState.DELETED : BotState.REGISTERED);
-                    saveData(holder, dao);
-                });
-                return LoopState.NEXT_STATE;
-            }
-            return nextState;
-        });
-    }
-
-    /**
      * Join to room.
      *
      * @param eventMap invited eventMap. Map &lt;roomId&gt; - &lt;[event]&gt; room_id to invite_state.
+     * @return true if bot joined else false.
      */
-    public void joinRoom(Map<String, List<Event>> eventMap) {
-        getHolder().runInTransaction((holder, dao) -> {
+    public boolean joinRoom(Map<String, List<Event>> eventMap) {
+        return getHolder().runInTransaction((holder, dao) -> {
             LOGGER.debug("Start joining.");
-            eventMap.forEach((roomId, events) -> events.stream().peek(event -> {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Event type: {}", event.getType());
-                }
-            }).filter(event -> {
-                if (event.getContent() instanceof RoomMember) {
-                    RoomMember content = (RoomMember) event.getContent();
-                    LOGGER.debug("Membership: {}", content.getMembership());
-                    return Event.MembershipState.INVITE.equals(content.getMembership());
-                }
-                return false;
-            }).findFirst().ifPresent(event -> {
-                LOGGER.debug("Join to room {}", roomId);
-                holder.getMatrixClient().room().joinByIdOrAlias(roomId);
+            boolean joined = false;
+            for (Map.Entry<String, List<Event>> eventEntry : eventMap.entrySet()) {
+                List<Event> inviteEvents = eventEntry.getValue().stream().peek(event -> {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Event type: {}", event.getType());
+                    }
+                }).filter(event -> {
+                    if (event.getContent() instanceof RoomMember) {
+                        RoomMember content = (RoomMember) event.getContent();
+                        LOGGER.debug("Membership: {}", content.getMembership());
+                        return Event.MembershipState.INVITE.equals(content.getMembership());
+                    }
+                    return false;
+                }).collect(Collectors.toList());
 
-                C config = holder.getConfig();
-                config.setState(BotState.JOINED);
-                config.setOwner(event.getSender());
-                saveData(holder, dao);
-                LOGGER.debug("Finish joining");
-            }));
+                for (Event event : inviteEvents) {
+                    String roomId = eventEntry.getKey();
+                    LOGGER.debug("Join to room {}", roomId);
+                    holder.getMatrixClient().room().joinByIdOrAlias(roomId);
+
+                    C config = holder.getConfig();
+                    config.setState(BotState.JOINED);
+                    config.setOwner(event.getSender());
+                    LOGGER.debug("Finish joining");
+                    joined = true;
+                }
+            }
+            return joined;
         });
     }
 
@@ -418,38 +263,6 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     }
 
     /**
-     * Send event.
-     *
-     * @param event event.
-     */
-    public void send(Event event) {
-        LoopState state = LoopState.RUN;
-        LOGGER.debug("State: {}", state);
-        switch (getHolder().getConfig().getState()) {
-            case NEW:
-                state = newState();
-                break;
-            case REGISTERED:
-                Map<String, List<Event>> eventMap = new HashMap<>();
-                eventMap.put(event.getRoomId(), Collections.singletonList(event));
-                state = registeredState(eventMap);
-                break;
-            case JOINED:
-                state = processJoinedRoom(event.getRoomId(), Collections.singletonList(event));
-                break;
-            case DELETED:
-                state = deletedState();
-                break;
-            default:
-                LOGGER.error("Unknown state: " + getHolder().getConfig().getState());
-        }
-
-        if (LoopState.EXIT.equals(state)) {
-            getHolder().getShutdownListeners().forEach(Supplier::get);
-        }
-    }
-
-    /**
      * Process an one event.
      *
      * @param roomId room id.
@@ -462,23 +275,21 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         boolean invoked = false;
         if (event.getContent() instanceof RoomMessage) {
             RoomMessage content = (RoomMessage) event.getContent();
-            String body = content.getBody();
+            String body = content.getBody().trim();
             boolean permit = permit(event);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Sender: {}", event.getSender());
-                LOGGER.debug("Msgtype: {}", content.getClass().toString());
+                LOGGER.debug("Msgtype: {}", content.getMsgtype());
                 LOGGER.debug("Permit: {}", permit);
             }
+            boolean defaultCommand = config.getDefaultCommand() != null && !config.getDefaultCommand().trim().isEmpty();
             if (!matrixClient.getUserId().equals(event.getSender())
                 && content instanceof Text
                 && permit
-                && (body.trim().startsWith(getPrefix()) || (config.getDefaultCommand() != null && !config.getDefaultCommand().trim()
-                .isEmpty()))) {
+                && (body.startsWith(getPrefix()) || defaultCommand)) {
                 try {
                     invoked = getHolder().runInTransaction((holder, dao) -> {
-                        boolean processed = processAction(roomId, event, body);
-                        saveData(holder, dao);
-                        return processed;
+                        return processAction(roomId, event, body);
                     });
                 } catch (Exception e) {
                     LOGGER.error(String.format("Cannot perform action '%s'", body), e);
@@ -521,7 +332,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @return {@code true} if invoked command, else {@code false}.
      */
     protected boolean processAction(String roomId, Event event, String content) {
-        String contentWithoutPrefix = content.trim().substring(getPrefix().length());
+        String contentWithoutPrefix = content.substring(getPrefix().length());
         String[] arguments = contentWithoutPrefix.trim().split("\\s");
         String commandName = arguments[0];
         Command<C, D, S, E> command = getCommands().get(commandName);

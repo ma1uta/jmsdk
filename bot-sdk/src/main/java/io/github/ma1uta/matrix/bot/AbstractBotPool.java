@@ -16,18 +16,12 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Event;
-import io.github.ma1uta.matrix.events.RoomMember;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Client;
 
 /**
@@ -37,14 +31,12 @@ import javax.ws.rs.client.Client;
  * @param <D> bot dao.
  * @param <S> bot service.
  * @param <E> extra data.
+ * @param <B> bot's class.
  */
-public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> {
+public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E,
+    B extends Bot<C, D, S, E>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBotPool.class);
-
-    private static final int TIMEOUT = 10;
-
-    private final ExecutorService pool;
 
     private final String homeserverUrl;
 
@@ -52,31 +44,19 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
 
     private final Client client;
 
-    private final String appToken;
-
     private final S service;
 
     private final List<Class<? extends Command<C, D, S, E>>> commandClasses;
 
-    private Map<String, Bot<C, D, S, E>> botMap = new HashMap<>();
+    private Map<String, B> botMap = new HashMap<>();
 
-    private final RunState runState;
-
-    public AbstractBotPool(String homeserverUrl, String displayName, Client client, String appToken,
-                           S service, List<Class<? extends Command<C, D, S, E>>> commandClasses,
-                           RunState runState) {
+    public AbstractBotPool(String homeserverUrl, String displayName, Client client, S service,
+                           List<Class<? extends Command<C, D, S, E>>> commandClasses) {
         this.service = service;
         this.commandClasses = commandClasses;
-        this.runState = runState;
-        this.pool = Executors.newCachedThreadPool();
         this.homeserverUrl = homeserverUrl;
         this.displayName = displayName;
         this.client = client;
-        this.appToken = appToken;
-    }
-
-    public ExecutorService getPool() {
-        return pool;
     }
 
     public String getHomeserverUrl() {
@@ -91,10 +71,6 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
         return client;
     }
 
-    public String getAppToken() {
-        return appToken;
-    }
-
     public S getService() {
         return service;
     }
@@ -103,17 +79,17 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
         return commandClasses;
     }
 
-    public Map<String, Bot<C, D, S, E>> getBotMap() {
+    public Map<String, B> getBotMap() {
         return botMap;
-    }
-
-    public RunState getRunState() {
-        return runState;
     }
 
     protected abstract C createConfig(String username);
 
     protected abstract void initializeBot(Bot<C, D, S, E> bot);
+
+    protected abstract B createBotInstance(C config);
+
+    protected abstract void submitBot(B bot);
 
     /**
      * Run new bot.
@@ -124,68 +100,11 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
         submit(createConfig(username));
     }
 
-    /**
-     * Send an one event to the bot.
-     *
-     * @param roomId room id.
-     * @param event  event.
-     * @return {@code true} if event was processed, else {@code false}.
-     */
-    public boolean send(String roomId, Event event) {
-        LOGGER.debug("Receive event in the room: {0}", roomId);
-        if (RunState.APPLICATION_SERVICE.equals(getRunState())) {
-            Optional<Bot<C, D, S, E>> bot = getBotMap().entrySet().stream()
-                .filter(entry -> {
-                    BotHolder<C, D, S, E> holder = entry.getValue().getHolder();
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Bot \"{}\"", holder.getConfig().getUserId());
-                    }
-                    List<String> joinedRooms;
-                    try {
-                        joinedRooms = holder.getMatrixClient().room().joinedRooms();
-                    } catch (Exception e) {
-                        LOGGER.error("Cannot retrieve joined rooms.", e);
-                        return false;
-                    }
-                    if (LOGGER.isDebugEnabled()) {
-                        joinedRooms.forEach(joinedRoom -> LOGGER.debug("Room: {}", joinedRoom));
-                    }
-                    if (joinedRooms.contains(roomId)) {
-                        return true;
-                    }
-                    if (event.getContent() instanceof RoomMember) {
-                        RoomMember content = (RoomMember) event.getContent();
-                        String stateKey = event.getStateKey();
-                        String membership = content.getMembership();
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("Membership: {}", membership);
-                            LOGGER.debug("Event type: {}", event.getType());
-                            LOGGER.debug("State key: {}", stateKey);
-                        }
-                        return holder.getConfig().getUserId().equals(stateKey) && Event.MembershipState.INVITE.equals(membership);
-                    }
-                    return false;
-                }).map(Map.Entry::getValue).findFirst();
-
-            if (bot.isPresent()) {
-                LOGGER.debug("Bot \"{}\" is found.", bot.get().getHolder().getConfig().getUserId());
-                bot.get().send(event);
-                return true;
-            } else {
-                LOGGER.debug("Bot isn't found.");
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
-
     protected void submit(C config) {
         getService().invoke(dao -> {
             dao.save(config);
         });
-        Bot<C, D, S, E> bot = new Bot<>(getClient(), getHomeserverUrl(), getAppToken(), true, false, true, config, getService(),
-            getCommandClasses());
+        B bot = createBotInstance(config);
         initializeBot(bot);
         String userId = bot.getHolder().getConfig().getUserId();
         getBotMap().put(userId, bot);
@@ -193,19 +112,7 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
             getBotMap().remove(userId);
             return null;
         });
-        switch (getRunState()) {
-            case STANDALONE:
-                getPool().submit(bot);
-                break;
-            case APPLICATION_SERVICE:
-                if (BotState.NEW.equals(config.getState())) {
-                    bot.newState();
-                }
-                bot.init();
-                break;
-            default:
-                LOGGER.warn("Unknown run state: " + getRunState());
-        }
+        submitBot(bot);
     }
 
     /**
@@ -223,6 +130,5 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
      * @throws InterruptedException when cannot stop bot's thread.
      */
     public void stop() throws InterruptedException {
-        getPool().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
     }
 }
