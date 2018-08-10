@@ -51,13 +51,15 @@ public class AccountMethods {
      * Register a new user.
      *
      * @param request registration request.
+     * @return date of the registered user..
      */
-    public void register(RegisterRequest request) {
+    public LoginResponse register(RegisterRequest request) {
         RequestParams params = new RequestParams().queryParam("kind", AccountApi.RegisterType.USER);
         LoginResponse registered = getMatrixClient().getRequestMethods()
             .post(AccountApi.class, "register", params, request, LoginResponse.class);
 
         getMatrixClient().updateCredentials(registered);
+        return registered;
     }
 
     /**
