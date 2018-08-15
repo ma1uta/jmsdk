@@ -28,6 +28,7 @@ import io.github.ma1uta.matrix.client.methods.EventMethods;
 import io.github.ma1uta.matrix.client.methods.FilterMethods;
 import io.github.ma1uta.matrix.client.methods.PresenceMethods;
 import io.github.ma1uta.matrix.client.methods.ProfileMethods;
+import io.github.ma1uta.matrix.client.methods.ProtocolMethods;
 import io.github.ma1uta.matrix.client.methods.PushMethods;
 import io.github.ma1uta.matrix.client.methods.ReceiptMethods;
 import io.github.ma1uta.matrix.client.methods.ReportMethods;
@@ -92,6 +93,15 @@ public class MatrixClient implements Closeable {
      */
     public String getAccessToken() {
         return getRequestMethods().getAccessToken();
+    }
+
+    /**
+     * Return homeserver url.
+     *
+     * @return homeserver url.
+     */
+    public String getHomeserverUrl() {
+        return getRequestMethods().getHomeserverUrl();
     }
 
     /**
@@ -335,5 +345,14 @@ public class MatrixClient implements Closeable {
      */
     public PushMethods push() {
         return new PushMethods(this);
+    }
+
+    /**
+     * The protocol methods.
+     *
+     * @return the protocol methods.
+     */
+    public ProtocolMethods protocol() {
+        return new ProtocolMethods(this);
     }
 }
