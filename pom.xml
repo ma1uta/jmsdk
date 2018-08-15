@@ -33,6 +33,7 @@
 
     <name>jmsdk</name>
     <description>SDK for clients and bots</description>
+    <url>https://github.com/ma1uta/jmsdk</url>
 
     <scm>
         <url>https://github.com/ma1uta/jmsdk</url>
