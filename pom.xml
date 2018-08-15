@@ -266,14 +266,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <modules>
-        <module>common-sdk</module>
-        <module>homeserver-sdk</module>
-        <module>client-sdk</module>
-        <module>bot-sdk</module>
-        <module>identity-sdk</module>
-    </modules>
-
     <profiles>
         <profile>
             <id>sign</id>
@@ -310,6 +302,47 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>all</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>common-sdk</module>
+                <module>homeserver-sdk</module>
+                <module>client-sdk</module>
+                <module>bot-sdk</module>
+                <module>identity-sdk</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>client</id>
+            <modules>
+                <module>common-sdk</module>
+                <module>client-sdk</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>bot</id>
+            <modules>
+                <module>common-sdk</module>
+                <module>client-sdk</module>
+                <module>bot-sdk</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>id</id>
+            <modules>
+                <module>common-sdk</module>
+                <module>identity-sdk</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>hs</id>
+            <modules>
+                <module>common-sdk</module>
+                <module>homeserver-sdk</module>
+            </modules>
+        </profile>
     </profiles>
-
 </project>
