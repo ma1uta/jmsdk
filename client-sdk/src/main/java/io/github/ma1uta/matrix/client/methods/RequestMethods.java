@@ -260,6 +260,10 @@ public class RequestMethods {
             () -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).build("DELETE", Entity.json(payload)).invoke(),
             EmptyResponse.class);
     }
+
+    protected void delete(Class<?> apiClass, String apiMethod, RequestParams params) {
+        extractResponseModel(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).delete(), EmptyResponse.class);
+    }
 }
 
 

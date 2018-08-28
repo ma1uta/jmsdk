@@ -90,7 +90,7 @@ public class RoomMethods {
     public void delete(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
         RequestParams params = new RequestParams().pathParam("roomAlias", alias);
-        getMatrixClient().getRequestMethods().delete(RoomApi.class, "delete", params, EmptyResponse.class);
+        getMatrixClient().getRequestMethods().delete(RoomApi.class, "delete", params);
     }
 
     /**
