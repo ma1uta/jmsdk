@@ -34,6 +34,16 @@ public class AppServiceClient extends MatrixClient {
     }
 
     /**
+     * Return a new AppService client with the specified `user_id`.
+     *
+     * @param userId The user MXID.
+     * @return The new AppService client.
+     */
+    public AppServiceClient userId(String userId) {
+        return new AppServiceClient(getHomeserverUrl(), getRequestFactory().getClient(), getDefaultParams().clone().userId(userId));
+    }
+
+    /**
      * App service client builder.
      */
     public static class Builder extends AbstractClientBuilder<AppServiceClient> {
