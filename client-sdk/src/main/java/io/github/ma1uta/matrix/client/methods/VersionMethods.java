@@ -16,23 +16,19 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.VersionApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.version.VersionsResponse;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Version methods.
  */
-public class VersionMethods {
+public class VersionMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public VersionMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public VersionMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -40,8 +36,7 @@ public class VersionMethods {
      *
      * @return The versions supported by the server.
      */
-    public String[] versions() {
-        return getMatrixClient().getRequestMethods().get(VersionApi.class, "versions", new RequestParams(), VersionsResponse.class)
-            .getVersions();
+    public CompletableFuture<String[]> versions() {
+        return factory().get(VersionApi.class, "versions", defaults(), VersionsResponse.class).thenApply(VersionsResponse::getVersions);
     }
 }

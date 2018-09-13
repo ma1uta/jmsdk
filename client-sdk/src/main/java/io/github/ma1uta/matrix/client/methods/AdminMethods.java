@@ -16,25 +16,20 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AdminApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Admin methods.
  */
-public class AdminMethods {
+public class AdminMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public AdminMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public AdminMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -44,9 +39,9 @@ public class AdminMethods {
      * @param userId user mxid
      * @return user information.
      */
-    public AdminResponse whois(String userId) {
+    public CompletableFuture<AdminResponse> whois(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId);
-        return getMatrixClient().getRequestMethods().get(AdminApi.class, "whois", params, AdminResponse.class);
+        RequestParams params = defaults().clone().path("userId", userId);
+        return factory().get(AdminApi.class, "whois", params, AdminResponse.class);
     }
 }

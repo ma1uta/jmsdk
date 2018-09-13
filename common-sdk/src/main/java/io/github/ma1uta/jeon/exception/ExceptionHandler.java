@@ -44,7 +44,7 @@ public class ExceptionHandler implements ExceptionMapper<Throwable> {
             message = new ErrorResponse(matrixException.getErrcode(), matrixException.getMessage(), matrixException.getRetryAfterMs());
             status = matrixException.getStatus();
         } else if (exception instanceof NotFoundException) {
-            message = new ErrorResponse(ErrorResponse.Code.M_NOT_FOUND, "Not found.");
+            message = new ErrorResponse(ErrorResponse.Code.M_NOT_FOUND, exception.getMessage());
         } else {
             message = new ErrorResponse(MatrixException.M_INTERNAL, exception.getMessage());
         }

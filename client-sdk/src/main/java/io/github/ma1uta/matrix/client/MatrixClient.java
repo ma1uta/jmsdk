@@ -16,6 +16,8 @@
 
 package io.github.ma1uta.matrix.client;
 
+import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.AdminMethods;
 import io.github.ma1uta.matrix.client.methods.AuthMethods;
@@ -32,7 +34,7 @@ import io.github.ma1uta.matrix.client.methods.ProtocolMethods;
 import io.github.ma1uta.matrix.client.methods.PushMethods;
 import io.github.ma1uta.matrix.client.methods.ReceiptMethods;
 import io.github.ma1uta.matrix.client.methods.ReportMethods;
-import io.github.ma1uta.matrix.client.methods.RequestMethods;
+import io.github.ma1uta.matrix.client.methods.RequestParams;
 import io.github.ma1uta.matrix.client.methods.RoomMethods;
 import io.github.ma1uta.matrix.client.methods.SearchMethods;
 import io.github.ma1uta.matrix.client.methods.SendToDeviceMethods;
@@ -56,43 +58,32 @@ public class MatrixClient implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatrixClient.class);
 
-    private final boolean updateAccessToken;
+    private final RequestFactory requestFactory;
+    private final RequestParams defaultParams;
 
-    private final RequestMethods requestMethods;
+    public MatrixClient(String homeserverUrl, Client client, String userId) {
+        this(homeserverUrl, client, new RequestParams().userId(userId));
+    }
 
-    public MatrixClient(String homeserverUrl, Client client, boolean addUserIdToRequests, boolean updateAccessToken) {
-        this.updateAccessToken = updateAccessToken;
-        this.requestMethods = new RequestMethods(client, homeserverUrl, addUserIdToRequests);
+    public MatrixClient(String homeserverUrl, Client client, RequestParams defaultParams) {
+        this.defaultParams = defaultParams;
+        this.requestFactory = new RequestFactory(client, homeserverUrl);
     }
 
     public String getUserId() {
-        return getRequestMethods().getUserId();
+        return getDefaultParams().getUserId();
     }
 
-    /**
-     * Setup user id.
-     *
-     * @param userId user mxid.
-     */
-    public void setUserId(String userId) {
-        getRequestMethods().setUserId(userId);
-    }
-
-    public boolean isUpdateAccessToken() {
-        return updateAccessToken;
-    }
-
-    public RequestMethods getRequestMethods() {
-        return requestMethods;
-    }
-
-    /**
-     * Return access token.
-     *
-     * @return access token.
-     */
     public String getAccessToken() {
-        return getRequestMethods().getAccessToken();
+        return getDefaultParams().getAccessToken();
+    }
+
+    public RequestFactory getRequestFactory() {
+        return requestFactory;
+    }
+
+    public RequestParams getDefaultParams() {
+        return defaultParams;
     }
 
     /**
@@ -101,30 +92,8 @@ public class MatrixClient implements Closeable {
      * @return homeserver url.
      */
     public String getHomeserverUrl() {
-        return getRequestMethods().getHomeserverUrl();
+        return getRequestFactory().getHomeserverUrl();
     }
-
-    /**
-     * Setup access token.
-     *
-     * @param accessToken a new access token.
-     */
-    public void setAccessToken(String accessToken) {
-        getRequestMethods().setAccessToken(accessToken);
-    }
-
-    /**
-     * Update the user ID and the access token.
-     *
-     * @param credentials user ID and the access token.
-     */
-    public void updateCredentials(LoginResponse credentials) {
-        if (isUpdateAccessToken()) {
-            getRequestMethods().setAccessToken(credentials.getAccessToken());
-        }
-        getRequestMethods().setUserId(credentials.getUserId());
-    }
-
 
     @Override
     public void close() {
@@ -137,7 +106,7 @@ public class MatrixClient implements Closeable {
      * @return account methods.
      */
     public AccountMethods account() {
-        return new AccountMethods(this);
+        return new AccountMethods(getRequestFactory(), getDefaultParams(), this::afterLogin);
     }
 
     /**
@@ -146,7 +115,7 @@ public class MatrixClient implements Closeable {
      * @return admin methods.
      */
     public AdminMethods admin() {
-        return new AdminMethods(this);
+        return new AdminMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -155,7 +124,7 @@ public class MatrixClient implements Closeable {
      * @return auth methods.
      */
     public AuthMethods auth() {
-        return new AuthMethods(this);
+        return new AuthMethods(getRequestFactory(), getDefaultParams(), this::afterLogin, this::afterLogout);
     }
 
     /**
@@ -164,7 +133,7 @@ public class MatrixClient implements Closeable {
      * @return client config methods.
      */
     public ClientConfigMethods clientConfig() {
-        return new ClientConfigMethods(this);
+        return new ClientConfigMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -173,7 +142,7 @@ public class MatrixClient implements Closeable {
      * @return content methods.
      */
     public ContentMethods content() {
-        return new ContentMethods(this);
+        return new ContentMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -182,7 +151,7 @@ public class MatrixClient implements Closeable {
      * @return device methods.
      */
     public DeviceMethods device() {
-        return new DeviceMethods(this);
+        return new DeviceMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -191,7 +160,7 @@ public class MatrixClient implements Closeable {
      * @return encryption methods.
      */
     public EncryptionMethods encryption() {
-        return new EncryptionMethods(this);
+        return new EncryptionMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -200,7 +169,7 @@ public class MatrixClient implements Closeable {
      * @return event context method.
      */
     public EventContextMethods eventContext() {
-        return new EventContextMethods(this);
+        return new EventContextMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -209,7 +178,7 @@ public class MatrixClient implements Closeable {
      * @return presence methods.
      */
     public PresenceMethods presence() {
-        return new PresenceMethods(this);
+        return new PresenceMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -218,7 +187,7 @@ public class MatrixClient implements Closeable {
      * @return profile methods.
      */
     public ProfileMethods profile() {
-        return new ProfileMethods(this);
+        return new ProfileMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -227,7 +196,7 @@ public class MatrixClient implements Closeable {
      * @return receipt method.
      */
     public ReceiptMethods receipt() {
-        return new ReceiptMethods(this);
+        return new ReceiptMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -236,7 +205,7 @@ public class MatrixClient implements Closeable {
      * @return the report method.
      */
     public ReportMethods report() {
-        return new ReportMethods(this);
+        return new ReportMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -245,7 +214,7 @@ public class MatrixClient implements Closeable {
      * @return the search method.
      */
     public SearchMethods search() {
-        return new SearchMethods(this);
+        return new SearchMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -254,7 +223,7 @@ public class MatrixClient implements Closeable {
      * @return the send to device method.
      */
     public SendToDeviceMethods sendToDevice() {
-        return new SendToDeviceMethods(this);
+        return new SendToDeviceMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -263,7 +232,7 @@ public class MatrixClient implements Closeable {
      * @return sync method.
      */
     public SyncMethods sync() {
-        return new SyncMethods(this);
+        return new SyncMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -272,7 +241,7 @@ public class MatrixClient implements Closeable {
      * @return event methods.
      */
     public EventMethods event() {
-        return new EventMethods(this);
+        return new EventMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -281,7 +250,7 @@ public class MatrixClient implements Closeable {
      * @return filter methods.
      */
     public FilterMethods filter() {
-        return new FilterMethods(this);
+        return new FilterMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -290,7 +259,7 @@ public class MatrixClient implements Closeable {
      * @return room apis.
      */
     public RoomMethods room() {
-        return new RoomMethods(this);
+        return new RoomMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -299,7 +268,7 @@ public class MatrixClient implements Closeable {
      * @return tag methods.
      */
     public TagMethods tag() {
-        return new TagMethods(this);
+        return new TagMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -308,7 +277,7 @@ public class MatrixClient implements Closeable {
      * @return typing methods.
      */
     public TypingMethods typing() {
-        return new TypingMethods(this);
+        return new TypingMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -317,7 +286,7 @@ public class MatrixClient implements Closeable {
      * @return user directory method.
      */
     public UserDirectoryMethods userDirectory() {
-        return new UserDirectoryMethods(this);
+        return new UserDirectoryMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -326,7 +295,7 @@ public class MatrixClient implements Closeable {
      * @return the versions method.
      */
     public VersionMethods versions() {
-        return new VersionMethods(this);
+        return new VersionMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -335,7 +304,7 @@ public class MatrixClient implements Closeable {
      * @return the voip methods.
      */
     public VoipMethods turnServers() {
-        return new VoipMethods(this);
+        return new VoipMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -344,7 +313,7 @@ public class MatrixClient implements Closeable {
      * @return the push methods.
      */
     public PushMethods push() {
-        return new PushMethods(this);
+        return new PushMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
@@ -353,6 +322,43 @@ public class MatrixClient implements Closeable {
      * @return the protocol methods.
      */
     public ProtocolMethods protocol() {
-        return new ProtocolMethods(this);
+        return new ProtocolMethods(getRequestFactory(), getDefaultParams());
+    }
+
+    /**
+     * Action after login/register.
+     *
+     * @param loginResponse The login response.
+     * @return The login response.
+     */
+    public LoginResponse afterLogin(LoginResponse loginResponse) {
+        if (loginResponse == null) {
+            getDefaultParams().accessToken(null);
+        } else {
+            getDefaultParams().accessToken(loginResponse.getAccessToken());
+        }
+        return loginResponse;
+    }
+
+    /**
+     * Action after logout/logoutAll.
+     *
+     * @param response The empty response.
+     * @return The login response.
+     */
+    public EmptyResponse afterLogout(EmptyResponse response) {
+        getDefaultParams().accessToken(null);
+        return response;
+    }
+
+    /**
+     * Matrix client builder.
+     */
+    public static class Builder extends AbstractClientBuilder<MatrixClient> {
+
+        @Override
+        public MatrixClient newInstance() {
+            return new MatrixClient(getHomeserverUrl(), getClient(), getDefaultParams());
+        }
     }
 }

@@ -17,24 +17,19 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ReceiptApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Receipt method.
  */
-public class ReceiptMethods {
+public class ReceiptMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public ReceiptMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public ReceiptMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -42,12 +37,13 @@ public class ReceiptMethods {
      *
      * @param roomId  room id.
      * @param eventId event id.
+     * @return empty response.
      */
-    public void sendReceipt(String roomId, String eventId) {
+    public CompletableFuture<EmptyResponse> sendReceipt(String roomId, String eventId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId)
-            .pathParam("receiptType", ReceiptApi.Receipt.READ);
-        getMatrixClient().getRequestMethods().post(ReceiptApi.class, "receipt", params, "", EmptyResponse.class);
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId)
+            .path("receiptType", ReceiptApi.Receipt.READ);
+        return factory().post(ReceiptApi.class, "receipt", params, "", EmptyResponse.class);
     }
 }

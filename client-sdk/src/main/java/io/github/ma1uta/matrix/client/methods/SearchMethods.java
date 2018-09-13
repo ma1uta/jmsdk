@@ -16,26 +16,21 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.SearchApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.search.SearchRequest;
 import io.github.ma1uta.matrix.client.model.search.SearchResponse;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Search methods.
  */
-public class SearchMethods {
+public class SearchMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public SearchMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public SearchMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -46,9 +41,9 @@ public class SearchMethods {
      *                  to this endpoint.
      * @return Results of the search.
      */
-    public SearchResponse search(SearchRequest request, String nextBatch) {
+    public CompletableFuture<SearchResponse> search(SearchRequest request, String nextBatch) {
         Objects.requireNonNull(request.getSearchCategories(), "Search categories cannot be empty.");
-        RequestParams params = new RequestParams().queryParam("nextBatch", nextBatch);
-        return getMatrixClient().getRequestMethods().post(SearchApi.class, "search", params, request, SearchResponse.class);
+        RequestParams params = defaults().clone().query("nextBatch", nextBatch);
+        return factory().post(SearchApi.class, "search", params, request, SearchResponse.class);
     }
 }

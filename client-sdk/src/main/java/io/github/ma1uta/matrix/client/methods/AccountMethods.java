@@ -17,34 +17,37 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AccountApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
 import io.github.ma1uta.matrix.client.model.account.DeactivateRequest;
+import io.github.ma1uta.matrix.client.model.account.EmailRequestToken;
 import io.github.ma1uta.matrix.client.model.account.PasswordRequest;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
-import io.github.ma1uta.matrix.client.model.account.RequestToken;
 import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * Account methods.
  */
-public class AccountMethods {
+public class AccountMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
+    private final Function<LoginResponse, LoginResponse> callback;
 
-    public AccountMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
+    public AccountMethods(RequestFactory factory, RequestParams defaultParams, Function<LoginResponse, LoginResponse> callback) {
+        super(factory, defaultParams);
+        this.callback = callback;
     }
 
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    protected Function<LoginResponse, LoginResponse> getCallback() {
+        return callback;
     }
 
     /**
@@ -53,55 +56,56 @@ public class AccountMethods {
      * @param request registration request.
      * @return date of the registered user..
      */
-    public LoginResponse register(RegisterRequest request) {
-        RequestParams params = new RequestParams().queryParam("kind", AccountApi.RegisterType.USER);
-        LoginResponse registered = getMatrixClient().getRequestMethods()
-            .post(AccountApi.class, "register", params, request, LoginResponse.class);
-
-        getMatrixClient().updateCredentials(registered);
-        return registered;
+    public CompletableFuture<LoginResponse> register(RegisterRequest request) {
+        RequestParams params = defaults().clone().query("kind", AccountApi.RegisterType.USER);
+        return factory().post(AccountApi.class, "register", params, request, LoginResponse.class).thenApply(getCallback());
     }
 
     /**
      * Request token.
      *
      * @param requestToken request token.
+     * @return empty response.
      */
-    public void requestToken(RequestToken requestToken) {
+    public CompletableFuture<EmptyResponse> requestToken(EmailRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
         Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
-        getMatrixClient().getRequestMethods()
-            .post(AccountApi.class, "requestToken", new RequestParams(), requestToken, EmptyResponse.class);
+        return factory().post(AccountApi.class, "requestToken", defaults(), requestToken, EmptyResponse.class);
     }
 
     /**
      * Change password.
      *
      * @param password new password.
+     * @return empty response.
      */
-    public void password(String password) {
+    public CompletableFuture<EmptyResponse> password(String password) {
         Objects.requireNonNull(password, "Password cannot be empty.");
         PasswordRequest request = new PasswordRequest();
         request.setNewPassword(password);
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "password", new RequestParams(), request, EmptyResponse.class);
+        return factory().post(AccountApi.class, "password", defaults(), request, EmptyResponse.class);
     }
 
     /**
      * Request validation tokens.
+     *
+     * @return empty response.
      */
-    public void passwordRequestToken() {
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "passwordRequestToken", new RequestParams(), "", EmptyResponse.class);
+    public CompletableFuture<EmptyResponse> passwordRequestToken() {
+        return factory().post(AccountApi.class, "passwordRequestToken", defaults(), "", EmptyResponse.class);
     }
 
     /**
      * Deactivate user.
      *
      * @param auth authentication data.
+     * @return empty response.
      */
-    public void deactivate(AuthenticationData auth) {
-        getMatrixClient().getRequestMethods()
-            .post(AccountApi.class, "deactivate", new RequestParams(), new DeactivateRequest(), EmptyResponse.class);
+    public CompletableFuture<EmptyResponse> deactivate(AuthenticationData auth) {
+        DeactivateRequest request = new DeactivateRequest();
+        request.setAuth(auth);
+        return factory().post(AccountApi.class, "deactivate", defaults(), request, EmptyResponse.class);
     }
 
     /**
@@ -110,10 +114,10 @@ public class AccountMethods {
      * @param username checked username.
      * @return {@code} if available, else {@code false}.
      */
-    public boolean available(String username) {
+    public CompletableFuture<Boolean> available(String username) {
         Objects.requireNonNull(username, "Username cannot be empty");
-        RequestParams params = new RequestParams().queryParam("username", username);
-        return getMatrixClient().getRequestMethods().get(AccountApi.class, "available", params, AvailableResponse.class).getAvailable();
+        RequestParams params = defaults().clone().query("username", username);
+        return factory().get(AccountApi.class, "available", params, AvailableResponse.class).thenApply(AvailableResponse::getAvailable);
     }
 
     /**
@@ -121,29 +125,32 @@ public class AccountMethods {
      *
      * @return third party identifiers.
      */
-    public ThreePidResponse showThreePid() {
-        return getMatrixClient().getRequestMethods().get(AccountApi.class, "showThreePid", new RequestParams(), ThreePidResponse.class);
+    public CompletableFuture<ThreePidResponse> showThreePid() {
+        return factory().get(AccountApi.class, "showThreePid", defaults(), ThreePidResponse.class);
     }
 
     /**
      * Adds contact information to the user's account.
      *
      * @param request new contact information.
+     * @return empty response.
      */
-    public void updateThreePid(ThreePidRequest request) {
+    public CompletableFuture<EmptyResponse> updateThreePid(ThreePidRequest request) {
         String error = "Threepids cannot be empty.";
         Objects.requireNonNull(request.getThreePidCreds(), error);
         if (request.getThreePidCreds().length == 0) {
             throw new NullPointerException(error);
         }
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "updateThreePid", new RequestParams(), request, EmptyResponse.class);
+        return factory().post(AccountApi.class, "updateThreePid", defaults(), request, EmptyResponse.class);
     }
 
     /**
      * Proxies the identity server API validate/email/requestToken.
+     *
+     * @return empty response.
      */
-    public void threePidRequestToken() {
-        getMatrixClient().getRequestMethods().post(AccountApi.class, "threePidRequestToken", new RequestParams(), "", EmptyResponse.class);
+    public CompletableFuture<EmptyResponse> threePidRequestToken() {
+        return factory().post(AccountApi.class, "threePidRequestToken", defaults(), "", EmptyResponse.class);
     }
 
     /**
@@ -151,7 +158,7 @@ public class AccountMethods {
      *
      * @return information about the owner of a given access token.
      */
-    public WhoamiResponse whoami() {
-        return getMatrixClient().getRequestMethods().get(AccountApi.class, "whoami", new RequestParams(), WhoamiResponse.class);
+    public CompletableFuture<WhoamiResponse> whoami() {
+        return factory().get(AccountApi.class, "whoami", defaults(), WhoamiResponse.class);
     }
 }

@@ -16,27 +16,26 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.api.VoipApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
-import io.github.ma1uta.matrix.client.model.voip.VoipResponse;
-
-import java.util.concurrent.CompletableFuture;
 
 /**
- * Voip methods.
+ * Common methods.
  */
-public class VoipMethods extends AbstractMethods {
+public abstract class AbstractMethods {
 
-    public VoipMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final RequestFactory factory;
+    private final RequestParams defaultParams;
+
+    public AbstractMethods(RequestFactory factory, RequestParams defaultParams) {
+        this.factory = factory;
+        this.defaultParams = defaultParams;
     }
 
-    /**
-     * This API provides credentials for the client to use when initiating calls.
-     *
-     * @return The TURN server credentials.
-     */
-    public CompletableFuture<VoipResponse> turnServers() {
-        return factory().get(VoipApi.class, "turnServer", defaults(), VoipResponse.class);
+    protected RequestParams defaults() {
+        return defaultParams;
+    }
+
+    protected RequestFactory factory() {
+        return factory;
     }
 }

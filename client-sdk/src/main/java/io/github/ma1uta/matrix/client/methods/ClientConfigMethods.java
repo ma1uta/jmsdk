@@ -17,25 +17,20 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ClientConfigApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Client config methods.
  */
-public class ClientConfigMethods {
+public class ClientConfigMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public ClientConfigMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public ClientConfigMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -44,13 +39,13 @@ public class ClientConfigMethods {
      *
      * @param type        The event type of the account_data to set. Custom types should be namespaced to avoid clashes.
      * @param accountData account data.
+     * @return empty response.
      */
-    public void addConfig(String type, Map<String, String> accountData) {
-        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
+    public CompletableFuture<EmptyResponse> addConfig(String type, Map<String, String> accountData) {
         Objects.requireNonNull(type, "Type cannot be empty.");
-        Objects.requireNonNull(requestMethods.getUserId(), "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId()).pathParam("type", type);
-        requestMethods.put(ClientConfigApi.class, "addConfig", params, accountData, EmptyResponse.class);
+        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
+        RequestParams params = defaults().clone().path("userId", defaults().getUserId()).path("type", type);
+        return factory().put(ClientConfigApi.class, "addConfig", params, accountData, EmptyResponse.class);
     }
 
     /**
@@ -60,14 +55,14 @@ public class ClientConfigMethods {
      * @param roomId      The id of the room to set account_data on.
      * @param type        The event type of the account_data to set. Custom types should be namespaced to avoid clashes.
      * @param accountData account data.
+     * @return empty response.
      */
-    public void addRoomConfig(String roomId, String type, Map<String, String> accountData) {
-        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
+    public CompletableFuture<EmptyResponse> addRoomConfig(String roomId, String type, Map<String, String> accountData) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(type, "Type cannot be empty");
-        Objects.requireNonNull(requestMethods.getUserId(), "UserId cannot be empty");
-        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId()).pathParam("roomId", roomId)
-            .pathParam("type", type);
-        requestMethods.put(ClientConfigApi.class, "addRoomConfig", params, accountData, EmptyResponse.class);
+        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty");
+        RequestParams params = defaults().clone().path("userId", defaults().getUserId()).path("roomId", roomId)
+            .path("type", type);
+        return factory().put(ClientConfigApi.class, "addRoomConfig", params, accountData, EmptyResponse.class);
     }
 }

@@ -17,25 +17,20 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.SendToDeviceApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.sendtodevice.SendToDeviceRequest;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Send to device method.
  */
-public class SendToDeviceMethods {
+public class SendToDeviceMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public SendToDeviceMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public SendToDeviceMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -43,11 +38,11 @@ public class SendToDeviceMethods {
      *
      * @param eventType The type of event to send.
      * @param request   sending data.
+     * @return empty response.
      */
-    public void sendToDevice(String eventType, SendToDeviceRequest request) {
+    public CompletableFuture<EmptyResponse> sendToDevice(String eventType, SendToDeviceRequest request) {
         Objects.requireNonNull(eventType, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("eventType", eventType)
-            .pathParam("txnId", Long.toString(System.currentTimeMillis()));
-        getMatrixClient().getRequestMethods().put(SendToDeviceApi.class, "send", params, request, EmptyResponse.class);
+        RequestParams params = defaults().clone().path("eventType", eventType).path("txnId", Long.toString(System.currentTimeMillis()));
+        return factory().put(SendToDeviceApi.class, "send", params, request, EmptyResponse.class);
     }
 }

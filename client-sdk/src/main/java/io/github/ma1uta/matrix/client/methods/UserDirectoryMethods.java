@@ -16,26 +16,21 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.UserDirectoryApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchRequest;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchResponse;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * User directory methods.
  */
-public class UserDirectoryMethods {
+public class UserDirectoryMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public UserDirectoryMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public UserDirectoryMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -45,9 +40,8 @@ public class UserDirectoryMethods {
      * @param request search request.
      * @return the result of the search.
      */
-    public SearchResponse search(SearchRequest request) {
+    public CompletableFuture<SearchResponse> search(SearchRequest request) {
         Objects.requireNonNull(request.getSearchTerm(), "SearchTerm cannot be empty.");
-        return getMatrixClient().getRequestMethods()
-            .post(UserDirectoryApi.class, "searchUsers", new RequestParams(), request, SearchResponse.class);
+        return factory().post(UserDirectoryApi.class, "searchUsers", defaults(), request, SearchResponse.class);
     }
 }

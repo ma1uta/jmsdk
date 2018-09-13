@@ -17,8 +17,8 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.RoomApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.room.CreateRoomRequest;
 import io.github.ma1uta.matrix.client.model.room.InviteRequest;
 import io.github.ma1uta.matrix.client.model.room.JoinRequest;
@@ -31,20 +31,15 @@ import io.github.ma1uta.matrix.client.model.room.RoomVisibility;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Room api.
  */
-public class RoomMethods {
+public class RoomMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public RoomMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public RoomMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -53,8 +48,8 @@ public class RoomMethods {
      * @param request the create room request.
      * @return Information about the newly created room.
      */
-    public RoomId create(CreateRoomRequest request) {
-        return getMatrixClient().getRequestMethods().post(RoomApi.class, "create", new RequestParams(), request, RoomId.class);
+    public CompletableFuture<RoomId> create(CreateRoomRequest request) {
+        return factory().post(RoomApi.class, "create", defaults(), request, RoomId.class);
     }
 
     /**
@@ -62,12 +57,13 @@ public class RoomMethods {
      *
      * @param roomId The information of the room.
      * @param alias  The room alias to set.
+     * @return empty response.
      */
-    public void newAlias(RoomId roomId, String alias) {
+    public CompletableFuture<EmptyResponse> newAlias(RoomId roomId, String alias) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(alias, "Alias cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomAlias", alias);
-        getMatrixClient().getRequestMethods().put(RoomApi.class, "newAlias", params, roomId, EmptyResponse.class);
+        RequestParams params = defaults().clone().path("roomAlias", alias);
+        return factory().put(RoomApi.class, "newAlias", params, roomId, EmptyResponse.class);
     }
 
     /**
@@ -76,21 +72,22 @@ public class RoomMethods {
      * @param alias The room alias.
      * @return The room ID and other information for this alias.
      */
-    public RoomId resolve(String alias) {
+    public CompletableFuture<RoomId> resolve(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomAlias", alias);
-        return getMatrixClient().getRequestMethods().get(RoomApi.class, "resolve", params, RoomId.class);
+        RequestParams params = defaults().clone().path("roomAlias", alias);
+        return factory().get(RoomApi.class, "resolve", params, RoomId.class);
     }
 
     /**
      * Remove a mapping of room alias to room ID.
      *
      * @param alias The room alias to remove.
+     * @return empty response.
      */
-    public void delete(String alias) {
+    public CompletableFuture<EmptyResponse> delete(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomAlias", alias);
-        getMatrixClient().getRequestMethods().delete(RoomApi.class, "delete", params);
+        RequestParams params = defaults().clone().path("roomAlias", alias);
+        return factory().delete(RoomApi.class, "delete", params);
     }
 
     /**
@@ -98,9 +95,9 @@ public class RoomMethods {
      *
      * @return joined room ids.
      */
-    public List<String> joinedRooms() {
-        return getMatrixClient().getRequestMethods().get(RoomApi.class, "joinedRooms", new RequestParams(), JoinedRoomsResponse.class)
-            .getJoinedRooms();
+    public CompletableFuture<List<String>> joinedRooms() {
+        return factory().get(RoomApi.class, "joinedRooms", defaults(), JoinedRoomsResponse.class)
+            .thenApply(JoinedRoomsResponse::getJoinedRooms);
     }
 
     /**
@@ -109,15 +106,16 @@ public class RoomMethods {
      *
      * @param roomId  The room identifier (not alias) to which to invite the user.
      * @param request The invite information.
+     * @return empty response.
      */
-    public void invite(String roomId, InviteRequest request) {
+    public CompletableFuture<EmptyResponse> invite(String roomId, InviteRequest request) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(request.getIdServer(), "IdServer cannot be empty.");
         Objects.requireNonNull(request.getAddress(), "Address cannot be empty.");
         Objects.requireNonNull(request.getMedium(), "Medium cannot be empty.");
         Objects.requireNonNull(request.getUserId(), "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        getMatrixClient().getRequestMethods().post(RoomApi.class, "invite", params, request, EmptyResponse.class);
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().post(RoomApi.class, "invite", params, request, EmptyResponse.class);
     }
 
     /**
@@ -127,10 +125,10 @@ public class RoomMethods {
      * @param request The join information.
      * @return The room has been joined. The joined room ID must be returned in the room_id field.
      */
-    public RoomId join(String roomId, JoinRequest request) {
+    public CompletableFuture<RoomId> join(String roomId, JoinRequest request) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        return getMatrixClient().getRequestMethods().post(RoomApi.class, "join", params, request, RoomId.class);
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().post(RoomApi.class, "join", params, request, RoomId.class);
     }
 
     /**
@@ -139,32 +137,34 @@ public class RoomMethods {
      * @param idOrAlias room id or alias.
      * @return room id.
      */
-    public RoomId joinByIdOrAlias(String idOrAlias) {
+    public CompletableFuture<RoomId> joinByIdOrAlias(String idOrAlias) {
         Objects.requireNonNull(idOrAlias, "IdOrAlias cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomIdOrAlias", idOrAlias);
-        return getMatrixClient().getRequestMethods().post(RoomApi.class, "joinByIdOrAlias", params, new JoinRequest(), RoomId.class);
+        RequestParams params = defaults().clone().path("roomIdOrAlias", idOrAlias);
+        return factory().post(RoomApi.class, "joinByIdOrAlias", params, new JoinRequest(), RoomId.class);
     }
 
     /**
      * Leave room.
      *
      * @param roomId room id.
+     * @return empty response.
      */
-    public void leave(String roomId) {
+    public CompletableFuture<EmptyResponse> leave(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        getMatrixClient().getRequestMethods().post(RoomApi.class, "leave", params, "", EmptyResponse.class);
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().post(RoomApi.class, "leave", params, "", EmptyResponse.class);
     }
 
     /**
      * This API stops a user remembering about a particular room.
      *
      * @param roomId The room identifier to forget.
+     * @return empty response.
      */
-    public void forget(String roomId) {
+    public CompletableFuture<EmptyResponse> forget(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        getMatrixClient().getRequestMethods().post(RoomApi.class, "forget", params, "", EmptyResponse.class);
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().post(RoomApi.class, "forget", params, "", EmptyResponse.class);
     }
 
     /**
@@ -173,15 +173,16 @@ public class RoomMethods {
      * @param roomId The room identifier (not alias) from which the user should be kicked.
      * @param userId The fully qualified user ID of the user being kicked.
      * @param reason The reason the user has been baned.
+     * @return empty response.
      */
-    public void kick(String roomId, String userId, String reason) {
+    public CompletableFuture<EmptyResponse> kick(String roomId, String userId, String reason) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
+        RequestParams params = defaults().clone().path("roomId", roomId);
         KickRequest request = new KickRequest();
         request.setUserId(userId);
         request.setReason(reason);
-        getMatrixClient().getRequestMethods().post(RoomApi.class, "kick", params, request, EmptyResponse.class);
+        return factory().post(RoomApi.class, "kick", params, request, EmptyResponse.class);
     }
 
     /**
@@ -190,15 +191,16 @@ public class RoomMethods {
      * @param roomId The room identifier (not alias) from which the user should be banned.
      * @param userId The fully qualified user ID of the user being baned.
      * @param reason The reason the user has been kicked.
+     * @return empty response.
      */
-    public void ban(String roomId, String userId, String reason) {
+    public CompletableFuture<EmptyResponse> ban(String roomId, String userId, String reason) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
+        RequestParams params = defaults().clone().path("roomId", roomId);
         KickRequest request = new KickRequest();
         request.setUserId(userId);
         request.setReason(reason);
-        getMatrixClient().getRequestMethods().post(RoomApi.class, "ban", params, request, EmptyResponse.class);
+        return factory().post(RoomApi.class, "ban", params, request, EmptyResponse.class);
     }
 
     /**
@@ -208,15 +210,16 @@ public class RoomMethods {
      * @param roomId The room identifier (not alias) from which the user should be unbanned.
      * @param userId The fully qualified user ID of the user being unbaned.
      * @param reason The reason the user has been unbaned.
+     * @return empty response.
      */
-    public void unban(String roomId, String userId, String reason) {
+    public CompletableFuture<EmptyResponse> unban(String roomId, String userId, String reason) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
+        RequestParams params = defaults().clone().path("roomId", roomId);
         KickRequest request = new KickRequest();
         request.setUserId(userId);
         request.setReason(reason);
-        getMatrixClient().getRequestMethods().post(RoomApi.class, "unban", params, request, EmptyResponse.class);
+        return factory().post(RoomApi.class, "unban", params, request, EmptyResponse.class);
     }
 
     /**
@@ -225,10 +228,10 @@ public class RoomMethods {
      * @param roomId The room ID.
      * @return The visibility of the room in the directory.
      */
-    public String getVisibility(String roomId) {
+    public CompletableFuture<String> getVisibility(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        return getMatrixClient().getRequestMethods().get(RoomApi.class, "getVisibility", params, RoomVisibility.class).getVisibility();
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().get(RoomApi.class, "getVisibility", params, RoomVisibility.class).thenApply(RoomVisibility::getVisibility);
     }
 
     /**
@@ -236,13 +239,14 @@ public class RoomMethods {
      *
      * @param roomId     The room ID.
      * @param visibility The visibility of the room in the directory. One of: ["private", "public"].
+     * @return empty response.
      */
-    public void setVisibility(String roomId, String visibility) {
+    public CompletableFuture<EmptyResponse> setVisibility(String roomId, String visibility) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
+        RequestParams params = defaults().clone().path("roomId", roomId);
         RoomVisibility request = new RoomVisibility();
         request.setVisibility(visibility);
-        getMatrixClient().getRequestMethods().put(RoomApi.class, "setVisibility", params, request, EmptyResponse.class);
+        return factory().put(RoomApi.class, "setVisibility", params, request, EmptyResponse.class);
     }
 
     /**
@@ -254,11 +258,9 @@ public class RoomMethods {
      * @param server The server to fetch the public room lists from. Defaults to the local server.
      * @return A list of the rooms on the server.
      */
-    public PublicRoomsResponse showPublicRooms(Long limit, String since, String server) {
-        RequestParams params = new RequestParams().queryParam("since", since)
-            .queryParam("server", server)
-            .queryParam("limit", limit);
-        return getMatrixClient().getRequestMethods().get(RoomApi.class, "showPublicRooms", params, PublicRoomsResponse.class);
+    public CompletableFuture<PublicRoomsResponse> showPublicRooms(Long limit, String since, String server) {
+        RequestParams params = defaults().clone().query("since", since).query("server", server).query("limit", limit);
+        return factory().get(RoomApi.class, "showPublicRooms", params, PublicRoomsResponse.class);
     }
 
     /**
@@ -268,8 +270,8 @@ public class RoomMethods {
      * @param request The search request.
      * @return A list of the rooms on the server.
      */
-    public PublicRoomsResponse searchPublicRooms(String server, PublicRoomsRequest request) {
-        RequestParams params = new RequestParams().queryParam("server", server);
-        return getMatrixClient().getRequestMethods().post(RoomApi.class, "searchPublicRooms", params, request, PublicRoomsResponse.class);
+    public CompletableFuture<PublicRoomsResponse> searchPublicRooms(String server, PublicRoomsRequest request) {
+        RequestParams params = defaults().clone().query("server", server);
+        return factory().post(RoomApi.class, "searchPublicRooms", params, request, PublicRoomsResponse.class);
     }
 }

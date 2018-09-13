@@ -16,29 +16,24 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ThirdPartyProtocolApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.protocol.Protocol;
 import io.github.ma1uta.matrix.protocol.ProtocolLocation;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.GenericType;
 
 /**
  * Protocol methods.
  */
-public class ProtocolMethods {
+public class ProtocolMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public ProtocolMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public ProtocolMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -47,10 +42,9 @@ public class ProtocolMethods {
      *
      * @return <p>Status code 200: The protocols supported by the homeserver.</p>
      */
-    public Map<String, Protocol> protocols() {
-        return getMatrixClient().getRequestMethods()
-            .get(ThirdPartyProtocolApi.class, "protocols", new RequestParams(), new GenericType<Map<String, Protocol>>() {
-            });
+    public CompletableFuture<Map<String, Protocol>> protocols() {
+        return factory().get(ThirdPartyProtocolApi.class, "protocols", defaults(), new GenericType<Map<String, Protocol>>() {
+        });
     }
 
     /**
@@ -60,10 +54,10 @@ public class ProtocolMethods {
      * @return <p>Status code 200: The protocol was found and metadata returned.</p>
      * <p>Status code 404: The protocol is unknown.</p>
      */
-    public Protocol protocol(String protocol) {
+    public CompletableFuture<Protocol> protocol(String protocol) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("protocol", protocol);
-        return getMatrixClient().getRequestMethods().get(ThirdPartyProtocolApi.class, "protocol", params, Protocol.class);
+        RequestParams params = defaults().clone().path("protocol", protocol);
+        return factory().get(ThirdPartyProtocolApi.class, "protocol", params, Protocol.class);
     }
 
 
@@ -79,13 +73,12 @@ public class ProtocolMethods {
      * @return <p>Status code 200: At least one portal room was found.</p>
      * <p>Status code 404: No portal rooms were found.</p>
      */
-    public List<Protocol> locations(String protocol, Map<String, String> queryParams) {
+    public CompletableFuture<List<Protocol>> locations(String protocol, Map<String, String> queryParams) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("protocol", protocol);
+        RequestParams params = defaults().clone().path("protocol", protocol);
         params.getQueryParams().putAll(queryParams);
-        return getMatrixClient().getRequestMethods()
-            .get(ThirdPartyProtocolApi.class, "locationProtocol", params, new GenericType<List<Protocol>>() {
-            });
+        return factory().get(ThirdPartyProtocolApi.class, "locationProtocol", params, new GenericType<List<Protocol>>() {
+        });
     }
 
     /**
@@ -96,13 +89,12 @@ public class ProtocolMethods {
      * @return <p>Status code 200: The Matrix User IDs found with the given parameters.</p>
      * <p>Status code 404: The Matrix User ID was not found.</p>
      */
-    public List<Protocol> users(String protocol, Map<String, String> queryParams) {
+    public CompletableFuture<List<Protocol>> users(String protocol, Map<String, String> queryParams) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("protocol", protocol);
+        RequestParams params = defaults().clone().path("protocol", protocol);
         params.getQueryParams().putAll(queryParams);
-        return getMatrixClient().getRequestMethods()
-            .get(ThirdPartyProtocolApi.class, "userProtocol", params, new GenericType<List<Protocol>>() {
-            });
+        return factory().get(ThirdPartyProtocolApi.class, "userProtocol", params, new GenericType<List<Protocol>>() {
+        });
     }
 
     /**
@@ -112,12 +104,11 @@ public class ProtocolMethods {
      * @return <p>Status code 200: At least one portal room was found.</p>
      * <p>Status code 404: No portal rooms were found.</p>
      */
-    public List<ProtocolLocation> location(String alias) {
+    public CompletableFuture<List<ProtocolLocation>> location(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
-        RequestParams params = new RequestParams().queryParam("alias", alias);
-        return getMatrixClient().getRequestMethods()
-            .get(ThirdPartyProtocolApi.class, "location", params, new GenericType<List<ProtocolLocation>>() {
-            });
+        RequestParams params = defaults().clone().query("alias", alias);
+        return factory().get(ThirdPartyProtocolApi.class, "location", params, new GenericType<List<ProtocolLocation>>() {
+        });
     }
 
     /**
@@ -127,11 +118,10 @@ public class ProtocolMethods {
      * @return <p>Status code 200: The Matrix User IDs found with the given parameters.</p>
      * <p>Status code 404: The Matrix User ID was not found.</p>
      */
-    public List<ProtocolLocation> user(String userId) {
+    public CompletableFuture<List<ProtocolLocation>> user(String userId) {
         Objects.requireNonNull(userId, "userId cannot be empty.");
-        RequestParams params = new RequestParams().queryParam("userid", userId);
-        return getMatrixClient().getRequestMethods()
-            .get(ThirdPartyProtocolApi.class, "user", params, new GenericType<List<ProtocolLocation>>() {
-            });
+        RequestParams params = defaults().clone().query("userid", userId);
+        return factory().get(ThirdPartyProtocolApi.class, "user", params, new GenericType<List<ProtocolLocation>>() {
+        });
     }
 }

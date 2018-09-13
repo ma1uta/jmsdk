@@ -17,25 +17,20 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.TypingApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.typing.TypingRequest;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Typing methods.
  */
-public class TypingMethods {
+public class TypingMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public TypingMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public TypingMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -45,16 +40,17 @@ public class TypingMethods {
      * @param roomId  The user who has started to type.
      * @param typing  Whether the user is typing or not. If false, the timeout key can be omitted.
      * @param timeout The length of time in milliseconds to mark this user as typing.
+     * @return empty response.
      */
-    public void typing(String roomId, Boolean typing, Long timeout) {
-        String userId = getMatrixClient().getUserId();
+    public CompletableFuture<EmptyResponse> typing(String roomId, Boolean typing, Long timeout) {
+        String userId = defaults().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(typing, "Typing cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId);
+        RequestParams params = defaults().clone().path("userId", userId).path("roomId", roomId);
         TypingRequest request = new TypingRequest();
         request.setTyping(typing);
         request.setTimeout(timeout);
-        getMatrixClient().getRequestMethods().put(TypingApi.class, "typing", params, request, EmptyResponse.class);
+        return factory().put(TypingApi.class, "typing", params, request, EmptyResponse.class);
     }
 }

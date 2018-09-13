@@ -16,25 +16,20 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.EventContextApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.eventcontext.EventContextResponse;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Event context methods.
  */
-public class EventContextMethods {
+public class EventContextMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public EventContextMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public EventContextMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -46,12 +41,10 @@ public class EventContextMethods {
      * @param limit   The maximum number of events to return. Default: 10.
      * @return The events and state surrounding the requested event.
      */
-    public EventContextResponse context(String roomId, String eventId, Integer limit) {
+    public CompletableFuture<EventContextResponse> context(String roomId, String eventId, Integer limit) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId)
-            .pathParam("eventId", eventId)
-            .queryParam("limit", limit);
-        return getMatrixClient().getRequestMethods().get(EventContextApi.class, "context", params, EventContextResponse.class);
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId).query("limit", limit);
+        return factory().get(EventContextApi.class, "context", params, EventContextResponse.class);
     }
 }

@@ -19,8 +19,8 @@ package io.github.ma1uta.matrix.client.methods;
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.EventContent;
 import io.github.ma1uta.matrix.Page;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.EventApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.event.JoinedMembersResponse;
 import io.github.ma1uta.matrix.client.model.event.MembersResponse;
 import io.github.ma1uta.matrix.client.model.event.RedactRequest;
@@ -32,21 +32,16 @@ import io.github.ma1uta.matrix.events.messages.Text;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.GenericType;
 
 /**
  * EventMethods api.
  */
-public class EventMethods {
+public class EventMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public EventMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    public MatrixClient getMatrixClient() {
-        return matrixClient;
+    public EventMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -57,11 +52,11 @@ public class EventMethods {
      * @param eventId The event ID to get.
      * @return The full event.
      */
-    public Event event(String roomId, String eventId) {
+    public CompletableFuture<Event> event(String roomId, String eventId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId);
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "singleEvent", params, Event.class);
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId);
+        return factory().get(EventApi.class, "singleEvent", params, Event.class);
     }
 
     /**
@@ -73,15 +68,13 @@ public class EventMethods {
      * @param stateKey  The key of the state to look up.
      * @return The content of the state event.
      */
-    public Map<String, Object> eventContent(String roomId, String eventType, String stateKey) {
+    public CompletableFuture<EventContent> eventContent(String roomId, String eventType, String stateKey) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
         Objects.requireNonNull(stateKey, "StateKey cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType)
-            .pathParam("stateKey", stateKey);
-        return getMatrixClient().getRequestMethods()
-            .get(EventApi.class, "eventsForRoomWithTypeAndState", params, new GenericType<Map<String, Object>>() {
-            });
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
+            .path("stateKey", stateKey);
+        return factory().get(EventApi.class, "eventsForRoomWithTypeAndState", params, EventContent.class);
     }
 
     /**
@@ -92,13 +85,11 @@ public class EventMethods {
      * @param eventType The type of state to look up.
      * @return The content of the state event.
      */
-    public Map<String, Object> eventContent(String roomId, String eventType) {
+    public CompletableFuture<EventContent> eventContent(String roomId, String eventType) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType);
-        return getMatrixClient().getRequestMethods()
-            .get(EventApi.class, "eventsForRoomWithType", params, new GenericType<Map<String, Object>>() {
-            });
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType);
+        return factory().get(EventApi.class, "eventsForRoomWithType", params, EventContent.class);
     }
 
     /**
@@ -107,10 +98,10 @@ public class EventMethods {
      * @param roomId The room to look up the state for.
      * @return The current state of the room.
      */
-    public List<Event> events(String roomId) {
+    public CompletableFuture<List<Event>> events(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "eventForRoom", params, new GenericType<List<Event>>() {
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().get(EventApi.class, "eventForRoom", params, new GenericType<List<Event>>() {
         });
     }
 
@@ -120,10 +111,10 @@ public class EventMethods {
      * @param roomId The room to get the member events for.
      * @return A list of members of the room.
      */
-    public MembersResponse members(String roomId) {
+    public CompletableFuture<MembersResponse> members(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "members", params, MembersResponse.class);
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().get(EventApi.class, "members", params, MembersResponse.class);
     }
 
     /**
@@ -132,10 +123,10 @@ public class EventMethods {
      * @param roomId The room to get the members of.
      * @return A map of MXID to room member objects.
      */
-    public JoinedMembersResponse joinedMembers(String roomId) {
+    public CompletableFuture<JoinedMembersResponse> joinedMembers(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId);
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "joinedMembers", params, JoinedMembersResponse.class);
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().get(EventApi.class, "joinedMembers", params, JoinedMembersResponse.class);
     }
 
     /**
@@ -149,16 +140,12 @@ public class EventMethods {
      * @param filter A JSON RoomEventFilter to filter returned events with.
      * @return A list of messages with a new token to request more.
      */
-    public Page<Event> messages(String roomId, String from, String to, String dir, Integer limit, String filter) {
+    public CompletableFuture<Page<Event>> messages(String roomId, String from, String to, String dir, Integer limit, String filter) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(from, "From cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId)
-            .queryParam("from", from)
-            .queryParam("to", to)
-            .queryParam("dir", dir)
-            .queryParam("filter", filter)
-            .queryParam("limit", limit);
-        return getMatrixClient().getRequestMethods().get(EventApi.class, "messages", params, new GenericType<Page<Event>>() {
+        RequestParams params = defaults().clone().path("roomId", roomId).query("from", from).query("to", to).query("dir", dir)
+            .query("filter", filter).query("limit", limit);
+        return factory().get(EventApi.class, "messages", params, new GenericType<Page<Event>>() {
         });
     }
 
@@ -171,14 +158,14 @@ public class EventMethods {
      * @param eventContent Event content.
      * @return An ID for the sent event.
      */
-    public String sendStateEvent(String roomId, String eventType, String stateKey, Map<String, Object> eventContent) {
+    public CompletableFuture<String> sendStateEvent(String roomId, String eventType, String stateKey, Map<String, Object> eventContent) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
         Objects.requireNonNull(stateKey, "StateKey cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType)
-            .pathParam("stateKey", stateKey);
-        return getMatrixClient().getRequestMethods()
-            .put(EventApi.class, "sendEventWithTypeAndState", params, eventContent, SendEventResponse.class).getEventId();
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
+            .path("stateKey", stateKey);
+        return factory().put(EventApi.class, "sendEventWithTypeAndState", params, eventContent, SendEventResponse.class)
+            .thenApply(SendEventResponse::getEventId);
     }
 
     /**
@@ -189,12 +176,12 @@ public class EventMethods {
      * @param eventContent Event content.
      * @return An ID for the sent event.
      */
-    public String sendStateEvent(String roomId, String eventType, Map<String, Object> eventContent) {
+    public CompletableFuture<String> sendStateEvent(String roomId, String eventType, Map<String, Object> eventContent) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType);
-        return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEventWithType", params, eventContent, SendEventResponse.class)
-            .getEventId();
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType);
+        return factory().put(EventApi.class, "sendEventWithType", params, eventContent, SendEventResponse.class)
+            .thenApply(SendEventResponse::getEventId);
     }
 
     /**
@@ -206,13 +193,13 @@ public class EventMethods {
      * @param eventContent Event content.
      * @return An ID for the sent event.
      */
-    public String sendEvent(String roomId, String eventType, EventContent eventContent) {
+    public CompletableFuture<String> sendEvent(String roomId, String eventType, EventContent eventContent) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventType", eventType)
-            .pathParam("txnId", Long.toString(System.currentTimeMillis()));
-        return getMatrixClient().getRequestMethods().put(EventApi.class, "sendEvent", params, eventContent, SendEventResponse.class)
-            .getEventId();
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
+            .path("txnId", Long.toString(System.currentTimeMillis()));
+        return factory().put(EventApi.class, "sendEvent", params, eventContent, SendEventResponse.class)
+            .thenApply(SendEventResponse::getEventId);
     }
 
     /**
@@ -223,14 +210,15 @@ public class EventMethods {
      * @param reason  The reason for the event being redacted.
      * @return An ID for the redaction event.
      */
-    public String redact(String roomId, String eventId, String reason) {
+    public CompletableFuture<String> redact(String roomId, String eventId, String reason) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId)
-            .pathParam("txnId", Long.toString(System.currentTimeMillis()));
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId)
+            .path("txnId", Long.toString(System.currentTimeMillis()));
         RedactRequest request = new RedactRequest();
         request.setReason(reason);
-        return getMatrixClient().getRequestMethods().put(EventApi.class, "redact", params, request, SendEventResponse.class).getEventId();
+        return factory().put(EventApi.class, "redact", params, request, SendEventResponse.class)
+            .thenApply(SendEventResponse::getEventId);
     }
 
     /**
@@ -240,7 +228,7 @@ public class EventMethods {
      * @param text   message.
      * @return sent event id.
      */
-    public String sendMessage(String roomId, String text) {
+    public CompletableFuture<String> sendMessage(String roomId, String text) {
         return sendFormattedMessage(roomId, text, null);
     }
 
@@ -251,7 +239,7 @@ public class EventMethods {
      * @param text   message.
      * @return sent event id.
      */
-    public String sendNotice(String roomId, String text) {
+    public CompletableFuture<String> sendNotice(String roomId, String text) {
         return sendFormattedNotice(roomId, text, null);
     }
 
@@ -263,7 +251,7 @@ public class EventMethods {
      * @param formattedText formatted message.
      * @return sent event id.
      */
-    public String sendFormattedMessage(String roomId, String text, String formattedText) {
+    public CompletableFuture<String> sendFormattedMessage(String roomId, String text, String formattedText) {
         Text payload = new Text();
         payload.setBody(text);
         payload.setFormattedBody(formattedText);
@@ -282,7 +270,7 @@ public class EventMethods {
      * @param formattedText formatted message.
      * @return sent event id.
      */
-    public String sendFormattedNotice(String roomId, String text, String formattedText) {
+    public CompletableFuture<String> sendFormattedNotice(String roomId, String text, String formattedText) {
         Notice payload = new Notice();
         payload.setBody(text);
         payload.setFormattedBody(formattedText);

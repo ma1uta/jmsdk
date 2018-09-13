@@ -17,30 +17,24 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.DeviceApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.device.Device;
-import io.github.ma1uta.matrix.client.model.device.DeviceDeleteRequest;
 import io.github.ma1uta.matrix.client.model.device.DeviceUpdateRequest;
 import io.github.ma1uta.matrix.client.model.device.DevicesDeleteRequest;
 import io.github.ma1uta.matrix.client.model.device.DevicesResponse;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Admin methods.
  */
-public class DeviceMethods {
+public class DeviceMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public DeviceMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public DeviceMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -48,9 +42,8 @@ public class DeviceMethods {
      *
      * @return devices.
      */
-    public List<Device> devices() {
-        return getMatrixClient().getRequestMethods().get(DeviceApi.class, "devices", new RequestParams(), DevicesResponse.class)
-            .getDevices();
+    public CompletableFuture<List<Device>> devices() {
+        return factory().get(DeviceApi.class, "devices", defaults(), DevicesResponse.class).thenApply(DevicesResponse::getDevices);
     }
 
     /**
@@ -59,10 +52,10 @@ public class DeviceMethods {
      * @param deviceId device id.
      * @return device information.
      */
-    public Device device(String deviceId) {
+    public CompletableFuture<Device> device(String deviceId) {
         Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("deviceId", deviceId);
-        return getMatrixClient().getRequestMethods().get(DeviceApi.class, "device", params, Device.class);
+        RequestParams params = defaults().clone().path("deviceId", deviceId);
+        return factory().get(DeviceApi.class, "device", params, Device.class);
     }
 
     /**
@@ -70,39 +63,28 @@ public class DeviceMethods {
      *
      * @param deviceId    device id.
      * @param displayName new device display name.
+     * @return empty response.
      */
-    public void update(String deviceId, String displayName) {
+    public CompletableFuture<EmptyResponse> update(String deviceId, String displayName) {
         Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("deviceId", deviceId);
+        RequestParams params = defaults().clone().path("deviceId", deviceId);
         DeviceUpdateRequest request = new DeviceUpdateRequest();
         request.setDisplayName(displayName);
-        getMatrixClient().getRequestMethods().put(DeviceApi.class, "updateDevice", params, request, EmptyResponse.class);
-    }
-
-    /**
-     * Deletes the given device, and invalidates any access token associated with it.
-     *
-     * @param deviceId device id.
-     * @param request  authentication request.
-     */
-    public void delete(String deviceId, DeviceDeleteRequest request) {
-        Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
-        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        RequestParams params = new RequestParams().pathParam("deviceId", deviceId);
-        requestMethods.delete(DeviceApi.class, "deleteDevice", params, request);
+        return factory().put(DeviceApi.class, "updateDevice", params, request, EmptyResponse.class);
     }
 
     /**
      * Deletes the given devices, and invalidates any access token associated with them.
      *
      * @param request Devices to delete and additional authentication data.
+     * @return empty response.
      */
-    public void deleteDevices(DevicesDeleteRequest request) {
+    public CompletableFuture<EmptyResponse> deleteDevices(DevicesDeleteRequest request) {
         String error = "Devices cannot be empty.";
         Objects.requireNonNull(request.getDevices(), error);
         if (request.getDevices().isEmpty()) {
             throw new NullPointerException(error);
         }
-        getMatrixClient().getRequestMethods().post(DeviceApi.class, "deleteDevices", new RequestParams(), request, EmptyResponse.class);
+        return factory().post(DeviceApi.class, "deleteDevices", defaults(), request, EmptyResponse.class);
     }
 }

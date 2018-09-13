@@ -22,11 +22,14 @@ import java.util.Map;
 /**
  * Aggregator for path, query and header parameters.
  */
-public class RequestParams {
+public class RequestParams implements Cloneable {
 
     private Map<String, String> pathParams = new HashMap<>();
     private Map<String, String> queryParams = new HashMap<>();
     private Map<String, String> headerParams = new HashMap<>();
+
+    private String userId;
+    private String accessToken;
 
     /**
      * Add a path parameter.
@@ -35,7 +38,7 @@ public class RequestParams {
      * @param paramValue value of the parameter.
      * @return parameters.
      */
-    public RequestParams pathParam(String paramName, String paramValue) {
+    public RequestParams path(String paramName, String paramValue) {
         if (paramValue != null) {
             pathParams.put(paramName, paramValue);
         }
@@ -49,7 +52,7 @@ public class RequestParams {
      * @param paramValue value of the parameter.
      * @return parameters.
      */
-    public RequestParams queryParam(String paramName, String paramValue) {
+    public RequestParams query(String paramName, String paramValue) {
         if (paramValue != null) {
             queryParams.put(paramName, paramValue);
         }
@@ -63,7 +66,7 @@ public class RequestParams {
      * @param paramValue value of the parameter.
      * @return parameters.
      */
-    public RequestParams queryParam(String paramName, Boolean paramValue) {
+    public RequestParams query(String paramName, Boolean paramValue) {
         if (paramValue != null) {
             queryParams.put(paramName, Boolean.toString(paramValue));
         }
@@ -77,7 +80,7 @@ public class RequestParams {
      * @param paramValue value of the parameter.
      * @return parameters.
      */
-    public RequestParams queryParam(String paramName, Long paramValue) {
+    public RequestParams query(String paramName, Long paramValue) {
         if (paramValue != null) {
             queryParams.put(paramName, Long.toString(paramValue));
         }
@@ -91,7 +94,7 @@ public class RequestParams {
      * @param paramValue value of the parameter.
      * @return parameters.
      */
-    public RequestParams queryParam(String paramName, Integer paramValue) {
+    public RequestParams query(String paramName, Integer paramValue) {
         if (paramValue != null) {
             queryParams.put(paramName, Integer.toString(paramValue));
         }
@@ -105,7 +108,7 @@ public class RequestParams {
      * @param paramValue value of the parameter.
      * @return parameters.
      */
-    public RequestParams headerParam(String paramName, String paramValue) {
+    public RequestParams header(String paramName, String paramValue) {
         if (paramValue != null) {
             headerParams.put(paramName, paramValue);
         }
@@ -122,5 +125,54 @@ public class RequestParams {
 
     public Map<String, String> getHeaderParams() {
         return headerParams;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * Set a new user ID.
+     *
+     * @param userId The user Matrix ID.
+     * @return This request params.
+     */
+    public RequestParams userId(String userId) {
+        this.userId = userId;
+        return this;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    /**
+     * Set a new access token.
+     *
+     * @param accessToken The access token.
+     * @return This request params.
+     */
+    public RequestParams accessToken(String accessToken) {
+        this.accessToken = accessToken;
+        return this;
+    }
+
+    /**
+     * Merge this and another params.
+     * <br>
+     * This method doesn't modify current instance and create a new instance.
+     * <br>
+     * The specified params instance override current params.
+     *
+     * @return merged params.
+     * @throws RuntimeException if this class doesn't implements the {@link Cloneable} interface.
+     */
+    @Override
+    public RequestParams clone() {
+        try {
+            return (RequestParams) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

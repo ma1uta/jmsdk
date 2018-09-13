@@ -16,26 +16,21 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.FilterApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.FilterResponse;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Filter methods.
  */
-public class FilterMethods {
+public class FilterMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public FilterMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public FilterMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -44,11 +39,10 @@ public class FilterMethods {
      * @param filter new filter.
      * @return filter id.
      */
-    public FilterResponse uploadFilter(FilterData filter) {
-        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        Objects.requireNonNull(requestMethods.getUserId(), "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId());
-        return requestMethods.post(FilterApi.class, "uploadFilter", params, filter, FilterResponse.class);
+    public CompletableFuture<FilterResponse> uploadFilter(FilterData filter) {
+        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
+        RequestParams params = defaults().clone().path("userId", defaults().getUserId());
+        return factory().post(FilterApi.class, "uploadFilter", params, filter, FilterResponse.class);
     }
 
     /**
@@ -57,11 +51,10 @@ public class FilterMethods {
      * @param filterId filter id.
      * @return filter.
      */
-    public FilterData getFilter(String filterId) {
-        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        Objects.requireNonNull(requestMethods.getUserId(), "UserId cannot be empty.");
+    public CompletableFuture<FilterData> getFilter(String filterId) {
+        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
         Objects.requireNonNull(filterId, "FilterId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", requestMethods.getUserId()).pathParam("filterId", filterId);
-        return requestMethods.get(FilterApi.class, "getFilter", params, FilterData.class);
+        RequestParams params = defaults().clone().path("userId", defaults().getUserId()).path("filterId", filterId);
+        return factory().get(FilterApi.class, "getFilter", params, FilterData.class);
     }
 }

@@ -18,25 +18,20 @@ package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.Page;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.SyncApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.GenericType;
 
 /**
  * Sync method.
  */
-public class SyncMethods {
+public class SyncMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public SyncMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public SyncMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -49,13 +44,10 @@ public class SyncMethods {
      * @param timeout   timeout
      * @return sync data.
      */
-    public SyncResponse sync(String filter, String since, boolean fullState, String presence, Long timeout) {
-        RequestParams params = new RequestParams().queryParam("filter", filter)
-            .queryParam("since", since)
-            .queryParam("fullState", Boolean.toString(fullState))
-            .queryParam("presence", presence)
-            .queryParam("timeout", timeout);
-        return getMatrixClient().getRequestMethods().asyncGet(SyncApi.class, "sync", params, SyncResponse.class);
+    public CompletableFuture<SyncResponse> sync(String filter, String since, boolean fullState, String presence, Long timeout) {
+        RequestParams params = defaults().clone().query("filter", filter).query("since", since)
+            .query("fullState", Boolean.toString(fullState)).query("presence", presence).query("timeout", timeout);
+        return factory().get(SyncApi.class, "sync", params, SyncResponse.class);
     }
 
     /**
@@ -68,11 +60,9 @@ public class SyncMethods {
      * @param roomId  The room ID for which events should be returned.
      * @return The events received, which may be none.
      */
-    public Page<Event> events(String from, Long timeout, String roomId) {
-        RequestParams params = new RequestParams().queryParam("from", from)
-            .queryParam("roomId", roomId)
-            .queryParam("timeout", timeout);
-        return getMatrixClient().getRequestMethods().get(SyncApi.class, "events", params, new GenericType<Page<Event>>() {
+    public CompletableFuture<Page<Event>> events(String from, Long timeout, String roomId) {
+        RequestParams params = defaults().clone().query("from", from).query("roomId", roomId).query("timeout", timeout);
+        return factory().get(SyncApi.class, "events", params, new GenericType<Page<Event>>() {
         });
     }
 }

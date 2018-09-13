@@ -17,25 +17,20 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ReportApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.report.ReportRequest;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Report methods.
  */
-public class ReportMethods {
+public class ReportMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public ReportMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public ReportMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -45,16 +40,17 @@ public class ReportMethods {
      * @param eventId The event to report.
      * @param reason  The reason the content is being reported. May be blank.
      * @param score   The score to rate this content as where -100 is most offensive and 0 is inoffensive.
+     * @return empty response.
      */
-    public void report(String roomId, String eventId, String reason, Integer score) {
+    public CompletableFuture<EmptyResponse> report(String roomId, String eventId, String reason, Integer score) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
         Objects.requireNonNull(reason, "Reason cannot be empty.");
         Objects.requireNonNull(score, "Score cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("roomId", roomId).pathParam("eventId", eventId);
+        RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId);
         ReportRequest request = new ReportRequest();
         request.setReason(reason);
         request.setScore(score);
-        getMatrixClient().getRequestMethods().post(ReportApi.class, "report", params, reason, EmptyResponse.class);
+        return factory().post(ReportApi.class, "report", params, reason, EmptyResponse.class);
     }
 }

@@ -18,28 +18,24 @@ package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.Event;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.PresenceApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.presence.PresenceList;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.GenericType;
 
 /**
  * Presence methods.
  */
-public class PresenceMethods {
+public class PresenceMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public PresenceMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public PresenceMethods(RequestFactory factory,
+                           RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -47,14 +43,15 @@ public class PresenceMethods {
      * that activity; the client does not need to specify the last_active_ago field. You cannot set the presence state of
      * another user.
      *
-     * @param status the new presence status.
+     * @param status the new presence status
+     * @return empty response..
      */
-    public void setPresenceStatus(PresenceStatus status) {
-        String userId = getMatrixClient().getUserId();
+    public CompletableFuture<EmptyResponse> setPresenceStatus(PresenceStatus status) {
+        String userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(status.getPresence(), "Presence cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId);
-        getMatrixClient().getRequestMethods().put(PresenceApi.class, "setPresenceStatus", params, status, EmptyResponse.class);
+        RequestParams params = defaults().clone().path("userId", userId);
+        return factory().put(PresenceApi.class, "setPresenceStatus", params, status, EmptyResponse.class);
     }
 
     /**
@@ -63,22 +60,23 @@ public class PresenceMethods {
      * @param userId The user whose presence state to get.
      * @return The presence state for this user.
      */
-    public PresenceStatus getPresenceStatus(String userId) {
+    public CompletableFuture<PresenceStatus> getPresenceStatus(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId);
-        return getMatrixClient().getRequestMethods().get(PresenceApi.class, "getPresenceStatus", params, PresenceStatus.class);
+        RequestParams params = defaults().clone().path("userId", userId);
+        return factory().get(PresenceApi.class, "getPresenceStatus", params, PresenceStatus.class);
     }
 
     /**
      * Adds or removes users from this presence list.
      *
      * @param presenceList the presence list.
+     * @return empty response.
      */
-    public void setPresenceList(PresenceList presenceList) {
-        String userId = getMatrixClient().getUserId();
+    public CompletableFuture<EmptyResponse> setPresenceList(PresenceList presenceList) {
+        String userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId);
-        getMatrixClient().getRequestMethods().post(PresenceApi.class, "setPresenceList", params, presenceList, EmptyResponse.class);
+        RequestParams params = defaults().clone().path("userId", userId);
+        return factory().post(PresenceApi.class, "setPresenceList", params, presenceList, EmptyResponse.class);
     }
 
     /**
@@ -87,10 +85,10 @@ public class PresenceMethods {
      * @param userId The user whose presence list should be retrieved.
      * @return A list of presence events for this list.
      */
-    public List<Event> getPresenceList(String userId) {
+    public CompletableFuture<List<Event>> getPresenceList(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId);
-        return getMatrixClient().getRequestMethods().get(PresenceApi.class, "getPresenceList", params, new GenericType<List<Event>>() {
+        RequestParams params = defaults().clone().path("userId", userId);
+        return factory().get(PresenceApi.class, "getPresenceList", params, new GenericType<List<Event>>() {
         });
     }
 }

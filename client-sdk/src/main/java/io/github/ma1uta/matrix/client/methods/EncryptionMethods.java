@@ -16,8 +16,8 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.EncryptionApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.encryption.ChangesResponse;
 import io.github.ma1uta.matrix.client.model.encryption.ClaimRequest;
 import io.github.ma1uta.matrix.client.model.encryption.ClaimResponse;
@@ -27,20 +27,15 @@ import io.github.ma1uta.matrix.client.model.encryption.UploadRequest;
 import io.github.ma1uta.matrix.client.model.encryption.UploadResponse;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Admin methods.
  */
-public class EncryptionMethods {
+public class EncryptionMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public EncryptionMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public EncryptionMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -49,9 +44,8 @@ public class EncryptionMethods {
      * @param request devices key to publish.
      * @return For each key algorithm, the number of unclaimed one-time keys of that type currently held on the server for this device.
      */
-    public UploadResponse uploadKey(UploadRequest request) {
-        return getMatrixClient().getRequestMethods()
-            .post(EncryptionApi.class, "uploadKey", new RequestParams(), request, UploadResponse.class);
+    public CompletableFuture<UploadResponse> uploadKey(UploadRequest request) {
+        return factory().post(EncryptionApi.class, "uploadKey", defaults(), request, UploadResponse.class);
     }
 
     /**
@@ -60,11 +54,11 @@ public class EncryptionMethods {
      * @param request query request.
      * @return query result.
      */
-    public QueryResponse query(QueryRequest request) {
+    public CompletableFuture<QueryResponse> query(QueryRequest request) {
         if (request.getDeviceKeys() == null || request.getDeviceKeys().isEmpty()) {
             throw new NullPointerException("DeviceKeys cannot be empty.");
         }
-        return getMatrixClient().getRequestMethods().post(EncryptionApi.class, "query", new RequestParams(), request, QueryResponse.class);
+        return factory().post(EncryptionApi.class, "query", defaults(), request, QueryResponse.class);
     }
 
     /**
@@ -73,11 +67,11 @@ public class EncryptionMethods {
      * @param request claim request.
      * @return claim response.
      */
-    public ClaimResponse claim(ClaimRequest request) {
+    public CompletableFuture<ClaimResponse> claim(ClaimRequest request) {
         if (request.getOneTimeKeys().isEmpty()) {
             throw new NullPointerException("OneTimeKeys cannot be empty.");
         }
-        return getMatrixClient().getRequestMethods().post(EncryptionApi.class, "claim", new RequestParams(), request, ClaimResponse.class);
+        return factory().post(EncryptionApi.class, "claim", defaults(), request, ClaimResponse.class);
     }
 
     /**
@@ -91,10 +85,10 @@ public class EncryptionMethods {
      *             date.
      * @return The list of users who updated their devices.
      */
-    public ChangesResponse changes(String from, String to) {
+    public CompletableFuture<ChangesResponse> changes(String from, String to) {
         Objects.requireNonNull(from, "From cannot be empty.");
         Objects.requireNonNull(to, "To cannot be empty.");
-        RequestParams params = new RequestParams().queryParam("from", from).queryParam("to", to);
-        return getMatrixClient().getRequestMethods().get(EncryptionApi.class, "changes", params, ChangesResponse.class);
+        RequestParams params = defaults().clone().query("from", from).query("to", to);
+        return factory().get(EncryptionApi.class, "changes", params, ChangesResponse.class);
     }
 }

@@ -17,8 +17,8 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.AuthApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginType;
@@ -28,22 +28,32 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * Authentication methods.
  */
-public class AuthMethods {
+public class AuthMethods extends AbstractMethods {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthMethods.class);
 
-    private final MatrixClient matrixClient;
+    private final Function<LoginResponse, LoginResponse> afterLogin;
+    private final Function<EmptyResponse, EmptyResponse> afterLogout;
 
-    public AuthMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
+    public AuthMethods(RequestFactory factory, RequestParams defaultParams, Function<LoginResponse, LoginResponse> afterLogin,
+                       Function<EmptyResponse, EmptyResponse> afterLogout) {
+        super(factory, defaultParams);
+        this.afterLogin = afterLogin;
+        this.afterLogout = afterLogout;
     }
 
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    protected Function<LoginResponse, LoginResponse> afterLogin() {
+        return afterLogin;
+    }
+
+    protected Function<EmptyResponse, EmptyResponse> afterLogout() {
+        return afterLogout;
     }
 
     /**
@@ -51,51 +61,46 @@ public class AuthMethods {
      *
      * @param login    username.
      * @param password password.
+     * @return login response.
      */
-    public void login(String login, String password) {
+    public CompletableFuture<LoginResponse> login(String login, String password) {
         LOGGER.debug("Login with username: ''{}'' and password: ''<redacted>''", login);
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setType(AuthApi.AuthType.PASSWORD);
         loginRequest.setUser(login);
         loginRequest.setPassword(password);
 
-        login(loginRequest);
+        return login(loginRequest);
     }
 
     /**
      * Login.
      *
      * @param loginRequest request.
+     * @return login response.
      */
-    public void login(LoginRequest loginRequest) {
+    public CompletableFuture<LoginResponse> login(LoginRequest loginRequest) {
         Objects.requireNonNull(loginRequest.getType(), "Type cannot be empty.");
-        LoginResponse loginResponse = getMatrixClient().getRequestMethods()
-            .post(AuthApi.class, "login", new RequestParams(), loginRequest, LoginResponse.class);
-
-        getMatrixClient().updateCredentials(loginResponse);
+        return factory().post(AuthApi.class, "login", defaults(), loginRequest, LoginResponse.class).thenApply(afterLogin());
     }
 
     /**
      * Logout.
+     *
+     * @return empty response.
      */
-    public void logout() {
+    public CompletableFuture<EmptyResponse> logout() {
         LOGGER.debug("Logout");
-        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        requestMethods.post(AuthApi.class, "logout", new RequestParams(), "", EmptyResponse.class);
-        if (getMatrixClient().isUpdateAccessToken()) {
-            requestMethods.setAccessToken(null);
-        }
+        return factory().post(AuthApi.class, "logout", defaults(), "", EmptyResponse.class).thenApply(afterLogout());
     }
 
     /**
      * Logout from all devices and invalidate all access tokens.
+     *
+     * @return empty response.
      */
-    public void logoutAll() {
-        RequestMethods requestMethods = getMatrixClient().getRequestMethods();
-        requestMethods.post(AuthApi.class, "logoutAll", new RequestParams(), "", EmptyResponse.class);
-        if (getMatrixClient().isUpdateAccessToken()) {
-            requestMethods.setAccessToken(null);
-        }
+    public CompletableFuture<EmptyResponse> logoutAll() {
+        return factory().post(AuthApi.class, "logoutAll", defaults(), "", EmptyResponse.class).thenApply(afterLogout());
     }
 
     /**
@@ -103,8 +108,8 @@ public class AuthMethods {
      *
      * @return supported login types.
      */
-    public List<LoginType> loginTypes() {
-        return getMatrixClient().getRequestMethods()
-            .get(AuthApi.class, "supportedLoginTypes", new RequestParams(), SupportedLoginResponse.class).getFlows();
+    public CompletableFuture<List<LoginType>> loginTypes() {
+        return factory().get(AuthApi.class, "supportedLoginTypes", defaults(), SupportedLoginResponse.class)
+            .thenApply(SupportedLoginResponse::getFlows);
     }
 }

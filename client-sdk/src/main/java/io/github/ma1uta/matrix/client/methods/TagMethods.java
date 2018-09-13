@@ -17,26 +17,21 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.TagApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.tag.Tags;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * TagInfo methods.
  */
-public class TagMethods {
+public class TagMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public TagMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public TagMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -45,12 +40,12 @@ public class TagMethods {
      * @param roomId The id of the room to get tags for.
      * @return The list of tags for the user for the room.
      */
-    public Tags show(String roomId) {
-        String userId = getMatrixClient().getUserId();
+    public CompletableFuture<Tags> show(String roomId) {
+        String userId = defaults().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId);
-        return getMatrixClient().getRequestMethods().get(TagApi.class, "showTags", params, Tags.class);
+        RequestParams params = defaults().clone().path("userId", userId).path("roomId", roomId);
+        return factory().get(TagApi.class, "showTags", params, Tags.class);
     }
 
     /**
@@ -59,14 +54,15 @@ public class TagMethods {
      * @param roomId  The id of the room to add a tag to.
      * @param tag     The tag to add.
      * @param tagData the tag data.
+     * @return empty response.
      */
-    public void add(String roomId, String tag, Map<String, String> tagData) {
-        String userId = getMatrixClient().getUserId();
+    public CompletableFuture<EmptyResponse> add(String roomId, String tag, Map<String, String> tagData) {
+        String userId = defaults().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(tag, "TagInfo cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId).pathParam("tag", tag);
-        getMatrixClient().getRequestMethods().put(TagApi.class, "addTag", params, tagData, EmptyResponse.class);
+        RequestParams params = defaults().clone().path("userId", userId).path("roomId", roomId).path("tag", tag);
+        return factory().put(TagApi.class, "addTag", params, tagData, EmptyResponse.class);
     }
 
     /**
@@ -74,13 +70,14 @@ public class TagMethods {
      *
      * @param roomId The id of the room to remove a tag from.
      * @param tag    The tag to remove.
+     * @return empty response.
      */
-    public void delete(String roomId, String tag) {
-        String userId = getMatrixClient().getUserId();
+    public CompletableFuture<EmptyResponse> delete(String roomId, String tag) {
+        String userId = defaults().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(tag, "TagInfo cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("userId", userId).pathParam("roomId", roomId).pathParam("tag", tag);
-        getMatrixClient().getRequestMethods().delete(TagApi.class, "deleteTag", params, "");
+        RequestParams params = defaults().clone().path("userId", userId).path("roomId", roomId).path("tag", tag);
+        return factory().delete(TagApi.class, "deleteTag", params);
     }
 }

@@ -16,31 +16,25 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.api.ContentApi;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.content.ContentConfig;
 import io.github.ma1uta.matrix.client.model.content.ContentUri;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
 /**
  * Content methods.
  */
-public class ContentMethods {
+public class ContentMethods extends AbstractMethods {
 
-    private final MatrixClient matrixClient;
-
-    public ContentMethods(MatrixClient matrixClient) {
-        this.matrixClient = matrixClient;
-    }
-
-    protected MatrixClient getMatrixClient() {
-        return matrixClient;
+    public ContentMethods(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
     }
 
     /**
@@ -51,10 +45,10 @@ public class ContentMethods {
      * @param contentType The content type of the file being uploaded.
      * @return The MXC URI to the uploaded content.
      */
-    public String upload(InputStream inputStream, String filename, String contentType) {
-        RequestParams params = new RequestParams().queryParam("filename", filename).headerParam("Content-Type", contentType);
-        return getMatrixClient().getRequestMethods().post(ContentApi.class, "upload", params, inputStream, ContentUri.class,
-            MediaType.MULTIPART_FORM_DATA).getContentUri();
+    public CompletableFuture<String> upload(InputStream inputStream, String filename, String contentType) {
+        RequestParams params = defaults().clone().query("filename", filename).header("Content-Type", contentType);
+        return factory().post(ContentApi.class, "upload", params, inputStream, ContentUri.class, MediaType.MULTIPART_FORM_DATA)
+            .thenApply(ContentUri::getContentUri);
     }
 
     /**
@@ -66,13 +60,11 @@ public class ContentMethods {
      *                    This is to prevent routing loops where the server contacts itself. Defaults to true if not provided.
      * @return The content that was previously uploaded.
      */
-    public OutputStream download(String serverName, String mediaId, Boolean allowRemote) {
+    public CompletableFuture<InputStream> download(String serverName, String mediaId, Boolean allowRemote) {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("serverName", serverName)
-            .pathParam("mediaId", mediaId)
-            .queryParam("allowRemote", allowRemote);
-        return getMatrixClient().getRequestMethods().get(ContentApi.class, "download", params, OutputStream.class);
+        RequestParams params = defaults().clone().path("serverName", serverName).path("mediaId", mediaId).query("allowRemote", allowRemote);
+        return factory().get(ContentApi.class, "download", params, InputStream.class);
     }
 
     /**
@@ -87,16 +79,14 @@ public class ContentMethods {
      *                    This is to prevent routing loops where the server contacts itself. Defaults to true if not provided.
      * @return The content that was previously uploaded.
      */
-    public OutputStream thumbnail(String serverName, String mediaId, Long width, Long height, String method, Boolean allowRemote) {
+    public CompletableFuture<InputStream> thumbnail(String serverName, String mediaId, Long width, Long height, String method,
+                                                    Boolean allowRemote) {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
-        RequestParams params = new RequestParams().pathParam("serverName", serverName)
-            .pathParam("mediaId", mediaId)
-            .queryParam("width", width)
-            .queryParam("height", height)
-            .queryParam("method", method)
-            .queryParam("allowRemote", Boolean.toString(allowRemote));
-        return getMatrixClient().getRequestMethods().get(ContentApi.class, "thumbnail", params, OutputStream.class);
+        RequestParams params = defaults().clone().path("serverName", serverName).path("mediaId", mediaId).query("width", width)
+            .query("height", height).query("method", method)
+            .query("allowRemote", Boolean.toString(allowRemote));
+        return factory().get(ContentApi.class, "thumbnail", params, InputStream.class);
     }
 
     /**
@@ -107,10 +97,10 @@ public class ContentMethods {
      *            have the requested version available.
      * @return The content that was previously uploaded.
      */
-    public Map<String, String> previewInfo(String url, String ts) {
+    public CompletableFuture<Map<String, String>> previewInfo(String url, String ts) {
         Objects.requireNonNull(url, "Url cannot be empty.");
-        RequestParams params = new RequestParams().queryParam("url", url).queryParam("ts", ts);
-        return getMatrixClient().getRequestMethods().get(ContentApi.class, "previewUrl", params, new GenericType<Map<String, String>>() {
+        RequestParams params = defaults().clone().query("url", url).query("ts", ts);
+        return factory().get(ContentApi.class, "previewUrl", params, new GenericType<Map<String, String>>() {
         });
     }
 
@@ -119,8 +109,7 @@ public class ContentMethods {
      *
      * @return supported upload size.
      */
-    public Long getUploadSize() {
-        return getMatrixClient().getRequestMethods().get(ContentApi.class, "config", new RequestParams(), ContentConfig.class)
-            .getUploadSize();
+    public CompletableFuture<Long> getUploadSize() {
+        return factory().get(ContentApi.class, "config", new RequestParams(), ContentConfig.class).thenApply(ContentConfig::getUploadSize);
     }
 }
