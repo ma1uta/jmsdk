@@ -131,11 +131,11 @@ public class RequestFactory {
             path = path.queryParam("user_id", encode(params.getUserId().trim()));
         }
         Invocation.Builder request = path.request(requestType);
-        if (params.getAccessToken() != null && !params.getAccessToken().trim().isEmpty()) {
-            request = request.header("Authorization", "Bearer " + params.getAccessToken().trim());
-        }
         for (Map.Entry<String, String> entry : params.getHeaderParams().entrySet()) {
             request.header(entry.getKey(), encode(entry.getValue()));
+        }
+        if (params.getAccessToken() != null && !params.getAccessToken().trim().isEmpty()) {
+            request = request.header("Authorization", "Bearer " + params.getAccessToken().trim());
         }
         return request;
     }

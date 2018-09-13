@@ -170,7 +170,20 @@ public class RequestParams implements Cloneable {
     @Override
     public RequestParams clone() {
         try {
-            return (RequestParams) super.clone();
+            RequestParams clone = (RequestParams) super.clone();
+
+            clone.pathParams = new HashMap<>();
+            clone.queryParams = new HashMap<>();
+            clone.headerParams = new HashMap<>();
+
+            clone.pathParams.putAll(getPathParams());
+            clone.queryParams.putAll(getQueryParams());
+            clone.headerParams.putAll(getHeaderParams());
+
+            clone.userId(getUserId());
+            clone.accessToken(getAccessToken());
+
+            return clone;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }

@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.util.concurrent.Executor;
 import javax.ws.rs.client.Client;
 
 /**
@@ -68,6 +69,11 @@ public class MatrixClient implements Closeable {
     public MatrixClient(String homeserverUrl, Client client, RequestParams defaultParams) {
         this.defaultParams = defaultParams;
         this.requestFactory = new RequestFactory(client, homeserverUrl);
+    }
+
+    public MatrixClient(String homeserverUrl, Client client, RequestParams defaultParams, Executor executor) {
+        this.defaultParams = defaultParams;
+        this.requestFactory = new RequestFactory(client, homeserverUrl, executor);
     }
 
     public String getUserId() {

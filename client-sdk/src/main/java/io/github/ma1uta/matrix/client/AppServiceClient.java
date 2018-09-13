@@ -18,6 +18,7 @@ package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.client.methods.RequestParams;
 
+import java.util.concurrent.Executor;
 import javax.ws.rs.client.Client;
 
 /**
@@ -31,6 +32,10 @@ public class AppServiceClient extends MatrixClient {
 
     public AppServiceClient(String homeserverUrl, Client client, RequestParams defaultParams) {
         super(homeserverUrl, client, defaultParams);
+    }
+
+    public AppServiceClient(String homeserverUrl, Client client, RequestParams defaultParams, Executor executor) {
+        super(homeserverUrl, client, defaultParams, executor);
     }
 
     /**
