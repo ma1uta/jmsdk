@@ -22,6 +22,7 @@ import io.github.ma1uta.matrix.client.model.content.ContentConfig;
 import io.github.ma1uta.matrix.client.model.content.ContentUri;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -40,14 +41,14 @@ public class ContentMethods extends AbstractMethods {
     /**
      * Upload some content to the content repository.
      *
-     * @param inputStream the file content.
-     * @param filename    The name of the file being uploaded.
-     * @param contentType The content type of the file being uploaded.
+     * @param outputStream The file content.
+     * @param filename     The name of the file being uploaded.
+     * @param contentType  The content type of the file being uploaded.
      * @return The MXC URI to the uploaded content.
      */
-    public CompletableFuture<String> upload(InputStream inputStream, String filename, String contentType) {
+    public CompletableFuture<String> upload(OutputStream outputStream, String filename, String contentType) {
         RequestParams params = defaults().clone().query("filename", filename).header("Content-Type", contentType);
-        return factory().post(ContentApi.class, "upload", params, inputStream, ContentUri.class, MediaType.MULTIPART_FORM_DATA)
+        return factory().post(ContentApi.class, "upload", params, outputStream, ContentUri.class, MediaType.MULTIPART_FORM_DATA)
             .thenApply(ContentUri::getContentUri);
     }
 
@@ -63,6 +64,7 @@ public class ContentMethods extends AbstractMethods {
     public CompletableFuture<InputStream> download(String serverName, String mediaId, Boolean allowRemote) {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
+
         RequestParams params = defaults().clone().path("serverName", serverName).path("mediaId", mediaId).query("allowRemote", allowRemote);
         return factory().get(ContentApi.class, "download", params, InputStream.class);
     }
@@ -83,9 +85,14 @@ public class ContentMethods extends AbstractMethods {
                                                     Boolean allowRemote) {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
-        RequestParams params = defaults().clone().path("serverName", serverName).path("mediaId", mediaId).query("width", width)
-            .query("height", height).query("method", method)
-            .query("allowRemote", Boolean.toString(allowRemote));
+
+        RequestParams params = defaults().clone()
+            .path("serverName", serverName)
+            .path("mediaId", mediaId)
+            .query("width", width)
+            .query("height", height)
+            .query("method", method)
+            .query("allowRemote", allowRemote);
         return factory().get(ContentApi.class, "thumbnail", params, InputStream.class);
     }
 

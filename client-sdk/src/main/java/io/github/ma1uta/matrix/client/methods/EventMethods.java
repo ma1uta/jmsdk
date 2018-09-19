@@ -55,8 +55,9 @@ public class EventMethods extends AbstractMethods {
     public CompletableFuture<Event> event(String roomId, String eventId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId);
-        return factory().get(EventApi.class, "singleEvent", params, Event.class);
+        return factory().get(EventApi.class, "roomEvent", params, Event.class);
     }
 
     /**
@@ -72,9 +73,10 @@ public class EventMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
         Objects.requireNonNull(stateKey, "StateKey cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
             .path("stateKey", stateKey);
-        return factory().get(EventApi.class, "eventsForRoomWithTypeAndState", params, EventContent.class);
+        return factory().get(EventApi.class, "roomEventWithTypeAndState", params, EventContent.class);
     }
 
     /**
@@ -88,8 +90,9 @@ public class EventMethods extends AbstractMethods {
     public CompletableFuture<EventContent> eventContent(String roomId, String eventType) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType);
-        return factory().get(EventApi.class, "eventsForRoomWithType", params, EventContent.class);
+        return factory().get(EventApi.class, "roomEventWithType", params, EventContent.class);
     }
 
     /**
@@ -100,8 +103,9 @@ public class EventMethods extends AbstractMethods {
      */
     public CompletableFuture<List<Event>> events(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().get(EventApi.class, "eventForRoom", params, new GenericType<List<Event>>() {
+        return factory().get(EventApi.class, "roomState", params, new GenericType<List<Event>>() {
         });
     }
 
@@ -113,6 +117,7 @@ public class EventMethods extends AbstractMethods {
      */
     public CompletableFuture<MembersResponse> members(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId);
         return factory().get(EventApi.class, "members", params, MembersResponse.class);
     }
@@ -125,6 +130,7 @@ public class EventMethods extends AbstractMethods {
      */
     public CompletableFuture<JoinedMembersResponse> joinedMembers(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId);
         return factory().get(EventApi.class, "joinedMembers", params, JoinedMembersResponse.class);
     }
@@ -143,8 +149,15 @@ public class EventMethods extends AbstractMethods {
     public CompletableFuture<Page<Event>> messages(String roomId, String from, String to, String dir, Integer limit, String filter) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(from, "From cannot be empty.");
-        RequestParams params = defaults().clone().path("roomId", roomId).query("from", from).query("to", to).query("dir", dir)
-            .query("filter", filter).query("limit", limit);
+        Objects.requireNonNull(dir, "Dir cannot be empty.");
+
+        RequestParams params = defaults().clone()
+            .path("roomId", roomId)
+            .query("from", from)
+            .query("to", to)
+            .query("dir", dir)
+            .query("filter", filter)
+            .query("limit", limit);
         return factory().get(EventApi.class, "messages", params, new GenericType<Page<Event>>() {
         });
     }
@@ -155,13 +168,14 @@ public class EventMethods extends AbstractMethods {
      * @param roomId       The room to set the state in.
      * @param eventType    The type of event to send.
      * @param stateKey     The state_key for the state to send. Defaults to the empty string.
-     * @param eventContent Event content.
+     * @param eventContent The event content.
      * @return An ID for the sent event.
      */
     public CompletableFuture<String> sendStateEvent(String roomId, String eventType, String stateKey, Map<String, Object> eventContent) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
         Objects.requireNonNull(stateKey, "StateKey cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
             .path("stateKey", stateKey);
         return factory().put(EventApi.class, "sendEventWithTypeAndState", params, eventContent, SendEventResponse.class)
@@ -173,12 +187,13 @@ public class EventMethods extends AbstractMethods {
      *
      * @param roomId       The room to set the state in.
      * @param eventType    The type of event to send.
-     * @param eventContent Event content.
+     * @param eventContent The event content.
      * @return An ID for the sent event.
      */
     public CompletableFuture<String> sendStateEvent(String roomId, String eventType, Map<String, Object> eventContent) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType);
         return factory().put(EventApi.class, "sendEventWithType", params, eventContent, SendEventResponse.class)
             .thenApply(SendEventResponse::getEventId);
@@ -190,12 +205,13 @@ public class EventMethods extends AbstractMethods {
      *
      * @param roomId       The room to send the event to.
      * @param eventType    The type of event to send.
-     * @param eventContent Event content.
+     * @param eventContent The event content.
      * @return An ID for the sent event.
      */
     public CompletableFuture<String> sendEvent(String roomId, String eventType, EventContent eventContent) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
             .path("txnId", Long.toString(System.currentTimeMillis()));
         return factory().put(EventApi.class, "sendEvent", params, eventContent, SendEventResponse.class)
@@ -213,6 +229,7 @@ public class EventMethods extends AbstractMethods {
     public CompletableFuture<String> redact(String roomId, String eventId, String reason) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId)
             .path("txnId", Long.toString(System.currentTimeMillis()));
         RedactRequest request = new RedactRequest();
@@ -224,9 +241,9 @@ public class EventMethods extends AbstractMethods {
     /**
      * Send message.
      *
-     * @param roomId room id.
-     * @param text   message.
-     * @return sent event id.
+     * @param roomId The room id.
+     * @param text   The message.
+     * @return The ID of the sent event.
      */
     public CompletableFuture<String> sendMessage(String roomId, String text) {
         return sendFormattedMessage(roomId, text, null);
@@ -235,9 +252,9 @@ public class EventMethods extends AbstractMethods {
     /**
      * Send notice.
      *
-     * @param roomId room id.
-     * @param text   message.
-     * @return sent event id.
+     * @param roomId The room id.
+     * @param text   The message.
+     * @return The ID of the sent event.
      */
     public CompletableFuture<String> sendNotice(String roomId, String text) {
         return sendFormattedNotice(roomId, text, null);
@@ -246,10 +263,10 @@ public class EventMethods extends AbstractMethods {
     /**
      * Send formatted message.
      *
-     * @param roomId        room id.
-     * @param text          message.
-     * @param formattedText formatted message.
-     * @return sent event id.
+     * @param roomId        The room id.
+     * @param text          The message.
+     * @param formattedText The formatted message.
+     * @return The ID of the sent event.
      */
     public CompletableFuture<String> sendFormattedMessage(String roomId, String text, String formattedText) {
         Text payload = new Text();
@@ -265,10 +282,10 @@ public class EventMethods extends AbstractMethods {
     /**
      * Send notice.
      *
-     * @param roomId        room id.
-     * @param text          message.
-     * @param formattedText formatted message.
-     * @return sent event id.
+     * @param roomId        The room id.
+     * @param text          The message.
+     * @param formattedText The formatted message.
+     * @return The ID of the sent event.
      */
     public CompletableFuture<String> sendFormattedNotice(String roomId, String text, String formattedText) {
         Notice payload = new Notice();

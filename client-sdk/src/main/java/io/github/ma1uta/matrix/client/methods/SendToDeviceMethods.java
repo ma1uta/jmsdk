@@ -37,11 +37,12 @@ public class SendToDeviceMethods extends AbstractMethods {
      * This endpoint is used to send send-to-device events to a set of client devices.
      *
      * @param eventType The type of event to send.
-     * @param request   sending data.
-     * @return empty response.
+     * @param request   The sending data.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> sendToDevice(String eventType, SendToDeviceRequest request) {
         Objects.requireNonNull(eventType, "RoomId cannot be empty.");
+
         RequestParams params = defaults().clone().path("eventType", eventType).path("txnId", Long.toString(System.currentTimeMillis()));
         return factory().put(SendToDeviceApi.class, "send", params, request, EmptyResponse.class);
     }

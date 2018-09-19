@@ -37,16 +37,20 @@ public class SyncMethods extends AbstractMethods {
     /**
      * Sync events.
      *
-     * @param filter    filter name.
-     * @param since     next batch token.
-     * @param fullState full state or not.
-     * @param presence  offline presence or not.
-     * @param timeout   timeout
-     * @return sync data.
+     * @param filter    The filter name.
+     * @param since     The next batch token.
+     * @param fullState The full state or not.
+     * @param presence  The offline presence or not.
+     * @param timeout   The timeout.
+     * @return The sync data.
      */
     public CompletableFuture<SyncResponse> sync(String filter, String since, boolean fullState, String presence, Long timeout) {
-        RequestParams params = defaults().clone().query("filter", filter).query("since", since)
-            .query("fullState", Boolean.toString(fullState)).query("presence", presence).query("timeout", timeout);
+        RequestParams params = defaults().clone()
+            .query("filter", filter)
+            .query("since", since)
+            .query("fullState", fullState)
+            .query("presence", presence)
+            .query("timeout", timeout);
         return factory().get(SyncApi.class, "sync", params, SyncResponse.class);
     }
 
@@ -61,7 +65,10 @@ public class SyncMethods extends AbstractMethods {
      * @return The events received, which may be none.
      */
     public CompletableFuture<Page<Event>> events(String from, Long timeout, String roomId) {
-        RequestParams params = defaults().clone().query("from", from).query("roomId", roomId).query("timeout", timeout);
+        RequestParams params = defaults().clone()
+            .query("from", from)
+            .query("roomId", roomId)
+            .query("timeout", timeout);
         return factory().get(SyncApi.class, "events", params, new GenericType<Page<Event>>() {
         });
     }

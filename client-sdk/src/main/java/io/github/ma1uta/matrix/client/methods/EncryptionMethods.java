@@ -41,7 +41,7 @@ public class EncryptionMethods extends AbstractMethods {
     /**
      * Publishes end-to-end encryption keys for the device.
      *
-     * @param request devices key to publish.
+     * @param request The devices key to publish.
      * @return For each key algorithm, the number of unclaimed one-time keys of that type currently held on the server for this device.
      */
     public CompletableFuture<UploadResponse> uploadKey(UploadRequest request) {
@@ -51,8 +51,8 @@ public class EncryptionMethods extends AbstractMethods {
     /**
      * Returns the current devices and identity keys for the given users.
      *
-     * @param request query request.
-     * @return query result.
+     * @param request The query request.
+     * @return The query result.
      */
     public CompletableFuture<QueryResponse> query(QueryRequest request) {
         if (request.getDeviceKeys() == null || request.getDeviceKeys().isEmpty()) {
@@ -64,8 +64,8 @@ public class EncryptionMethods extends AbstractMethods {
     /**
      * Claims one-time keys for use in pre-key messages.
      *
-     * @param request claim request.
-     * @return claim response.
+     * @param request The claim request.
+     * @return The claim response.
      */
     public CompletableFuture<ClaimResponse> claim(ClaimRequest request) {
         if (request.getOneTimeKeys().isEmpty()) {
@@ -88,6 +88,7 @@ public class EncryptionMethods extends AbstractMethods {
     public CompletableFuture<ChangesResponse> changes(String from, String to) {
         Objects.requireNonNull(from, "From cannot be empty.");
         Objects.requireNonNull(to, "To cannot be empty.");
+
         RequestParams params = defaults().clone().query("from", from).query("to", to);
         return factory().get(EncryptionApi.class, "changes", params, ChangesResponse.class);
     }

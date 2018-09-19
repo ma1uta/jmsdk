@@ -38,12 +38,13 @@ public class ProfileMethods extends AbstractMethods {
     /**
      * Set new display name.
      *
-     * @param displayName display name.
-     * @return empty response.
+     * @param displayName A new display name.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setDisplayName(String displayName) {
         String userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         DisplayName request = new DisplayName();
         request.setDisplayName(displayName);
@@ -59,6 +60,7 @@ public class ProfileMethods extends AbstractMethods {
      */
     public CompletableFuture<String> showDisplayName(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(ProfileApi.class, "showDisplayName", params, DisplayName.class).thenApply(DisplayName::getDisplayName);
     }
@@ -73,6 +75,7 @@ public class ProfileMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> setAvaterUrl(String avatarUrl) {
         String userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         AvatarUrl request = new AvatarUrl();
         request.setAvatarUrl(avatarUrl);
@@ -88,6 +91,7 @@ public class ProfileMethods extends AbstractMethods {
      */
     public CompletableFuture<String> showAvatarUrl(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(ProfileApi.class, "showAvatarUrl", params, AvatarUrl.class).thenApply(AvatarUrl::getAvatarUrl);
     }
@@ -101,6 +105,7 @@ public class ProfileMethods extends AbstractMethods {
      */
     public CompletableFuture<Profile> profile(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(ProfileApi.class, "profile", params, Profile.class);
     }

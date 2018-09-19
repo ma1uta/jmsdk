@@ -36,11 +36,12 @@ public class AdminMethods extends AbstractMethods {
      * This API may be restricted to only be called by the user being looked up, or by a server admin. Server-local administrator
      * privileges are not specified in this document.
      *
-     * @param userId user mxid
-     * @return user information.
+     * @param userId The user mxid
+     * @return The user information.
      */
     public CompletableFuture<AdminResponse> whois(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(AdminApi.class, "whois", params, AdminResponse.class);
     }

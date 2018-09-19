@@ -40,13 +40,14 @@ public class TypingMethods extends AbstractMethods {
      * @param roomId  The user who has started to type.
      * @param typing  Whether the user is typing or not. If false, the timeout key can be omitted.
      * @param timeout The length of time in milliseconds to mark this user as typing.
-     * @return empty response.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> typing(String roomId, Boolean typing, Long timeout) {
         String userId = defaults().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(typing, "Typing cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId).path("roomId", roomId);
         TypingRequest request = new TypingRequest();
         request.setTyping(typing);

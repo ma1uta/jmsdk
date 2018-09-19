@@ -19,6 +19,7 @@ package io.github.ma1uta.matrix.client.methods;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.ReceiptApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.model.receipt.ReadMarkersRequest;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -35,15 +36,30 @@ public class ReceiptMethods extends AbstractMethods {
     /**
      * Send receipt to specified event.
      *
-     * @param roomId  room id.
-     * @param eventId event id.
-     * @return empty response.
+     * @param roomId  The room id.
+     * @param eventId The event id.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> sendReceipt(String roomId, String eventId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId)
             .path("receiptType", ReceiptApi.Receipt.READ);
         return factory().post(ReceiptApi.class, "receipt", params, "", EmptyResponse.class);
+    }
+
+    /**
+     * Sets the position of the read marker for a given room, and optionally the read receipt's location.
+     *
+     * @param roomId  The room id.
+     * @param request The optional read markers.
+     * @return The empty response.
+     */
+    public CompletableFuture<EmptyResponse> readMarkers(String roomId, ReadMarkersRequest request) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+
+        RequestParams params = defaults().clone().path("roomId", roomId);
+        return factory().post(ReceiptApi.class, "readMarkers", params, request, EmptyResponse.class);
     }
 }

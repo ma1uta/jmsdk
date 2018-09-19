@@ -40,7 +40,7 @@ public class ProtocolMethods extends AbstractMethods {
      * Fetches the overall metadata about protocols supported by the homeserver. Includes both the available protocols and all
      * fields required for queries against each protocol.
      *
-     * @return <p>Status code 200: The protocols supported by the homeserver.</p>
+     * @return The protocols map.
      */
     public CompletableFuture<Map<String, Protocol>> protocols() {
         return factory().get(ThirdPartyProtocolApi.class, "protocols", defaults(), new GenericType<Map<String, Protocol>>() {
@@ -51,11 +51,11 @@ public class ProtocolMethods extends AbstractMethods {
      * Fetches the metadata from the homeserver about a particular third party protocol.
      *
      * @param protocol Required. The name of the protocol.
-     * @return <p>Status code 200: The protocol was found and metadata returned.</p>
-     * <p>Status code 404: The protocol is unknown.</p>
+     * @return The specified protocol.
      */
     public CompletableFuture<Protocol> protocol(String protocol) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
+
         RequestParams params = defaults().clone().path("protocol", protocol);
         return factory().get(ThirdPartyProtocolApi.class, "protocol", params, Protocol.class);
     }
@@ -69,12 +69,12 @@ public class ProtocolMethods extends AbstractMethods {
      * as much as reasonably possible given the network type.
      *
      * @param protocol    Required. The protocol used to communicate to the third party network.
-     * @param queryParams query params.
-     * @return <p>Status code 200: At least one portal room was found.</p>
-     * <p>Status code 404: No portal rooms were found.</p>
+     * @param queryParams Query params.
+     * @return Founded protocols.
      */
     public CompletableFuture<List<Protocol>> locations(String protocol, Map<String, String> queryParams) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
+
         RequestParams params = defaults().clone().path("protocol", protocol);
         params.getQueryParams().putAll(queryParams);
         return factory().get(ThirdPartyProtocolApi.class, "locationProtocol", params, new GenericType<List<Protocol>>() {
@@ -85,12 +85,12 @@ public class ProtocolMethods extends AbstractMethods {
      * Retrieve a Matrix User ID linked to a user on the third party service, given a set of user parameters.
      *
      * @param protocol    Required. The name of the protocol.
-     * @param queryParams query params.
-     * @return <p>Status code 200: The Matrix User IDs found with the given parameters.</p>
-     * <p>Status code 404: The Matrix User ID was not found.</p>
+     * @param queryParams Query params.
+     * @return Founded users.
      */
     public CompletableFuture<List<Protocol>> users(String protocol, Map<String, String> queryParams) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
+
         RequestParams params = defaults().clone().path("protocol", protocol);
         params.getQueryParams().putAll(queryParams);
         return factory().get(ThirdPartyProtocolApi.class, "userProtocol", params, new GenericType<List<Protocol>>() {
@@ -101,25 +101,25 @@ public class ProtocolMethods extends AbstractMethods {
      * Retrieve an array of third party network locations from a Matrix room alias.
      *
      * @param alias Required. The Matrix room alias to look up.
-     * @return <p>Status code 200: At least one portal room was found.</p>
-     * <p>Status code 404: No portal rooms were found.</p>
+     * @return Founded location.
      */
     public CompletableFuture<List<ProtocolLocation>> location(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
+
         RequestParams params = defaults().clone().query("alias", alias);
         return factory().get(ThirdPartyProtocolApi.class, "location", params, new GenericType<List<ProtocolLocation>>() {
         });
     }
 
     /**
-     * Retreive an array of third party users from a Matrix User ID.
+     * Retrieve an array of third party users from a Matrix User ID.
      *
      * @param userId Required. The Matrix User ID to look up.
-     * @return <p>Status code 200: The Matrix User IDs found with the given parameters.</p>
-     * <p>Status code 404: The Matrix User ID was not found.</p>
+     * @return Founded users.
      */
     public CompletableFuture<List<ProtocolLocation>> user(String userId) {
         Objects.requireNonNull(userId, "userId cannot be empty.");
+
         RequestParams params = defaults().clone().query("userid", userId);
         return factory().get(ThirdPartyProtocolApi.class, "user", params, new GenericType<List<ProtocolLocation>>() {
         });

@@ -44,6 +44,7 @@ public class EventContextMethods extends AbstractMethods {
     public CompletableFuture<EventContextResponse> context(String roomId, String eventId, Integer limit) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
+
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventId", eventId).query("limit", limit);
         return factory().get(EventContextApi.class, "context", params, EventContextResponse.class);
     }

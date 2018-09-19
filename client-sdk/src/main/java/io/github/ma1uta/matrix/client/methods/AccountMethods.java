@@ -22,7 +22,9 @@ import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
 import io.github.ma1uta.matrix.client.model.account.DeactivateRequest;
+import io.github.ma1uta.matrix.client.model.account.Delete3PidRequest;
 import io.github.ma1uta.matrix.client.model.account.EmailRequestToken;
+import io.github.ma1uta.matrix.client.model.account.MsisdnRequestToken;
 import io.github.ma1uta.matrix.client.model.account.PasswordRequest;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
@@ -53,8 +55,8 @@ public class AccountMethods extends AbstractMethods {
     /**
      * Register a new user.
      *
-     * @param request registration request.
-     * @return date of the registered user..
+     * @param request The registration request.
+     * @return The date of the registered user..
      */
     public CompletableFuture<LoginResponse> register(RegisterRequest request) {
         RequestParams params = defaults().clone().query("kind", AccountApi.RegisterType.USER);
@@ -62,45 +64,82 @@ public class AccountMethods extends AbstractMethods {
     }
 
     /**
-     * Request token.
+     * Request the email token.
      *
-     * @param requestToken request token.
-     * @return empty response.
+     * @param requestToken The request token.
+     * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> requestToken(EmailRequestToken requestToken) {
+    public CompletableFuture<EmptyResponse> emailRequestToken(EmailRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
         Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
-        return factory().post(AccountApi.class, "requestToken", defaults(), requestToken, EmptyResponse.class);
+
+        return factory().post(AccountApi.class, "emailRequestToken", defaults(), requestToken, EmptyResponse.class);
+    }
+
+    /**
+     * Request the SMS token.
+     *
+     * @param requestToken The request token.
+     * @return The empty response.
+     */
+    public CompletableFuture<EmptyResponse> msisdnRequestToken(MsisdnRequestToken requestToken) {
+        Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
+        Objects.requireNonNull(requestToken.getCountry(), "Country cannot be empty.");
+        Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
+        Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
+
+        return factory().post(AccountApi.class, "msisdnRequestToken", defaults(), requestToken, EmptyResponse.class);
     }
 
     /**
      * Change password.
      *
-     * @param password new password.
-     * @return empty response.
+     * @param password The new password.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> password(String password) {
         Objects.requireNonNull(password, "Password cannot be empty.");
+
         PasswordRequest request = new PasswordRequest();
         request.setNewPassword(password);
         return factory().post(AccountApi.class, "password", defaults(), request, EmptyResponse.class);
     }
 
     /**
-     * Request validation tokens.
+     * Request the email validation tokens.
      *
-     * @return empty response.
+     * @param requestToken The request token.
+     * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> passwordRequestToken() {
-        return factory().post(AccountApi.class, "passwordRequestToken", defaults(), "", EmptyResponse.class);
+    public CompletableFuture<EmptyResponse> passwordEmailRequestToken(EmailRequestToken requestToken) {
+        Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
+        Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
+        Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
+
+        return factory().post(AccountApi.class, "passwordEmailRequestToken", defaults(), requestToken, EmptyResponse.class);
+    }
+
+    /**
+     * Request the SMS validation tokens.
+     *
+     * @param requestToken The request token.
+     * @return The empty response.
+     */
+    public CompletableFuture<EmptyResponse> passwordMsisdnRequestToken(MsisdnRequestToken requestToken) {
+        Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
+        Objects.requireNonNull(requestToken.getCountry(), "Country cannot be empty.");
+        Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
+        Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
+
+        return factory().post(AccountApi.class, "passwordMsisdnRequestToken", defaults(), requestToken, EmptyResponse.class);
     }
 
     /**
      * Deactivate user.
      *
-     * @param auth authentication data.
-     * @return empty response.
+     * @param auth The authentication data.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> deactivate(AuthenticationData auth) {
         DeactivateRequest request = new DeactivateRequest();
@@ -111,11 +150,12 @@ public class AccountMethods extends AbstractMethods {
     /**
      * Checks to see if a username is available, and valid, for the server.
      *
-     * @param username checked username.
-     * @return {@code} if available, else {@code false}.
+     * @param username The checked username.
+     * @return {@code true} if available, else {@code false}.
      */
     public CompletableFuture<Boolean> available(String username) {
         Objects.requireNonNull(username, "Username cannot be empty");
+
         RequestParams params = defaults().clone().query("username", username);
         return factory().get(AccountApi.class, "available", params, AvailableResponse.class).thenApply(AvailableResponse::getAvailable);
     }
@@ -123,17 +163,17 @@ public class AccountMethods extends AbstractMethods {
     /**
      * Gets a list of the third party identifiers that the homeserver has associated with the user's account.
      *
-     * @return third party identifiers.
+     * @return The third party identifiers.
      */
-    public CompletableFuture<ThreePidResponse> showThreePid() {
-        return factory().get(AccountApi.class, "showThreePid", defaults(), ThreePidResponse.class);
+    public CompletableFuture<ThreePidResponse> getThreePid() {
+        return factory().get(AccountApi.class, "getThreePid", defaults(), ThreePidResponse.class);
     }
 
     /**
      * Adds contact information to the user's account.
      *
-     * @param request new contact information.
-     * @return empty response.
+     * @param request The new contact information.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> updateThreePid(ThreePidRequest request) {
         String error = "Threepids cannot be empty.";
@@ -141,22 +181,60 @@ public class AccountMethods extends AbstractMethods {
         if (request.getThreePidCreds().length == 0) {
             throw new NullPointerException(error);
         }
+
         return factory().post(AccountApi.class, "updateThreePid", defaults(), request, EmptyResponse.class);
     }
 
     /**
-     * Proxies the identity server API validate/email/requestToken.
+     * Delete the 3pid.
      *
-     * @return empty response.
+     * @param medium  The medium of the 3pid identifier.
+     * @param address The 3pid address (email of phone).
+     * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> threePidRequestToken() {
-        return factory().post(AccountApi.class, "threePidRequestToken", defaults(), "", EmptyResponse.class);
+    public CompletableFuture<EmptyResponse> deleteThreePid(String medium, String address) {
+        Objects.requireNonNull(medium, "Medium cannot be empty.");
+        Objects.requireNonNull(address, "Address cannot be empty.");
+
+        Delete3PidRequest request = new Delete3PidRequest();
+        request.setMedium(medium);
+        request.setAddress(address);
+        return factory().post(AccountApi.class, "deleteThreePid", defaults(), request, EmptyResponse.class);
+    }
+
+    /**
+     * Proxies the identity server API validate/email/emailRequestToken.
+     *
+     * @param requestToken The request token.
+     * @return The empty response.
+     */
+    public CompletableFuture<EmptyResponse> threePidEmailRequestToken(EmailRequestToken requestToken) {
+        Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
+        Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
+        Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
+
+        return factory().post(AccountApi.class, "threePidEmailRequestToken", defaults(), requestToken, EmptyResponse.class);
+    }
+
+    /**
+     * Proxies the identity server API validate/msisdn/msisdnRequestToken.
+     *
+     * @param requestToken The request token.
+     * @return The empty response.
+     */
+    public CompletableFuture<EmptyResponse> threePidMsisdnRequestToken(MsisdnRequestToken requestToken) {
+        Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
+        Objects.requireNonNull(requestToken.getCountry(), "Country cannot be empty.");
+        Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
+        Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
+
+        return factory().post(AccountApi.class, "threePidMsisdnRequestToken", defaults(), requestToken, EmptyResponse.class);
     }
 
     /**
      * Gets information about the owner of a given access token.
      *
-     * @return information about the owner of a given access token.
+     * @return The information about the owner of a given access token.
      */
     public CompletableFuture<WhoamiResponse> whoami() {
         return factory().get(AccountApi.class, "whoami", defaults(), WhoamiResponse.class);

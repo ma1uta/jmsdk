@@ -37,11 +37,12 @@ public class UserDirectoryMethods extends AbstractMethods {
      * This API performs a server-side search over all users registered on the server. It searches user ID and displayname
      * case-insensitively for users that you share a room with or that are in public rooms.
      *
-     * @param request search request.
-     * @return the result of the search.
+     * @param request The search request.
+     * @return The result of the search.
      */
     public CompletableFuture<SearchResponse> search(SearchRequest request) {
         Objects.requireNonNull(request.getSearchTerm(), "SearchTerm cannot be empty.");
+
         return factory().post(UserDirectoryApi.class, "searchUsers", defaults(), request, SearchResponse.class);
     }
 }

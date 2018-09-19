@@ -42,7 +42,8 @@ public class AuthMethods extends AbstractMethods {
     private final Function<LoginResponse, LoginResponse> afterLogin;
     private final Function<EmptyResponse, EmptyResponse> afterLogout;
 
-    public AuthMethods(RequestFactory factory, RequestParams defaultParams, Function<LoginResponse, LoginResponse> afterLogin,
+    public AuthMethods(RequestFactory factory, RequestParams defaultParams,
+                       Function<LoginResponse, LoginResponse> afterLogin,
                        Function<EmptyResponse, EmptyResponse> afterLogout) {
         super(factory, defaultParams);
         this.afterLogin = afterLogin;
@@ -60,9 +61,9 @@ public class AuthMethods extends AbstractMethods {
     /**
      * Login.
      *
-     * @param login    username.
-     * @param password password.
-     * @return login response.
+     * @param login    The user MXID.
+     * @param password The password.
+     * @return The login response.
      */
     public CompletableFuture<LoginResponse> login(String login, String password) {
         LOGGER.debug("Login with username: ''{}'' and password: ''<redacted>''", login);
@@ -79,18 +80,19 @@ public class AuthMethods extends AbstractMethods {
     /**
      * Login.
      *
-     * @param loginRequest request.
-     * @return login response.
+     * @param loginRequest The login request.
+     * @return The login response.
      */
     public CompletableFuture<LoginResponse> login(LoginRequest loginRequest) {
         Objects.requireNonNull(loginRequest.getType(), "Type cannot be empty.");
+
         return factory().post(AuthApi.class, "login", defaults(), loginRequest, LoginResponse.class).thenApply(afterLogin());
     }
 
     /**
      * Logout.
      *
-     * @return empty response.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> logout() {
         LOGGER.debug("Logout");
@@ -100,7 +102,7 @@ public class AuthMethods extends AbstractMethods {
     /**
      * Logout from all devices and invalidate all access tokens.
      *
-     * @return empty response.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> logoutAll() {
         return factory().post(AuthApi.class, "logoutAll", defaults(), "", EmptyResponse.class).thenApply(afterLogout());
@@ -109,7 +111,7 @@ public class AuthMethods extends AbstractMethods {
     /**
      * Get supported login types.
      *
-     * @return supported login types.
+     * @return The supported login types.
      */
     public CompletableFuture<List<LoginType>> loginTypes() {
         return factory().get(AuthApi.class, "supportedLoginTypes", defaults(), SupportedLoginResponse.class)

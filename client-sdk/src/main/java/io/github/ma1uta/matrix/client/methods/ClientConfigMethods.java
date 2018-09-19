@@ -38,13 +38,14 @@ public class ClientConfigMethods extends AbstractMethods {
      * synced to clients in the top-level account_data.
      *
      * @param type        The event type of the account_data to set. Custom types should be namespaced to avoid clashes.
-     * @param accountData account data.
-     * @return empty response.
+     * @param accountData The account data.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> addConfig(String type, Map<String, String> accountData) {
         Objects.requireNonNull(type, "Type cannot be empty.");
         Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
         RequestParams params = defaults().clone().path("userId", defaults().getUserId()).path("type", type);
+
         return factory().put(ClientConfigApi.class, "addConfig", params, accountData, EmptyResponse.class);
     }
 
@@ -54,13 +55,14 @@ public class ClientConfigMethods extends AbstractMethods {
      *
      * @param roomId      The id of the room to set account_data on.
      * @param type        The event type of the account_data to set. Custom types should be namespaced to avoid clashes.
-     * @param accountData account data.
-     * @return empty response.
+     * @param accountData The account data.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> addRoomConfig(String roomId, String type, Map<String, String> accountData) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(type, "Type cannot be empty");
         Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty");
+
         RequestParams params = defaults().clone().path("userId", defaults().getUserId()).path("roomId", roomId)
             .path("type", type);
         return factory().put(ClientConfigApi.class, "addRoomConfig", params, accountData, EmptyResponse.class);

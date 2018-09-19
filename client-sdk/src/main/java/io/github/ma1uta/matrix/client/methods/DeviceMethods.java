@@ -40,7 +40,7 @@ public class DeviceMethods extends AbstractMethods {
     /**
      * Gets information about all devices for the current user.
      *
-     * @return devices.
+     * @return The devices.
      */
     public CompletableFuture<List<Device>> devices() {
         return factory().get(DeviceApi.class, "devices", defaults(), DevicesResponse.class).thenApply(DevicesResponse::getDevices);
@@ -49,11 +49,12 @@ public class DeviceMethods extends AbstractMethods {
     /**
      * Gets information on a single device, by device id.
      *
-     * @param deviceId device id.
-     * @return device information.
+     * @param deviceId The device id.
+     * @return The device information.
      */
     public CompletableFuture<Device> device(String deviceId) {
         Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
+
         RequestParams params = defaults().clone().path("deviceId", deviceId);
         return factory().get(DeviceApi.class, "device", params, Device.class);
     }
@@ -61,12 +62,13 @@ public class DeviceMethods extends AbstractMethods {
     /**
      * Updates the metadata on the given device.
      *
-     * @param deviceId    device id.
-     * @param displayName new device display name.
-     * @return empty response.
+     * @param deviceId    The device id.
+     * @param displayName A new device display name.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> update(String deviceId, String displayName) {
         Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
+
         RequestParams params = defaults().clone().path("deviceId", deviceId);
         DeviceUpdateRequest request = new DeviceUpdateRequest();
         request.setDisplayName(displayName);
@@ -77,7 +79,7 @@ public class DeviceMethods extends AbstractMethods {
      * Deletes the given devices, and invalidates any access token associated with them.
      *
      * @param request Devices to delete and additional authentication data.
-     * @return empty response.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> deleteDevices(DevicesDeleteRequest request) {
         String error = "Devices cannot be empty.";
@@ -85,6 +87,7 @@ public class DeviceMethods extends AbstractMethods {
         if (request.getDevices().isEmpty()) {
             throw new NullPointerException(error);
         }
+
         return factory().post(DeviceApi.class, "deleteDevices", defaults(), request, EmptyResponse.class);
     }
 }

@@ -34,8 +34,8 @@ public class RequestParams implements Cloneable {
     /**
      * Add a path parameter.
      *
-     * @param paramName  name of the parameter.
-     * @param paramValue value of the parameter.
+     * @param paramName  The name of the parameter.
+     * @param paramValue The value of the parameter.
      * @return parameters.
      */
     public RequestParams path(String paramName, String paramValue) {
@@ -48,8 +48,8 @@ public class RequestParams implements Cloneable {
     /**
      * Add a query parameter.
      *
-     * @param paramName  name of the parameter.
-     * @param paramValue value of the parameter.
+     * @param paramName  The name of the parameter.
+     * @param paramValue The value of the parameter.
      * @return parameters.
      */
     public RequestParams query(String paramName, String paramValue) {
@@ -62,8 +62,8 @@ public class RequestParams implements Cloneable {
     /**
      * Add a query parameter.
      *
-     * @param paramName  name of the parameter.
-     * @param paramValue value of the parameter.
+     * @param paramName  The name of the parameter.
+     * @param paramValue The value of the parameter.
      * @return parameters.
      */
     public RequestParams query(String paramName, Boolean paramValue) {
@@ -76,8 +76,8 @@ public class RequestParams implements Cloneable {
     /**
      * Add a query parameter.
      *
-     * @param paramName  name of the parameter.
-     * @param paramValue value of the parameter.
+     * @param paramName  The name of the parameter.
+     * @param paramValue The value of the parameter.
      * @return parameters.
      */
     public RequestParams query(String paramName, Long paramValue) {
@@ -90,8 +90,8 @@ public class RequestParams implements Cloneable {
     /**
      * Add a query parameter.
      *
-     * @param paramName  name of the parameter.
-     * @param paramValue value of the parameter.
+     * @param paramName  The name of the parameter.
+     * @param paramValue The value of the parameter.
      * @return parameters.
      */
     public RequestParams query(String paramName, Integer paramValue) {
@@ -104,8 +104,8 @@ public class RequestParams implements Cloneable {
     /**
      * Add a header parameter.
      *
-     * @param paramName  name of the parameter.
-     * @param paramValue value of the parameter.
+     * @param paramName  The name of the parameter.
+     * @param paramValue The value of the parameter.
      * @return parameters.
      */
     public RequestParams header(String paramName, String paramValue) {
@@ -164,7 +164,7 @@ public class RequestParams implements Cloneable {
      * <br>
      * The specified params instance override current params.
      *
-     * @return merged params.
+     * @return Merged params.
      * @throws RuntimeException if this class doesn't implements the {@link Cloneable} interface.
      */
     @Override

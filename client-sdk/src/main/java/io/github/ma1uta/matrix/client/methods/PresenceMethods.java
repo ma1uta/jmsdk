@@ -43,13 +43,14 @@ public class PresenceMethods extends AbstractMethods {
      * that activity; the client does not need to specify the last_active_ago field. You cannot set the presence state of
      * another user.
      *
-     * @param status the new presence status
-     * @return empty response..
+     * @param status The new presence status
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setPresenceStatus(PresenceStatus status) {
         String userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(status.getPresence(), "Presence cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         return factory().put(PresenceApi.class, "setPresenceStatus", params, status, EmptyResponse.class);
     }
@@ -62,6 +63,7 @@ public class PresenceMethods extends AbstractMethods {
      */
     public CompletableFuture<PresenceStatus> getPresenceStatus(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(PresenceApi.class, "getPresenceStatus", params, PresenceStatus.class);
     }
@@ -69,12 +71,13 @@ public class PresenceMethods extends AbstractMethods {
     /**
      * Adds or removes users from this presence list.
      *
-     * @param presenceList the presence list.
-     * @return empty response.
+     * @param presenceList The presence list.
+     * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setPresenceList(PresenceList presenceList) {
         String userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         return factory().post(PresenceApi.class, "setPresenceList", params, presenceList, EmptyResponse.class);
     }
@@ -87,6 +90,7 @@ public class PresenceMethods extends AbstractMethods {
      */
     public CompletableFuture<List<Event>> getPresenceList(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
+
         RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(PresenceApi.class, "getPresenceList", params, new GenericType<List<Event>>() {
         });

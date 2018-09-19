@@ -36,13 +36,14 @@ public class SearchMethods extends AbstractMethods {
     /**
      * Performs a full text search across different categories.
      *
-     * @param request   the search request.
+     * @param request   The search request.
      * @param nextBatch The point to return events from. If given, this should be a next_batch result from a previous call
      *                  to this endpoint.
      * @return Results of the search.
      */
     public CompletableFuture<SearchResponse> search(SearchRequest request, String nextBatch) {
         Objects.requireNonNull(request.getSearchCategories(), "Search categories cannot be empty.");
+
         RequestParams params = defaults().clone().query("nextBatch", nextBatch);
         return factory().post(SearchApi.class, "search", params, request, SearchResponse.class);
     }
