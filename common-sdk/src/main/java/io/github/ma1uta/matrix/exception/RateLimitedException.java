@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.jeon.exception;
+package io.github.ma1uta.matrix.exception;
 
 /**
  * {@code RateLimitedException} indicates that server answered with the 427 status code.

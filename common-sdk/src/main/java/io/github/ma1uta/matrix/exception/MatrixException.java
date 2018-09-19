@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.jeon.exception;
+package io.github.ma1uta.matrix.exception;
 
 import java.net.HttpURLConnection;
 
