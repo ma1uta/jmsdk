@@ -16,19 +16,26 @@
 
 package io.github.ma1uta.matrix.client.factory;
 
-import io.github.ma1uta.jeon.exception.MatrixException;
-import io.github.ma1uta.jeon.exception.RateLimitedException;
+import static java.util.stream.Collectors.toMap;
+
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.ErrorResponse;
+import io.github.ma1uta.matrix.Secured;
 import io.github.ma1uta.matrix.client.methods.RequestParams;
+import io.github.ma1uta.matrix.exception.MatrixException;
+import io.github.ma1uta.matrix.exception.RateLimitedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -116,24 +123,121 @@ public class RequestFactory {
      * @return The prepared request.
      */
     protected Invocation.Builder buildRequest(Class<?> apiClass, String apiMethod, RequestParams params, String requestType) {
-        UriBuilder builder = UriBuilder.fromResource(apiClass).path(apiClass, apiMethod);
-        Map<String, String> encoded = new HashMap<>();
-        for (Map.Entry<String, String> entry : params.getPathParams().entrySet()) {
-            encoded.put(entry.getKey(), encode(entry.getValue()));
-        }
-        URI uri = builder.buildFromEncodedMap(encoded);
+        securityValidation(apiClass, apiMethod, params);
 
-        WebTarget path = getClient().target(getHomeserverUrl()).path(uri.toString());
+        UriBuilder builder = createUriBuilder(apiClass, apiMethod);
+        URI uri = buildUri(params, builder);
+
+        WebTarget path = buildWebTarget(uri);
+        path = applyQueryParams(params, path);
+
+        Invocation.Builder request = buildInvocationBuilder(requestType, path);
+        request = applyHeaderParams(params, request);
+        return addAccessToken(params, request);
+    }
+
+    /**
+     * Check that the access token is provided if the protected resource is requested.
+     *
+     * @param apiClass  API class.
+     * @param apiMethod API method.
+     * @param params    The request params.
+     * @throws IllegalArgumentException if the access token missing.
+     */
+    protected void securityValidation(Class<?> apiClass, String apiMethod, RequestParams params) {
+        Method[] methods = AccessController.doPrivileged((PrivilegedAction<Method[]>) apiClass::getDeclaredMethods);
+        long secured = Arrays.stream(methods).filter(m -> m.getName().equals(apiMethod))
+            .map(Method::getDeclaredAnnotations)
+            .flatMap(Arrays::stream)
+            .map(Annotation::getClass)
+            .filter(a -> a.equals(Secured.class))
+            .count();
+        if (secured > 0 && (params.getAccessToken() == null || params.getAccessToken().trim().isEmpty())) {
+            throw new IllegalArgumentException("The `access_token` should be specified in order to access to the secured resource.");
+        }
+    }
+
+    /**
+     * Create an URI builder.
+     *
+     * @param apiClass  API class.
+     * @param apiMethod API method.
+     * @return URI builder.
+     */
+    protected UriBuilder createUriBuilder(Class<?> apiClass, String apiMethod) {
+        return UriBuilder.fromResource(apiClass).path(apiClass, apiMethod);
+    }
+
+    /**
+     * Build the request URI.
+     *
+     * @param params  The request params.
+     * @param builder The URI builder.
+     * @return The request URI.
+     */
+    protected URI buildUri(RequestParams params, UriBuilder builder) {
+        Map<String, String> encoded = params.getPathParams().entrySet().stream()
+            .collect(toMap(Map.Entry::getKey, e -> encode(e.getValue())));
+        return builder.buildFromEncodedMap(encoded);
+    }
+
+    /**
+     * Build the request Web target.
+     *
+     * @param uri The request URI.
+     * @return The Web target.
+     */
+    protected WebTarget buildWebTarget(URI uri) {
+        return getClient().target(getHomeserverUrl()).path(uri.toString());
+    }
+
+    /**
+     * Add query params to the request.
+     *
+     * @param params The request params.
+     * @param path   The request target.
+     * @return The web target with the query params.
+     */
+    protected WebTarget applyQueryParams(RequestParams params, WebTarget path) {
         for (Map.Entry<String, String> entry : params.getQueryParams().entrySet()) {
             path = path.queryParam(entry.getKey(), entry.getValue());
         }
-        if (params.getUserId() != null && !params.getUserId().trim().isEmpty()) {
-            path = path.queryParam("user_id", encode(params.getUserId().trim()));
-        }
-        Invocation.Builder request = path.request(requestType);
+        return path;
+    }
+
+    /**
+     * Build the Invocation builder.
+     *
+     * @param requestType The MIME-type of the request.
+     * @param path        The request target.
+     * @return The Invocation builder.
+     */
+    protected Invocation.Builder buildInvocationBuilder(String requestType, WebTarget path) {
+        return path.request(requestType);
+    }
+
+    /**
+     * Add header params to the request.
+     *
+     * @param params  The request params.
+     * @param request The request.
+     * @return The request with the header params.
+     */
+    protected Invocation.Builder applyHeaderParams(RequestParams params, Invocation.Builder request) {
         for (Map.Entry<String, String> entry : params.getHeaderParams().entrySet()) {
-            request.header(entry.getKey(), encode(entry.getValue()));
+            request = request.header(entry.getKey(), encode(entry.getValue()));
         }
+        return request;
+    }
+
+    /**
+     * Add the access token if available.
+     *
+     * @param params  The request params.
+     * @param request The request.
+     * @return The request with the access token.
+     */
+    protected Invocation.Builder addAccessToken(RequestParams params, Invocation.Builder request) {
         if (params.getAccessToken() != null && !params.getAccessToken().trim().isEmpty()) {
             request = request.header("Authorization", "Bearer " + params.getAccessToken().trim());
         }
@@ -150,14 +254,14 @@ public class RequestFactory {
      */
     protected String encode(String origin) {
         if (origin == null) {
-            String msg = "Empty value";
+            String msg = "Empty value.";
             LOGGER.error(msg);
             throw new IllegalArgumentException(msg);
         }
         try {
             return URLEncoder.encode(origin, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            String msg = "Unsupported encoding";
+            String msg = "Unsupported encoding.";
             LOGGER.error(msg, e);
             throw new RuntimeException(msg, e);
         }

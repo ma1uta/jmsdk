@@ -39,15 +39,15 @@ import java.util.function.Function;
  */
 public class AccountMethods extends AbstractMethods {
 
-    private final Function<LoginResponse, LoginResponse> callback;
+    private final Function<LoginResponse, LoginResponse> afterLogin;
 
-    public AccountMethods(RequestFactory factory, RequestParams defaultParams, Function<LoginResponse, LoginResponse> callback) {
+    public AccountMethods(RequestFactory factory, RequestParams defaultParams, Function<LoginResponse, LoginResponse> afterLogin) {
         super(factory, defaultParams);
-        this.callback = callback;
+        this.afterLogin = afterLogin;
     }
 
-    protected Function<LoginResponse, LoginResponse> getCallback() {
-        return callback;
+    protected Function<LoginResponse, LoginResponse> getAfterLogin() {
+        return afterLogin;
     }
 
     /**
@@ -58,7 +58,7 @@ public class AccountMethods extends AbstractMethods {
      */
     public CompletableFuture<LoginResponse> register(RegisterRequest request) {
         RequestParams params = defaults().clone().query("kind", AccountApi.RegisterType.USER);
-        return factory().post(AccountApi.class, "register", params, request, LoginResponse.class).thenApply(getCallback());
+        return factory().post(AccountApi.class, "register", params, request, LoginResponse.class).thenApply(getAfterLogin());
     }
 
     /**

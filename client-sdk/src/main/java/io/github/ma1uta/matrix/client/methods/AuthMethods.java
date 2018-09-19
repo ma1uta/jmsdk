@@ -23,6 +23,7 @@ import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginType;
 import io.github.ma1uta.matrix.client.model.auth.SupportedLoginResponse;
+import io.github.ma1uta.matrix.client.model.auth.UserIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,9 @@ public class AuthMethods extends AbstractMethods {
         LOGGER.debug("Login with username: ''{}'' and password: ''<redacted>''", login);
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setType(AuthApi.AuthType.PASSWORD);
-        loginRequest.setUser(login);
+        UserIdentifier identifier = new UserIdentifier();
+        identifier.setUser(login);
+        loginRequest.setIdentifier(identifier);
         loginRequest.setPassword(password);
 
         return login(loginRequest);

@@ -49,8 +49,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 
 /**
  * Matrix client.
@@ -62,32 +64,62 @@ public class MatrixClient implements Closeable {
     private final RequestFactory requestFactory;
     private final RequestParams defaultParams;
 
-    public MatrixClient(String homeserverUrl, Client client, String userId) {
-        this(homeserverUrl, client, new RequestParams().userId(userId));
+    public MatrixClient(String homeserverUrl) {
+        this(homeserverUrl, ClientBuilder.newClient(), new RequestParams());
+    }
+
+    public MatrixClient(String homeserverUrl, Client client) {
+        this(homeserverUrl, client, new RequestParams());
     }
 
     public MatrixClient(String homeserverUrl, Client client, RequestParams defaultParams) {
-        this.defaultParams = defaultParams;
-        this.requestFactory = new RequestFactory(client, homeserverUrl);
+        this(homeserverUrl, client, defaultParams, null);
     }
 
     public MatrixClient(String homeserverUrl, Client client, RequestParams defaultParams, Executor executor) {
-        this.defaultParams = defaultParams;
-        this.requestFactory = new RequestFactory(client, homeserverUrl, executor);
+        this.defaultParams = Objects.requireNonNull(defaultParams, "The default `RequestParams` should be specified.");
+        this.requestFactory = initFactory(client, homeserverUrl, executor);
     }
 
-    public String getUserId() {
-        return getDefaultParams().getUserId();
+    /**
+     * Init the request factory.
+     *
+     * @param client        The http client.
+     * @param homeserverUrl The homeserver url.
+     * @param executor      The executor service to provide asynchronous requests.
+     * @return The {@link RequestFactory} instance.
+     */
+    protected RequestFactory initFactory(Client client, String homeserverUrl, Executor executor) {
+        return new RequestFactory(
+            Objects.requireNonNull(client, "The `client` should be specified."),
+            Objects.requireNonNull(homeserverUrl, "The `homeserverUrl` should be specified."),
+            executor
+        );
     }
 
+    /**
+     * Get the access token.
+     *
+     * @return The access token.
+     */
     public String getAccessToken() {
         return getDefaultParams().getAccessToken();
     }
 
+    /**
+     * Get the request factory.
+     *
+     * @return The {@link RequestFactory} instance.
+     */
     public RequestFactory getRequestFactory() {
         return requestFactory;
     }
 
+    /**
+     * Get the default request params.
+     *
+     * @return The {@link RequestParams} instance.
+     */
     public RequestParams getDefaultParams() {
         return defaultParams;
     }
@@ -341,6 +373,7 @@ public class MatrixClient implements Closeable {
         if (loginResponse == null) {
             getDefaultParams().accessToken(null);
         } else {
+            getDefaultParams().userId(loginResponse.getUserId());
             getDefaultParams().accessToken(loginResponse.getAccessToken());
         }
         return loginResponse;
