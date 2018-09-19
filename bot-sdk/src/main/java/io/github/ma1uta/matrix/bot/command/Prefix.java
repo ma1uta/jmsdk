@@ -19,7 +19,7 @@ package io.github.ma1uta.matrix.bot.command;
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
-import io.github.ma1uta.matrix.bot.BotHolder;
+import io.github.ma1uta.matrix.bot.Context;
 import io.github.ma1uta.matrix.bot.PersistentService;
 
 /**
@@ -38,11 +38,11 @@ public class Prefix<C extends BotConfig, D extends BotDao<C>, S extends Persiste
     }
 
     @Override
-    public boolean ownerInvoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
-        C config = holder.getConfig();
+    public boolean ownerInvoke(Context<C, D, S, E> context, String roomId, Event event, String arguments) {
+        C config = context.getConfig();
         if (arguments == null || arguments.trim().isEmpty()) {
             String prefix = config.getPrefix();
-            holder.getMatrixClient().event().sendNotice(roomId, prefix == null ? "!" : prefix);
+            context.getMatrixClient().event().sendNotice(roomId, prefix == null ? "!" : prefix);
         } else {
             config.setPrefix(arguments);
         }

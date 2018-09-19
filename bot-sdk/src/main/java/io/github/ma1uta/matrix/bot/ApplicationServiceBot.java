@@ -17,6 +17,9 @@
 package io.github.ma1uta.matrix.bot;
 
 import io.github.ma1uta.matrix.Event;
+import io.github.ma1uta.matrix.StrippedState;
+import io.github.ma1uta.matrix.client.AppServiceClient;
+import io.github.ma1uta.matrix.client.methods.RequestParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +44,25 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
 
     public ApplicationServiceBot(Client client, String homeserverUrl, String asToken, boolean exitOnEmptyRooms, C config, S service,
                                  List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        super(client, homeserverUrl, asToken, true, false, exitOnEmptyRooms, config, service, commandsClasses);
+        super(client, homeserverUrl, asToken, exitOnEmptyRooms, config, service, commandsClasses);
+    }
+
+    @Override
+    protected Context<C, D, S, E> init(Client client, String homeserverUrl, String asToken, C config, S service) {
+        AppServiceClient matrixClient = new AppServiceClient(homeserverUrl, client,
+            new RequestParams().userId(config.getUserId()).accessToken(asToken));
+        Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
+        context.setConfig(config);
+        return context;
+    }
+
+    @Override
+    public void init() {
+        if (getInitAction() != null) {
+            getContext().runInTransaction((context, dao) -> {
+                getInitAction().accept(context, dao);
+            });
+        }
     }
 
     /**
@@ -52,13 +73,19 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
     public void send(Event event) {
         LoopState state = LoopState.RUN;
         LOGGER.debug("State: {}", state);
-        switch (getHolder().getConfig().getState()) {
+        switch (getContext().getConfig().getState()) {
             case NEW:
                 state = newState();
                 break;
             case REGISTERED:
-                Map<String, List<Event>> eventMap = new HashMap<>();
-                eventMap.put(event.getRoomId(), Collections.singletonList(event));
+                StrippedState strippedState = new StrippedState();
+                strippedState.setSender(event.getSender());
+                strippedState.setStateKey(event.getStateKey());
+                strippedState.setContent(event.getContent());
+                strippedState.setType(event.getType());
+
+                Map<String, List<StrippedState>> eventMap = new HashMap<>();
+                eventMap.put(event.getRoomId(), Collections.singletonList(strippedState));
                 state = registeredState(eventMap);
                 break;
             case JOINED:
@@ -68,11 +95,11 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
                 state = deletedState();
                 break;
             default:
-                LOGGER.error("Unknown state: " + getHolder().getConfig().getState());
+                LOGGER.error("Unknown state: " + getContext().getConfig().getState());
         }
 
         if (LoopState.EXIT.equals(state)) {
-            getHolder().getShutdownListeners().forEach(Supplier::get);
+            getContext().getShutdownListeners().forEach(Supplier::get);
         }
     }
 }

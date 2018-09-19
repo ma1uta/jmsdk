@@ -18,7 +18,9 @@ package io.github.ma1uta.matrix.bot;
 
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.Id;
+import io.github.ma1uta.matrix.StrippedState;
 import io.github.ma1uta.matrix.client.MatrixClient;
+import io.github.ma1uta.matrix.client.methods.RequestParams;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.RoomEventFilter;
@@ -54,21 +56,17 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
     private final Map<String, Command<C, D, S, E>> commands;
 
-    private BiConsumer<BotHolder<C, D, S, E>, D> initAction;
+    private BiConsumer<Context<C, D, S, E>, D> initAction;
 
-    private final BotHolder<C, D, S, E> holder;
+    private Context<C, D, S, E> context;
 
     private final boolean exitOnEmptyRooms;
 
     private final Set<String> skipTimelineRooms = new HashSet<>();
 
-    public Bot(Client client, String homeserverUrl, String asToken, boolean addUserIdToRequests, boolean updateAccessToken,
-               boolean exitOnEmptyRooms, C config, S service, List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        MatrixClient matrixClient = new MatrixClient(homeserverUrl, client, addUserIdToRequests, updateAccessToken);
-        matrixClient.setAccessToken(asToken);
-        matrixClient.setUserId(config.getUserId());
-        this.holder = new BotHolder<>(matrixClient, service, this);
-        this.holder.setConfig(config);
+    public Bot(Client client, String homeserverUrl, String asToken, boolean exitOnEmptyRooms, C config, S service,
+               List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
+        this.context = init(client, homeserverUrl, asToken, config, service);
         this.exitOnEmptyRooms = exitOnEmptyRooms;
         this.commands = new HashMap<>(commandsClasses.size());
         commandsClasses.forEach(cl -> {
@@ -81,15 +79,38 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         });
     }
 
+    protected Context<C, D, S, E> init(Client client, String homeserverUrl, String asToken, C config, S service) {
+        MatrixClient matrixClient = new MatrixClient(homeserverUrl, client,
+            new RequestParams().userId(config.getUserId()).accessToken(asToken));
+        Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
+        context.setConfig(config);
+        return context;
+    }
+
+    /**
+     * Run startup action.
+     */
+    public void init() {
+        Context<C, D, S, E> context = getContext();
+        C config = context.getConfig();
+        context.getMatrixClient().auth().login(config.getUserId(), config.getPassword());
+
+        if (getInitAction() != null) {
+            context.runInTransaction((ctx, dao) -> {
+                getInitAction().accept(ctx, dao);
+            });
+        }
+    }
+
     public Map<String, Command<C, D, S, E>> getCommands() {
         return commands;
     }
 
-    public BotHolder<C, D, S, E> getHolder() {
-        return holder;
+    public Context<C, D, S, E> getContext() {
+        return context;
     }
 
-    public BiConsumer<BotHolder<C, D, S, E>, D> getInitAction() {
+    public BiConsumer<Context<C, D, S, E>, D> getInitAction() {
         return initAction;
     }
 
@@ -97,29 +118,12 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         return exitOnEmptyRooms;
     }
 
-    public void setInitAction(BiConsumer<BotHolder<C, D, S, E>, D> initAction) {
+    public void setInitAction(BiConsumer<Context<C, D, S, E>, D> initAction) {
         this.initAction = initAction;
     }
 
     public Set<String> getSkipTimelineRooms() {
         return skipTimelineRooms;
-    }
-
-    /**
-     * Run startup action.
-     */
-    public void init() {
-        BotHolder<C, D, S, E> holder = getHolder();
-        if (holder.getMatrixClient().isUpdateAccessToken()) {
-            C config = holder.getConfig();
-            holder.getMatrixClient().auth().login(config.getUserId(), config.getPassword());
-        }
-
-        if (getInitAction() != null) {
-            holder.runInTransaction((txHolder, dao) -> {
-                getInitAction().accept(txHolder, dao);
-            });
-        }
     }
 
     /**
@@ -130,16 +134,16 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @return {@link LoopState#NEXT_STATE} always. Move to the next state.
      */
     public LoopState newState() {
-        getHolder().runInTransaction((holder, dao) -> {
+        getContext().runInTransaction((context, dao) -> {
             LOGGER.debug("Start registration.");
-            BotConfig config = holder.getConfig();
+            BotConfig config = context.getConfig();
 
             RegisterRequest registerRequest = new RegisterRequest();
             registerRequest.setUsername(Id.localpart(config.getUserId()));
             registerRequest.setInitialDeviceDisplayName(config.getDisplayName());
             registerRequest.setDeviceId(config.getDeviceId());
 
-            MatrixClient matrixClient = holder.getMatrixClient();
+            MatrixClient matrixClient = context.getMatrixClient();
             matrixClient.account().register(registerRequest);
             LOGGER.debug("Set new display name: {}", config.getDisplayName());
             matrixClient.profile().setDisplayName(config.getDisplayName());
@@ -150,7 +154,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             roomFilter.setTimeline(roomEventFilter);
             FilterData filter = new FilterData();
             filter.setRoom(roomFilter);
-            config.setFilterId(matrixClient.filter().uploadFilter(filter).getFilterId());
+            config.setFilterId(matrixClient.filter().uploadFilter(filter).join().getFilterId());
             LOGGER.debug("Set new filter: {}", config.getFilterId());
 
             config.setState(BotState.REGISTERED);
@@ -160,7 +164,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         return LoopState.NEXT_STATE;
     }
 
-    protected LoopState registeredState(Map<String, List<Event>> eventMap) {
+    protected LoopState registeredState(Map<String, List<StrippedState>> eventMap) {
         LOGGER.debug("Wait for invite");
         if (!eventMap.isEmpty()) {
             return joinRoom(eventMap) ? LoopState.NEXT_STATE : LoopState.RUN;
@@ -175,32 +179,32 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @param eventMap invited eventMap. Map &lt;roomId&gt; - &lt;[event]&gt; room_id to invite_state.
      * @return true if bot joined else false.
      */
-    public boolean joinRoom(Map<String, List<Event>> eventMap) {
-        return getHolder().runInTransaction((holder, dao) -> {
+    public boolean joinRoom(Map<String, List<StrippedState>> eventMap) {
+        return getContext().runInTransaction((context, dao) -> {
             LOGGER.debug("Start joining.");
             boolean joined = false;
-            for (Map.Entry<String, List<Event>> eventEntry : eventMap.entrySet()) {
-                List<Event> inviteEvents = eventEntry.getValue().stream().peek(event -> {
+            for (Map.Entry<String, List<StrippedState>> eventEntry : eventMap.entrySet()) {
+                List<StrippedState> inviteEvents = eventEntry.getValue().stream().peek(state -> {
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Event type: {}", event.getType());
+                        LOGGER.debug("Event type: {}", state.getType());
                     }
-                }).filter(event -> {
-                    if (event.getContent() instanceof RoomMember) {
-                        RoomMember content = (RoomMember) event.getContent();
+                }).filter(state -> {
+                    if (state.getContent() instanceof RoomMember) {
+                        RoomMember content = (RoomMember) state.getContent();
                         LOGGER.debug("Membership: {}", content.getMembership());
                         return Event.MembershipState.INVITE.equals(content.getMembership());
                     }
                     return false;
                 }).collect(Collectors.toList());
 
-                for (Event event : inviteEvents) {
+                for (StrippedState state : inviteEvents) {
                     String roomId = eventEntry.getKey();
                     LOGGER.debug("Join to room {}", roomId);
-                    holder.getMatrixClient().room().joinByIdOrAlias(roomId);
+                    context.getMatrixClient().room().joinByIdOrAlias(roomId);
 
-                    C config = holder.getConfig();
+                    C config = context.getConfig();
                     config.setState(BotState.JOINED);
-                    config.setOwner(event.getSender());
+                    config.setOwner(state.getSender());
                     LOGGER.debug("Finish joining");
                     joined = true;
                 }
@@ -215,10 +219,10 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @return stop running.
      */
     public LoopState deletedState() {
-        getHolder().runInTransaction((holder, dao) -> {
+        getContext().runInTransaction((context, dao) -> {
             LOGGER.debug("Delete bot");
-            holder.getMatrixClient().account().deactivate(null);
-            dao.delete(holder.getConfig());
+            context.getMatrixClient().account().deactivate(null);
+            dao.delete(context.getConfig());
         });
         return LoopState.EXIT;
     }
@@ -233,7 +237,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     public LoopState processJoinedRoom(String roomId, List<Event> events) {
         String lastEvent = null;
         long lastOriginTs = 0;
-        MatrixClient matrixClient = getHolder().getMatrixClient();
+        MatrixClient matrixClient = getContext().getMatrixClient();
         boolean invoked = false;
         for (Event event : events) {
             if (!getSkipTimelineRooms().contains(roomId)) {
@@ -247,7 +251,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
                 lastEvent = event.getEventId();
             }
         }
-        C config = getHolder().getConfig();
+        C config = getContext().getConfig();
         boolean read = config.getReceiptPolicy() == null || ReceiptPolicy.READ.equals(config.getReceiptPolicy());
         boolean executed = config.getReceiptPolicy() != null && ReceiptPolicy.EXECUTED.equals(config.getReceiptPolicy()) && invoked;
 
@@ -270,8 +274,8 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @return {@code true} if any command was invoked, else {@code false}.
      */
     protected boolean processEvent(String roomId, Event event) {
-        MatrixClient matrixClient = getHolder().getMatrixClient();
-        C config = getHolder().getConfig();
+        MatrixClient matrixClient = getContext().getMatrixClient();
+        C config = getContext().getConfig();
         boolean invoked = false;
         if (event.getContent() instanceof RoomMessage) {
             RoomMessage content = (RoomMessage) event.getContent();
@@ -288,7 +292,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
                 && permit
                 && (body.startsWith(getPrefix()) || defaultCommand)) {
                 try {
-                    invoked = getHolder().runInTransaction((holder, dao) -> {
+                    invoked = getContext().runInTransaction((context, dao) -> {
                         return processAction(roomId, event, body);
                     });
                 } catch (Exception e) {
@@ -306,7 +310,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @return {@code true}, if process event, else {@code false}.
      */
     protected boolean permit(Event event) {
-        C config = getHolder().getConfig();
+        C config = getContext().getConfig();
         return config.getPolicy() == null
             || AccessPolicy.ALL.equals(config.getPolicy())
             || config.getOwner().equals(event.getSender());
@@ -318,7 +322,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @return command prefix.
      */
     public String getPrefix() {
-        C config = getHolder().getConfig();
+        C config = getContext().getConfig();
         String prefix = config.getPrefix();
         return prefix == null ? "!" : prefix.replaceAll("\\{\\{display_name}}", config.getDisplayName());
     }
@@ -336,7 +340,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         String[] arguments = contentWithoutPrefix.trim().split("\\s");
         String commandName = arguments[0];
         Command<C, D, S, E> command = getCommands().get(commandName);
-        C config = getHolder().getConfig();
+        C config = getContext().getConfig();
         String argument = Arrays.stream(arguments).skip(1).collect(Collectors.joining(" "));
         String defaultCommand = config.getDefaultCommand();
         if (command == null && defaultCommand != null && !defaultCommand.trim().isEmpty()) {
@@ -345,9 +349,9 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         }
         if (command != null) {
             LOGGER.debug("invoke command: {}", command.getClass());
-            return command.invoke(getHolder(), roomId, event, argument);
+            return command.invoke(getContext(), roomId, event, argument);
         } else {
-            getHolder().getMatrixClient().event().sendNotice(roomId, "Unknown command: " + commandName);
+            getContext().getMatrixClient().event().sendNotice(roomId, "Unknown command: " + commandName);
             return false;
         }
     }

@@ -62,13 +62,13 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
         LOGGER.debug("Receive event in the room: {0}", roomId);
         Optional<ApplicationServiceBot<C, D, S, E>> bot = getBotMap().entrySet().stream()
             .filter(entry -> {
-                BotHolder<C, D, S, E> holder = entry.getValue().getHolder();
+                Context<C, D, S, E> context = entry.getValue().getContext();
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Bot \"{}\"", holder.getConfig().getUserId());
+                    LOGGER.debug("Bot \"{}\"", context.getConfig().getUserId());
                 }
                 List<String> joinedRooms;
                 try {
-                    joinedRooms = holder.getMatrixClient().room().joinedRooms();
+                    joinedRooms = context.getMatrixClient().room().joinedRooms().join();
                 } catch (Exception e) {
                     LOGGER.error("Cannot retrieve joined rooms.", e);
                     return false;
@@ -88,17 +88,17 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
                         LOGGER.debug("Event type: {}", event.getType());
                         LOGGER.debug("State key: {}", stateKey);
                     }
-                    return holder.getConfig().getUserId().equals(stateKey) && Event.MembershipState.INVITE.equals(membership);
+                    return context.getConfig().getUserId().equals(stateKey) && Event.MembershipState.INVITE.equals(membership);
                 }
                 return false;
             }).map(Map.Entry::getValue).findFirst();
 
         if (bot.isPresent()) {
-            LOGGER.debug("Bot \"{}\" is found.", bot.get().getHolder().getConfig().getUserId());
+            LOGGER.debug("Bot \"{}\" is found.", bot.get().getContext().getConfig().getUserId());
             bot.get().send(event);
             return true;
         } else {
-            LOGGER.debug("Bot isn't found.");
+            LOGGER.debug("Bot didn't found.");
             return false;
         }
     }
@@ -110,7 +110,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
 
     @Override
     protected void submitBot(ApplicationServiceBot<C, D, S, E> bot) {
-        if (BotState.NEW.equals(bot.getHolder().getConfig().getState())) {
+        if (BotState.NEW.equals(bot.getContext().getConfig().getState())) {
             bot.newState();
         }
         bot.init();

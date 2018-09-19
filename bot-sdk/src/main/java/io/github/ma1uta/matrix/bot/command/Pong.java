@@ -19,8 +19,8 @@ package io.github.ma1uta.matrix.bot.command;
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
-import io.github.ma1uta.matrix.bot.BotHolder;
 import io.github.ma1uta.matrix.bot.Command;
+import io.github.ma1uta.matrix.bot.Context;
 import io.github.ma1uta.matrix.bot.PersistentService;
 
 /**
@@ -39,8 +39,8 @@ public class Pong<C extends BotConfig, D extends BotDao<C>, S extends Persistent
     }
 
     @Override
-    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
-        holder.getMatrixClient().event().sendNotice(roomId, "pong");
+    public boolean invoke(Context<C, D, S, E> context, String roomId, Event event, String arguments) {
+        context.getMatrixClient().event().sendNotice(roomId, "pong");
         return true;
     }
 

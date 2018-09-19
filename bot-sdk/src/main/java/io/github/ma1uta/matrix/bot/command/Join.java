@@ -19,8 +19,8 @@ package io.github.ma1uta.matrix.bot.command;
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
-import io.github.ma1uta.matrix.bot.BotHolder;
 import io.github.ma1uta.matrix.bot.Command;
+import io.github.ma1uta.matrix.bot.Context;
 import io.github.ma1uta.matrix.bot.PersistentService;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.model.room.RoomId;
@@ -45,9 +45,9 @@ public class Join<C extends BotConfig, D extends BotDao<C>, S extends Persistent
     }
 
     @Override
-    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
-        C config = holder.getConfig();
-        MatrixClient matrixClient = holder.getMatrixClient();
+    public boolean invoke(Context<C, D, S, E> context, String roomId, Event event, String arguments) {
+        C config = context.getConfig();
+        MatrixClient matrixClient = context.getMatrixClient();
         if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
             return false;
         }
@@ -55,8 +55,8 @@ public class Join<C extends BotConfig, D extends BotDao<C>, S extends Persistent
             matrixClient.event().sendNotice(roomId, "Usage: " + usage());
         } else {
             try {
-                RoomId result = matrixClient.room().joinByIdOrAlias(arguments);
-                holder.getBot().getSkipTimelineRooms().add(result.getRoomId());
+                RoomId result = matrixClient.room().joinByIdOrAlias(arguments).join();
+                context.getBot().getSkipTimelineRooms().add(result.getRoomId());
             } catch (Exception e) {
                 String msg = String.format("Cannot join: %s", e.getMessage());
                 LOGGER.error(msg, e);

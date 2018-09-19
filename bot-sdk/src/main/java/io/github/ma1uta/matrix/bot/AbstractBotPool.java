@@ -106,9 +106,9 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
         });
         B bot = createBotInstance(config);
         initializeBot(bot);
-        String userId = bot.getHolder().getConfig().getUserId();
+        String userId = bot.getContext().getConfig().getUserId();
         getBotMap().put(userId, bot);
-        bot.getHolder().addShutdownListener(() -> {
+        bot.getContext().addShutdownListener(() -> {
             getBotMap().remove(userId);
             return null;
         });

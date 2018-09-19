@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Event;
+import io.github.ma1uta.matrix.StrippedState;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.model.sync.InvitedRoom;
 import io.github.ma1uta.matrix.client.model.sync.JoinedRoom;
@@ -48,7 +48,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
 
     public StandaloneBot(Client client, String homeserverUrl, boolean exitOnEmptyRooms, C config, S service,
                          List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        super(client, homeserverUrl, null, false, true, exitOnEmptyRooms, config, service, commandsClasses);
+        super(client, homeserverUrl, null, exitOnEmptyRooms, config, service, commandsClasses);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
 
             LoopState state = LoopState.RUN;
             while (!LoopState.EXIT.equals(state)) {
-                switch (getHolder().getConfig().getState()) {
+                switch (getContext().getConfig().getState()) {
                     case NEW:
                         state = newState();
                         break;
@@ -72,7 +72,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
                         state = deletedState();
                         break;
                     default:
-                        LOGGER.error("Unknown state: " + getHolder().getConfig().getState());
+                        LOGGER.error("Unknown state: " + getContext().getConfig().getState());
                 }
             }
 
@@ -80,7 +80,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
             LOGGER.error("Exception:", e);
             throw e;
         } finally {
-            getHolder().getShutdownListeners().forEach(Supplier::get);
+            getContext().getShutdownListeners().forEach(Supplier::get);
         }
     }
 
@@ -91,16 +91,16 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
      * @return next loop state.
      */
     protected LoopState loop(Function<SyncResponse, LoopState> loopAction) {
-        C config = getHolder().getConfig();
-        MatrixClient matrixClient = getHolder().getMatrixClient();
-        SyncResponse sync = matrixClient.sync().sync(config.getFilterId(), config.getNextBatch(), false, null, null);
+        C config = getContext().getConfig();
+        MatrixClient matrixClient = getContext().getMatrixClient();
+        SyncResponse sync = matrixClient.sync().sync(config.getFilterId(), config.getNextBatch(), false, null, null).join();
 
         String initialBatch = sync.getNextBatch();
         if (config.getNextBatch() == null && config.getSkipInitialSync() != null && config.getSkipInitialSync()) {
-            getHolder().runInTransaction((holder, dao) -> {
-                holder.getConfig().setNextBatch(initialBatch);
+            getContext().runInTransaction((context, dao) -> {
+                context.getConfig().setNextBatch(initialBatch);
             });
-            sync = matrixClient.sync().sync(config.getFilterId(), initialBatch, false, null, config.getTimeout());
+            sync = matrixClient.sync().sync(config.getFilterId(), initialBatch, false, null, config.getTimeout()).join();
         }
 
         while (true) {
@@ -108,8 +108,8 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
                 LoopState nextState = loopAction.apply(sync);
 
                 String nextBatch = sync.getNextBatch();
-                getHolder().runInTransaction((holder, dao) -> {
-                    holder.getConfig().setNextBatch(nextBatch);
+                getContext().runInTransaction((context, dao) -> {
+                    context.getConfig().setNextBatch(nextBatch);
                 });
 
                 if (LoopState.NEXT_STATE.equals(nextState)) {
@@ -120,7 +120,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
                     return LoopState.EXIT;
                 }
 
-                sync = matrixClient.sync().sync(config.getFilterId(), nextBatch, false, null, config.getTimeout());
+                sync = matrixClient.sync().sync(config.getFilterId(), nextBatch, false, null, config.getTimeout()).join();
             } catch (Exception e) {
                 LOGGER.error("Exception: ", e);
             }
@@ -135,7 +135,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
     protected LoopState registeredState() {
         return loop(sync -> {
             Map<String, InvitedRoom> invite = sync.getRooms().getInvite();
-            Map<String, List<Event>> eventMap = new HashMap<>();
+            Map<String, List<StrippedState>> eventMap = new HashMap<>();
             for (Map.Entry<String, InvitedRoom> entry : invite.entrySet()) {
                 eventMap.put(entry.getKey(), entry.getValue().getInviteState().getEvents());
             }
@@ -152,8 +152,8 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
         return loop(sync -> {
             Rooms rooms = sync.getRooms();
 
-            MatrixClient matrixClient = getHolder().getMatrixClient();
-            List<String> joinedRooms = matrixClient.room().joinedRooms();
+            MatrixClient matrixClient = getContext().getMatrixClient();
+            List<String> joinedRooms = matrixClient.room().joinedRooms().join();
             for (Map.Entry<String, LeftRoom> roomEntry : rooms.getLeave().entrySet()) {
                 String leftRoom = roomEntry.getKey();
                 if (joinedRooms.contains(leftRoom)) {
@@ -180,9 +180,9 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
                 }
             }
 
-            if (getHolder().getMatrixClient().room().joinedRooms().isEmpty()) {
-                getHolder().runInTransaction((holder, dao) -> {
-                    holder.getConfig().setState(isExitOnEmptyRooms() ? BotState.DELETED : BotState.REGISTERED);
+            if (getContext().getMatrixClient().room().joinedRooms().join().isEmpty()) {
+                getContext().runInTransaction((context, dao) -> {
+                    context.getConfig().setState(isExitOnEmptyRooms() ? BotState.DELETED : BotState.REGISTERED);
                 });
                 return LoopState.NEXT_STATE;
             }

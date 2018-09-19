@@ -19,7 +19,7 @@ package io.github.ma1uta.matrix.bot.command;
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
-import io.github.ma1uta.matrix.bot.BotHolder;
+import io.github.ma1uta.matrix.bot.Context;
 import io.github.ma1uta.matrix.bot.PersistentService;
 
 /**
@@ -38,15 +38,15 @@ public class DefaultCommand<C extends BotConfig, D extends BotDao<C>, S extends 
     }
 
     @Override
-    public boolean ownerInvoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
+    public boolean ownerInvoke(Context<C, D, S, E> context, String roomId, Event event, String arguments) {
         if (arguments == null || arguments.trim().isEmpty()) {
-            holder.getConfig().setDefaultCommand(null);
+            context.getConfig().setDefaultCommand(null);
             return true;
-        } else if (holder.getBot().getCommands().get(arguments) != null) {
-            holder.getConfig().setDefaultCommand(arguments);
+        } else if (context.getBot().getCommands().get(arguments) != null) {
+            context.getConfig().setDefaultCommand(arguments);
             return true;
         } else {
-            holder.getMatrixClient().event().sendNotice(roomId, "Unknown command: " + arguments);
+            context.getMatrixClient().event().sendNotice(roomId, "Unknown command: " + arguments);
             return false;
         }
     }

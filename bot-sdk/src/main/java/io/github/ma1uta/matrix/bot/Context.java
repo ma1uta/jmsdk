@@ -25,14 +25,14 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
- * Holder of the matrix client, bot configuration and some extra data.
+ * Context of the bot.
  *
  * @param <C> bot configuration.
  * @param <D> bot dao.
  * @param <S> bot service.
  * @param <E> extra data.
  */
-public class BotHolder<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> {
+public class Context<C extends BotConfig, D extends BotDao<C>, S extends PersistentService<D>, E> {
 
     private final Object monitor = new Object();
 
@@ -48,7 +48,7 @@ public class BotHolder<C extends BotConfig, D extends BotDao<C>, S extends Persi
 
     private final Bot<C, D, S, E> bot;
 
-    public BotHolder(MatrixClient matrixClient, S service, Bot<C, D, S, E> bot) {
+    public Context(MatrixClient matrixClient, S service, Bot<C, D, S, E> bot) {
         this.matrixClient = matrixClient;
         this.service = service;
         this.bot = bot;
@@ -91,7 +91,7 @@ public class BotHolder<C extends BotConfig, D extends BotDao<C>, S extends Persi
      *
      * @param action action.
      */
-    public void runInTransaction(BiConsumer<BotHolder<C, D, S, E>, D> action) {
+    public void runInTransaction(BiConsumer<Context<C, D, S, E>, D> action) {
         synchronized (monitor) {
             getService().invoke(dao -> {
                 action.accept(this, dao);
@@ -107,7 +107,7 @@ public class BotHolder<C extends BotConfig, D extends BotDao<C>, S extends Persi
      * @param <R>    result's class.
      * @return result.
      */
-    public <R> R runInTransaction(BiFunction<BotHolder<C, D, S, E>, D, R> action) {
+    public <R> R runInTransaction(BiFunction<Context<C, D, S, E>, D, R> action) {
         synchronized (monitor) {
             return getService().invoke(dao -> {
                 R result = action.apply(this, dao);

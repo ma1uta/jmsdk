@@ -364,6 +364,15 @@ public class MatrixClient implements Closeable {
     }
 
     /**
+     * Get the `user_id`.
+     *
+     * @return the user MXID.
+     */
+    public String getUserId() {
+        return getDefaultParams().getUserId();
+    }
+
+    /**
      * Action after login/register.
      *
      * @param loginResponse The login response.

@@ -61,15 +61,6 @@ public class AppServiceClient extends MatrixClient {
     }
 
     /**
-     * Get the `user_id`.
-     *
-     * @return the user MXID.
-     */
-    public String getUserId() {
-        return getDefaultParams().getUserId();
-    }
-
-    /**
      * Return a new AppService client with the specified `user_id`.
      *
      * @param userId The user MXID.

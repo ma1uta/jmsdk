@@ -10,8 +10,7 @@ You can find implemented API [here](https://github.com/ma1uta/jeon/tree/master/c
 ### Usage
 
 ```$java
-javax.ws.rs.client.Client httpClient = ...; // For example Jersey
-MatrixClient mxClient = new MatrixClient("matrix.homeserver.tld", httpClient, false, true);
+MatrixClient mxClient = new MatrixClient("matrix.homeserver.tld");
 
 // login
 mxClient.auth().login("username", "password");
@@ -20,10 +19,10 @@ mxClient.auth().login("username", "password");
 mxCLient.profile().setDisplayName("my new display name");
 
 // retrieve all joined rooms
-List<String> rooms = mxClient.room().joinedRooms();
+List<String> rooms = mxClient.room().joinedRooms().join();
 String roomId = rooms.get(0);
 // or join to the room
-String roomId = mxClient.room().joinByIdOrAlias("#test:matrix.org");
+String roomId = mxClient.room().joinByIdOrAlias("#test:matrix.org").join();
 
 // send message to the room
 mxCLient.event().sendMessage(roomId, "Hello, World!");
@@ -40,21 +39,26 @@ There are two ways to receive events from the server:
     Also it should organize loop to cycle `sync`-method.
 2. run `SyncLoop` in the separate thread.
     ```$java
-    SyncLoop syncLoop = new SyncLoop(mxClient);
+    SyncLoop syncLoop = new SyncLoop(mxClient.sync());
     syncLoop.setInboundListener((SyncResponse) -> {
        // parse events from the server.
+       return null; // or a new sync params.
     });
     
+    // Set initial parameters.
+    SyncParams params = new SyncParams();
     // set initial batch_token (optional)
-    syncLoop.setStartBatch("s123");
+    params.setNextBatch("s123");
     // retrieve full state or not
-    syncLoop.setFullState(true);
+    params.setFullState(true);
     // filter the received events (optional)
-    syncLoop.setFilter("myFilter");
+    params.setFilter("myFilter");
     // set presence "offline" or null (optional)
-    syncLoop.setPresence(null);
+    params.setPresence(null);
     // set long-polling timeout in milliseconds (recommended to set bigger than 0 to avoid spam server)
-    syncLoop.setTimeout(10 * 1000);
+    params.setTimeout(10 * 1000);
+    
+    syncLoop.setInit(params);
     
     // run the syncLoop
     ExecutorService service = Executors.newFixedThreadPool(1);

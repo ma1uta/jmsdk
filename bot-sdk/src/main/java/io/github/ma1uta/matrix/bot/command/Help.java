@@ -19,8 +19,8 @@ package io.github.ma1uta.matrix.bot.command;
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
-import io.github.ma1uta.matrix.bot.BotHolder;
 import io.github.ma1uta.matrix.bot.Command;
+import io.github.ma1uta.matrix.bot.Context;
 import io.github.ma1uta.matrix.bot.PersistentService;
 import io.github.ma1uta.matrix.client.MatrixClient;
 
@@ -40,12 +40,12 @@ public class Help<C extends BotConfig, D extends BotDao<C>, S extends Persistent
     }
 
     @Override
-    public boolean invoke(BotHolder<C, D, S, E> holder, String roomId, Event event, String arguments) {
-        MatrixClient matrixClient = holder.getMatrixClient();
+    public boolean invoke(Context<C, D, S, E> context, String roomId, Event event, String arguments) {
+        MatrixClient matrixClient = context.getMatrixClient();
 
-        String prefix = holder.getBot().getPrefix();
-        String defaultCommand = holder.getConfig().getDefaultCommand();
-        String help = holder.getBot().getCommands().entrySet().stream().map(entry -> {
+        String prefix = context.getBot().getPrefix();
+        String defaultCommand = context.getConfig().getDefaultCommand();
+        String help = context.getBot().getCommands().entrySet().stream().map(entry -> {
             StringBuilder commandHelp = new StringBuilder();
             if (defaultCommand != null && !defaultCommand.trim().isEmpty() && entry.getKey().equals(defaultCommand)) {
                 commandHelp.append("(default) ");

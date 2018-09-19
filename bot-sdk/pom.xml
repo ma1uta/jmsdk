@@ -23,13 +23,13 @@
     <parent>
         <groupId>io.github.ma1uta.matrix</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.4</version>
+        <version>0.5.0</version>
     </parent>
     <artifactId>bot-sdk</artifactId>
-    <version>0.1</version>
+    <version>0.2-SNAPSHOT</version>
 
     <properties>
-        <client.sdk.version>0.3</client.sdk.version>
+        <client.sdk.version>0.4.0-SNAPSHOT</client.sdk.version>
     </properties>
 
     <dependencies>
