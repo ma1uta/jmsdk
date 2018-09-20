@@ -34,7 +34,7 @@ mxClient.auth().logout();
 There are two ways to receive events from the server:
 1. invoke api
     ```$java
-    SyncResponse response = mxClient.sync().sync(filterId, nextBatch, fullState, presence, timeout);
+    CompletableFuture<SyncResponse> response = mxClient.sync().sync(filterId, nextBatch, fullState, presence, timeout);
     ```
     Also it should organize loop to cycle `sync`-method.
 2. run `SyncLoop` in the separate thread.
