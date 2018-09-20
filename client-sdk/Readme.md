@@ -2,7 +2,7 @@
 
 There are two classes: `MatrixClient` and `SyncLoop`.
 
-`MatrixClient` is a core classes with full support of the [Client-Server API](https://matrix.org/docs/spec/client_server/r0.3.0.html).
+`MatrixClient` is a core classes with full support of the [Client-Server API](https://matrix.org/docs/spec/client_server/r0.4.0.html).
 
 Access to the methods organized via api methods (event() for Event Api, room() for Room Api, ...).
 You can find implemented API [here](https://github.com/ma1uta/jeon/tree/master/client-api/src/main/java/io/github/ma1uta/matrix/client/api)
