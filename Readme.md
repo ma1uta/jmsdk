@@ -5,7 +5,7 @@ Based on [Jeon API](https://github.com/ma1uta/jeon).
 
 ## Modules
 
-### [client-sdk](https://github.com/ma1uta/jmsdk/blob/master/docs/Client-sdk.md)
+### [client-sdk](https://github.com/ma1uta/jmsdk/blob/master/client-sdk/Readme.md)
 
 Matrix client with the full support of the Client-Server API.
 
