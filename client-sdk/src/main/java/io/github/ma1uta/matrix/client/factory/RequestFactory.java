@@ -512,7 +512,7 @@ public class RequestFactory {
         public void run() {
             long timeout = INITIAL_TIMEOUT;
             try {
-                while (!(result.isDone() && result.isCancelled() && result.isCompletedExceptionally())) {
+                while (!(result.isDone() || result.isCancelled() || result.isCompletedExceptionally())) {
                     LOGGER.debug("Try to send request.");
                     if (timeout > MAX_TIMEOUT) {
                         String msg = "Cannot send request, maximum timeout was reached";

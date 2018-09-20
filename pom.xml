@@ -311,7 +311,7 @@
             </modules>
         </profile>
         <profile>
-            <id>common-sdk</id>
+            <id>common</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
