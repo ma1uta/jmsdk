@@ -19,11 +19,13 @@ package io.github.ma1uta.matrix.client.methods;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.DeviceApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.device.Device;
 import io.github.ma1uta.matrix.client.model.device.DeviceUpdateRequest;
 import io.github.ma1uta.matrix.client.model.device.DevicesDeleteRequest;
 import io.github.ma1uta.matrix.client.model.device.DevicesResponse;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -76,6 +78,25 @@ public class DeviceMethods extends AbstractMethods {
     }
 
     /**
+     * Delete the current device and invalidate this access token.
+     *
+     * @param auth Additional authentication information for the user-interactive authentication API.
+     * @return The empty response.
+     */
+    public CompletableFuture<EmptyResponse> delete(AuthenticationData auth) {
+        DevicesDeleteRequest request = new DevicesDeleteRequest();
+        request.setAuth(auth);
+        List<String> devices = Collections.singletonList(defaults().getDeviceId());
+        request.setDevices(devices);
+        return factory().post(DeviceApi.class, "deleteDevices", defaults(), request, EmptyResponse.class)
+            .thenApply(r -> {
+                defaults().deviceId(null);
+                defaults().accessToken(null);
+                return r;
+            });
+    }
+
+    /**
      * Deletes the given devices, and invalidates any access token associated with them.
      *
      * @param request Devices to delete and additional authentication data.
@@ -88,6 +109,13 @@ public class DeviceMethods extends AbstractMethods {
             throw new NullPointerException(error);
         }
 
-        return factory().post(DeviceApi.class, "deleteDevices", defaults(), request, EmptyResponse.class);
+        return factory().post(DeviceApi.class, "deleteDevices", defaults(), request, EmptyResponse.class)
+            .thenApply(r -> {
+                if (request.getDevices().contains(defaults().getDeviceId())) {
+                    defaults().deviceId(null);
+                    defaults().accessToken(null);
+                }
+                return r;
+            });
     }
 }

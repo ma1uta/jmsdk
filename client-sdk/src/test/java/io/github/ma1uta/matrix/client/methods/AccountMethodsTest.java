@@ -48,13 +48,19 @@ public class AccountMethodsTest extends ClientToJettyServer {
     public void registerAndLogin() {
         LoginResponse loginResponse = register(false, true);
 
+        assertEquals("abc123", getMatrixClient().getDefaultParams().getAccessToken());
+        assertEquals("@cheeky_monkey:matrix.org", getMatrixClient().getDefaultParams().getUserId());
         assertEquals("abc123", loginResponse.getAccessToken());
+        assertEquals("GHTYAJCE", loginResponse.getDeviceId());
     }
 
     @Test
     public void onlyRegister() {
         LoginResponse loginResponse = register(true, true);
 
+        assertNull(getMatrixClient().getDefaultParams().getAccessToken());
+        assertEquals("@cheeky_monkey:matrix.org", getMatrixClient().getDefaultParams().getUserId());
+        assertNull(loginResponse.getDeviceId());
         assertNull(loginResponse.getAccessToken());
     }
 
@@ -86,9 +92,9 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
                     res.setContentType(MediaType.APPLICATION_JSON);
                     res.getWriter().println("{\n" +
-                        "  \"user_id\": \"@cheeky_monkey:matrix.org\",\n" +
-                        (inhibitLogin ? "" : "  \"access_token\": \"abc123\",\n") +
-                        "  \"device_id\": \"GHTYAJCE\"\n" +
+                        "  \"user_id\": \"@cheeky_monkey:matrix.org\"" + (inhibitLogin ? "" : ",\n" +
+                        "  \"access_token\": \"abc123\",\n" +
+                        "  \"device_id\": \"GHTYAJCE\"\n") +
                         "}");
                 } else {
                     res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
@@ -117,7 +123,6 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
         assertNotNull(loginResponse);
         assertEquals("@cheeky_monkey:matrix.org", loginResponse.getUserId());
-        assertEquals("GHTYAJCE", loginResponse.getDeviceId());
 
         return loginResponse;
     }
@@ -257,5 +262,141 @@ public class AccountMethodsTest extends ClientToJettyServer {
         }
         assertNotNull(getMatrixClient().account().password("ihatebananas", auth).join());
     }
+
+    @Test
+    public void passwordEmailRequestToken() {
+        getServlet().setPost((req, res) -> {
+            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password/email/requestToken"));
+            assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+
+            JsonNode jsonNode = incomingJson(req);
+
+            assertEquals("monkeys_are_GREAT", jsonNode.get("client_secret").asText());
+            assertEquals("alice@example.org", jsonNode.get("email").asText());
+            assertEquals(1, jsonNode.get("send_attempt").asInt());
+            assertEquals("https://example.org/congratulations.html", jsonNode.get("next_link").asText());
+            assertEquals("id.example.com", jsonNode.get("id_server").asText());
+
+            try {
+                res.setContentType(MediaType.APPLICATION_JSON);
+                res.getWriter().println("{\n" +
+                    "  \"sid\": \"123abc\"\n" +
+                    "}");
+            } catch (IOException e) {
+                fail();
+            }
+        });
+
+        EmailRequestToken request = new EmailRequestToken();
+        request.setClientSecret("monkeys_are_GREAT");
+        request.setEmail("alice@example.org");
+        request.setSendAttempt(1L);
+        request.setNextLink("https://example.org/congratulations.html");
+        request.setIdServer("id.example.com");
+        SessionResponse sessionResponse = getMatrixClient().account().passwordEmailRequestToken(request).join();
+
+        assertNotNull(sessionResponse);
+        assertEquals("123abc", sessionResponse.getSid());
+    }
+
+    @Test
+    public void passwordPhoneRequestToken() {
+        getServlet().setPost((req, res) -> {
+            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password/msisdn/requestToken"));
+            assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+
+            JsonNode jsonNode = incomingJson(req);
+
+            assertEquals("monkeys_are_GREAT", jsonNode.get("client_secret").asText());
+            assertEquals("GB", jsonNode.get("country").asText());
+            assertEquals("07700900001", jsonNode.get("phone_number").asText());
+            assertEquals(1, jsonNode.get("send_attempt").asInt());
+            assertEquals("https://example.org/congratulations.html", jsonNode.get("next_link").asText());
+            assertEquals("id.example.com", jsonNode.get("id_server").asText());
+
+            try {
+                res.setContentType(MediaType.APPLICATION_JSON);
+                res.getWriter().println("{\n" +
+                    "  \"sid\": \"123abc\"\n" +
+                    "}");
+            } catch (IOException e) {
+                fail();
+            }
+        });
+
+        MsisdnRequestToken request = new MsisdnRequestToken();
+        request.setClientSecret("monkeys_are_GREAT");
+        request.setCountry("GB");
+        request.setPhoneNumber("07700900001");
+        request.setSendAttempt(1L);
+        request.setNextLink("https://example.org/congratulations.html");
+        request.setIdServer("id.example.com");
+        SessionResponse sessionResponse = getMatrixClient().account().passwordMsisdnRequestToken(request).join();
+
+        assertNotNull(sessionResponse);
+        assertEquals("123abc", sessionResponse.getSid());
+    }
+
+    @Test
+    public void deactivate() {
+        deactivate(true, true);
+    }
+
+    @Test
+    public void tryToDeactivate() {
+        assertThrows(IllegalArgumentException.class, () -> deactivate(false, true));
+    }
+
+    @Test
+    public void tryToDeactivateWithouAuth() {
+        CompletionException e = assertThrows(CompletionException.class, () -> deactivate(true, false));
+        assertTrue(e.getCause() instanceof AuthenticationRequred);
+    }
+
+    public void deactivate(boolean withToken, boolean withAuth) {
+        getServlet().setPost((req, res) -> {
+            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/deactivate"));
+            assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+
+            if (authenticated(req, res)) {
+                JsonNode jsonNode = incomingJson(req);
+
+                JsonNode auth = jsonNode.get("auth");
+
+                if (auth == null || auth.isNull()) {
+                    try {
+                        res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+                    } catch (IOException e) {
+                        fail();
+                    }
+                } else {
+                    try {
+                        try {
+                            assertEquals("m.login.password", auth.get("type").asText());
+                            assertEquals("sss", auth.get("session").asText());
+                        } catch (AssertionFailedError e) {
+                            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+                        }
+
+                        res.setContentType(MediaType.APPLICATION_JSON);
+                        res.getWriter().println("{}");
+                    } catch (IOException e) {
+                        fail();
+                    }
+                }
+            }
+        });
+
+        if (withToken) {
+            getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
+        }
+        AuthenticationData auth = new AuthenticationData();
+        if (withAuth) {
+            auth.setType(AuthApi.AuthType.PASSWORD);
+            auth.setSession("sss");
+        }
+        assertNotNull(getMatrixClient().account().deactivate(auth).join());
+    }
+
 
 }

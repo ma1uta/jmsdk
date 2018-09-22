@@ -68,7 +68,7 @@ public class AccountMethods extends AbstractMethods {
      * Request the email token.
      *
      * @param requestToken The request token.
-     * @return The empty response.
+     * @return The session.
      */
     public CompletableFuture<SessionResponse> emailRequestToken(EmailRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
@@ -82,7 +82,7 @@ public class AccountMethods extends AbstractMethods {
      * Request the SMS token.
      *
      * @param requestToken The request token.
-     * @return The empty response.
+     * @return The session.
      */
     public CompletableFuture<SessionResponse> msisdnRequestToken(MsisdnRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
@@ -113,14 +113,14 @@ public class AccountMethods extends AbstractMethods {
      * Request the email validation tokens.
      *
      * @param requestToken The request token.
-     * @return The empty response.
+     * @return The session.
      */
-    public CompletableFuture<EmptyResponse> passwordEmailRequestToken(EmailRequestToken requestToken) {
+    public CompletableFuture<SessionResponse> passwordEmailRequestToken(EmailRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
         Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "passwordEmailRequestToken", defaults(), requestToken, EmptyResponse.class);
+        return factory().post(AccountApi.class, "passwordEmailRequestToken", defaults(), requestToken, SessionResponse.class);
     }
 
     /**
@@ -129,13 +129,13 @@ public class AccountMethods extends AbstractMethods {
      * @param requestToken The request token.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> passwordMsisdnRequestToken(MsisdnRequestToken requestToken) {
+    public CompletableFuture<SessionResponse> passwordMsisdnRequestToken(MsisdnRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
         Objects.requireNonNull(requestToken.getCountry(), "Country cannot be empty.");
         Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "passwordMsisdnRequestToken", defaults(), requestToken, EmptyResponse.class);
+        return factory().post(AccountApi.class, "passwordMsisdnRequestToken", defaults(), requestToken, SessionResponse.class);
     }
 
     /**

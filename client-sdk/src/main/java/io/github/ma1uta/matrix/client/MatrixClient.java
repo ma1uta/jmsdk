@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import javax.ws.rs.client.Client;
@@ -385,6 +386,7 @@ public class MatrixClient implements Closeable {
         } else {
             getDefaultParams().userId(loginResponse.getUserId());
             getDefaultParams().accessToken(loginResponse.getAccessToken());
+            getDefaultParams().deviceId(loginResponse.getDeviceId());
         }
         return loginResponse;
     }
@@ -397,6 +399,7 @@ public class MatrixClient implements Closeable {
      */
     public EmptyResponse afterLogout(EmptyResponse response) {
         getDefaultParams().accessToken(null);
+        getDefaultParams().deviceId(null);
         return response;
     }
 

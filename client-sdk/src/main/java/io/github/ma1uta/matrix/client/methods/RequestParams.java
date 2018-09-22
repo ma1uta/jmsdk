@@ -30,6 +30,7 @@ public class RequestParams implements Cloneable {
 
     private String userId;
     private String accessToken;
+    private String deviceId;
 
     /**
      * Add a path parameter.
@@ -155,6 +156,21 @@ public class RequestParams implements Cloneable {
     public RequestParams accessToken(String accessToken) {
         this.accessToken = accessToken;
         return this;
+    }
+
+    /**
+     * Set a new device id.
+     *
+     * @param deviceId The device id.
+     * @return This request params.
+     */
+    public RequestParams deviceId(String deviceId) {
+        this.deviceId = deviceId;
+        return this;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
     }
 
     /**
