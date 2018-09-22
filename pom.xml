@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.ma1uta.matrix</groupId>
     <artifactId>jmsdk</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <licenses>
         <license>
@@ -79,9 +79,16 @@
         <maven.project.info.plugin.version>3.0.0</maven.project.info.plugin.version>
         <slf4j.api.version>1.7.25</slf4j.api.version>
         <javax.ws.rs.api.version>2.0.1</javax.ws.rs.api.version>
-        <jackson.annotations.version>2.9.0</jackson.annotations.version>
+        <jackson.annotations.version>2.9.6</jackson.annotations.version>
         <javax.servlet.api.version>3.1.0</javax.servlet.api.version>
         <hibernate.jpa.api.version>1.0.0.Final</hibernate.jpa.api.version>
+        <junit5.bom.version>5.2.0</junit5.bom.version>
+        <jetty.server.version>9.4.11.v20180605</jetty.server.version>
+        <jersey.client.version>2.25.1</jersey.client.version>
+        <jersey.rx.client.version>2.25.1</jersey.rx.client.version>
+        <jersey.media.json.jackson.version>2.25.1</jersey.media.json.jackson.version>
+        <jackson.jaxrs.json.provider.version>2.9.6</jackson.jaxrs.json.provider.version>
+        <jackson.databind.version>2.9.6</jackson.databind.version>
     </properties>
 
     <build>
@@ -259,6 +266,51 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${javax.servlet.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-client</artifactId>
+                <version>${jersey.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.ext.rx</groupId>
+                <artifactId>jersey-rx-client</artifactId>
+                <version>${jersey.rx.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-json-jackson</artifactId>
+                <version>${jersey.media.json.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>${jackson.jaxrs.json.provider.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.databind.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit5.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.server.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.server.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

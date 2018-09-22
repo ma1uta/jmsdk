@@ -16,6 +16,11 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.EventContent;
 import io.github.ma1uta.matrix.Page;
@@ -28,7 +33,9 @@ import io.github.ma1uta.matrix.client.model.event.SendEventResponse;
 import io.github.ma1uta.matrix.events.messages.FormattedBody;
 import io.github.ma1uta.matrix.events.messages.Notice;
 import io.github.ma1uta.matrix.events.messages.Text;
+import io.github.ma1uta.matrix.jackson.EventContentDeserializer;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -76,7 +83,7 @@ public class EventMethods extends AbstractMethods {
 
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
             .path("stateKey", stateKey);
-        return factory().get(EventApi.class, "roomEventWithTypeAndState", params, EventContent.class);
+        return factory().get(EventApi.class, "roomEventWithTypeAndState", params, String.class).thenApply(r -> deserialize(r, eventType));
     }
 
     /**
@@ -92,7 +99,20 @@ public class EventMethods extends AbstractMethods {
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
 
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType);
-        return factory().get(EventApi.class, "roomEventWithType", params, EventContent.class);
+        return factory().get(EventApi.class, "roomEventWithType", params, String.class).thenApply(r -> deserialize(r, eventType));
+    }
+
+    protected EventContent deserialize(String response, String eventType) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JsonParser parser = objectMapper.getFactory().createParser(response);
+            ObjectCodec codec = parser.getCodec();
+            JsonNode node = codec.readTree(parser);
+            return new EventContentDeserializer().deserialize(node, eventType, codec);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

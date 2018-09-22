@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.client;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.methods.AccountMethods;
@@ -65,7 +66,7 @@ public class MatrixClient implements Closeable {
     private final RequestParams defaultParams;
 
     public MatrixClient(String homeserverUrl) {
-        this(homeserverUrl, ClientBuilder.newClient(), new RequestParams());
+        this(homeserverUrl, ClientBuilder.newBuilder().register(JacksonJsonProvider.class).build(), new RequestParams());
     }
 
     public MatrixClient(String homeserverUrl, Client client) {

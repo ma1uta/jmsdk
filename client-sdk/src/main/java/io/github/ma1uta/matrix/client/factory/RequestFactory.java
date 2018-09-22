@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -340,8 +341,9 @@ public class RequestFactory {
      */
     public <T, R> CompletableFuture<R> post(Class<?> apiClass, String apiMethod, RequestParams params, T payload, Class<R> responseClass,
                                             String requestType) {
-        return invoke(() -> buildRequest(apiClass, apiMethod, params, requestType).async().post(Entity.entity(payload, requestType)),
-            extractor(responseClass));
+        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, requestType).async();
+        Entity<T> entity = Entity.entity(payload, requestType);
+        return invoke(() -> action.post(entity), extractor(responseClass));
     }
 
     /**
@@ -376,8 +378,9 @@ public class RequestFactory {
      */
     public <T, R> CompletableFuture<R> post(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
                                             GenericType<R> genericType, String requestType) {
-        return invoke(() -> buildRequest(apiClass, apiMethod, params, requestType).async().post(Entity.entity(payload, requestType)),
-            extractor(genericType));
+        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, requestType).async();
+        Entity<T> entity = Entity.entity(payload, requestType);
+        return invoke(() -> action.post(entity), extractor(genericType));
     }
 
     /**
@@ -407,7 +410,8 @@ public class RequestFactory {
      */
     public <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass,
                                         String requestType) {
-        return invoke(() -> buildRequest(apiClass, apiMethod, params, requestType).async().get(), extractor(responseClass));
+        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, requestType).async();
+        return invoke(action::get, extractor(responseClass));
     }
 
     /**
@@ -437,7 +441,8 @@ public class RequestFactory {
      */
     public <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, GenericType<R> genericType,
                                         String requestType) {
-        return invoke(() -> buildRequest(apiClass, apiMethod, params, requestType).async().get(), extractor(genericType));
+        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, requestType).async();
+        return invoke(action::get, extractor(genericType));
     }
 
     /**
@@ -454,8 +459,9 @@ public class RequestFactory {
      */
     public <T, R> CompletableFuture<R> put(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
                                            Class<R> responseClass) {
-        return invoke(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async().put(Entity.json(payload)),
-            extractor(responseClass));
+        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async();
+        Entity<T> json = Entity.json(payload);
+        return invoke(() -> action.put(json), extractor(responseClass));
     }
 
     /**
@@ -472,8 +478,9 @@ public class RequestFactory {
      */
     public <T, R> CompletableFuture<R> put(Class<?> apiClass, String apiMethod, RequestParams params, T payload,
                                            GenericType<R> genericType) {
-        return invoke(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async().put(Entity.json(payload)),
-            extractor(genericType));
+        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async();
+        Entity<T> json = Entity.json(payload);
+        return invoke(() -> action.put(json), extractor(genericType));
     }
 
     /**
@@ -485,8 +492,8 @@ public class RequestFactory {
      * @return the {@link CompletableFuture} instance to make async request.
      */
     public CompletableFuture<EmptyResponse> delete(Class<?> apiClass, String apiMethod, RequestParams params) {
-        return invoke(() -> buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async().delete(),
-            extractor(EmptyResponse.class));
+        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async();
+        return invoke(action::delete, extractor(EmptyResponse.class));
     }
 
     /**
@@ -557,9 +564,12 @@ public class RequestFactory {
                                 LOGGER.debug("Error: {}", error.getError());
                             }
 
-                            result.completeExceptionally(
-                                new MatrixException(error.getErrcode(), error.getError(), error.getRetryAfterMs(), status));
-
+                            if (error == null) {
+                                result.completeExceptionally(new MatrixException(MatrixException.M_INTERNAL, "Empty response.", status));
+                            } else {
+                                result.completeExceptionally(
+                                    new MatrixException(error.getErrcode(), error.getError(), error.getRetryAfterMs(), status));
+                            }
                             LOGGER.debug("Finish invoking.");
                     }
                 }
