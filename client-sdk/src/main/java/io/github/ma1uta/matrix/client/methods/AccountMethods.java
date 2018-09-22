@@ -84,13 +84,13 @@ public class AccountMethods extends AbstractMethods {
      * @param requestToken The request token.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> msisdnRequestToken(MsisdnRequestToken requestToken) {
+    public CompletableFuture<SessionResponse> msisdnRequestToken(MsisdnRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
         Objects.requireNonNull(requestToken.getCountry(), "Country cannot be empty.");
         Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "msisdnRequestToken", defaults(), requestToken, EmptyResponse.class);
+        return factory().post(AccountApi.class, "msisdnRequestToken", defaults(), requestToken, SessionResponse.class);
     }
 
     /**

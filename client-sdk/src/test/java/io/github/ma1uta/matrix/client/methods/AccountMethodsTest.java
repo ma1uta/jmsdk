@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.EmailRequestToken;
+import io.github.ma1uta.matrix.client.model.account.MsisdnRequestToken;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
@@ -120,25 +121,9 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void emailRequestToken() {
-        SessionResponse sessionResponse = emailRequestToken(true);
-
-        assertNotNull(sessionResponse);
-        assertEquals("123abc", sessionResponse.getSid());
-    }
-
-    @Test
-    public void tryToEmailRequestToken() {
-        assertThrows(CompletionException.class, () -> emailRequestToken(false));
-    }
-
-    public SessionResponse emailRequestToken(boolean withAuth) {
         getServlet().setPost((req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register/email/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
-
-            if (!authenticated(req, res)) {
-                fail();
-            }
 
             JsonNode jsonNode = incomingJson(req);
 
@@ -158,15 +143,55 @@ public class AccountMethodsTest extends ClientToJettyServer {
             }
         });
 
-        if (withAuth) {
-            getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
-        }
         EmailRequestToken request = new EmailRequestToken();
         request.setClientSecret("monkeys_are_GREAT");
         request.setEmail("alice@example.org");
         request.setSendAttempt(1L);
         request.setNextLink("https://example.org/congratulations.html");
         request.setIdServer("id.example.com");
-        return getMatrixClient().account().emailRequestToken(request).join();
+        SessionResponse sessionResponse = getMatrixClient().account().emailRequestToken(request).join();
+
+        assertNotNull(sessionResponse);
+        assertEquals("123abc", sessionResponse.getSid());
     }
+
+    @Test
+    public void phoneRequestToken() {
+        getServlet().setPost((req, res) -> {
+            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register/msisdn/requestToken"));
+            assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+
+            JsonNode jsonNode = incomingJson(req);
+
+            assertEquals("monkeys_are_GREAT", jsonNode.get("client_secret").asText());
+            assertEquals("GB", jsonNode.get("country").asText());
+            assertEquals("07700900001", jsonNode.get("phone_number").asText());
+            assertEquals(1, jsonNode.get("send_attempt").asInt());
+            assertEquals("https://example.org/congratulations.html", jsonNode.get("next_link").asText());
+            assertEquals("id.example.com", jsonNode.get("id_server").asText());
+
+            try {
+                res.setContentType(MediaType.APPLICATION_JSON);
+                res.getWriter().println("{\n" +
+                    "  \"sid\": \"123abc\"\n" +
+                    "}");
+            } catch (IOException e) {
+                fail();
+            }
+        });
+
+        MsisdnRequestToken request = new MsisdnRequestToken();
+        request.setClientSecret("monkeys_are_GREAT");
+        request.setCountry("GB");
+        request.setPhoneNumber("07700900001");
+        request.setSendAttempt(1L);
+        request.setNextLink("https://example.org/congratulations.html");
+        request.setIdServer("id.example.com");
+        SessionResponse sessionResponse = getMatrixClient().account().msisdnRequestToken(request).join();
+
+        assertNotNull(sessionResponse);
+        assertEquals("123abc", sessionResponse.getSid());
+    }
+
+
 }
