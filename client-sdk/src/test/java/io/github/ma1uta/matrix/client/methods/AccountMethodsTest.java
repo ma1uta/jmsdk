@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.github.ma1uta.matrix.client.AuthenticationRequred;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.EmailRequestToken;
@@ -34,6 +35,7 @@ import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
 import io.github.ma1uta.matrix.thirdpid.SessionResponse;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
@@ -58,7 +60,8 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void tryToRegister() {
-        assertThrows(CompletionException.class, () -> register(false, false));
+        CompletionException e = assertThrows(CompletionException.class, () -> register(false, false));
+        assertTrue(e.getCause() instanceof AuthenticationRequred);
     }
 
     public LoginResponse register(boolean inhibitLogin, boolean withAuth) {
@@ -88,7 +91,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
                         "  \"device_id\": \"GHTYAJCE\"\n" +
                         "}");
                 } else {
-                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "");
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
                 }
             } catch (IOException e) {
                 fail();
@@ -193,5 +196,66 @@ public class AccountMethodsTest extends ClientToJettyServer {
         assertEquals("123abc", sessionResponse.getSid());
     }
 
+    @Test
+    public void password() {
+        password(true, true);
+    }
+
+    @Test
+    public void tryToPassword() {
+        assertThrows(IllegalArgumentException.class, () -> password(false, false));
+    }
+
+    @Test
+    public void unauthincatedTryToPassword() {
+        CompletionException e = assertThrows(CompletionException.class, () -> password(true, false));
+        assertTrue(e.getCause() instanceof AuthenticationRequred);
+    }
+
+    public void password(boolean withToken, boolean withAuth) {
+        getServlet().setPost((req, res) -> {
+            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password"));
+            assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+
+            if (authenticated(req, res)) {
+                JsonNode jsonNode = incomingJson(req);
+
+                assertEquals("ihatebananas", jsonNode.get("new_password").asText());
+                JsonNode auth = jsonNode.get("auth");
+
+                if (auth == null || auth.isNull()) {
+                    try {
+                        res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+                    } catch (IOException e) {
+                        fail();
+                    }
+                } else {
+                    try {
+                        try {
+                            assertEquals("m.login.password", auth.get("type").asText());
+                            assertEquals("xxxxx", auth.get("session").asText());
+                        } catch (AssertionFailedError e) {
+                            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+                        }
+
+                        res.setContentType(MediaType.APPLICATION_JSON);
+                        res.getWriter().println("{}");
+                    } catch (IOException e) {
+                        fail();
+                    }
+                }
+            }
+        });
+
+        if (withToken) {
+            getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
+        }
+        AuthenticationData auth = new AuthenticationData();
+        if (withAuth) {
+            auth.setType(AuthApi.AuthType.PASSWORD);
+            auth.setSession("xxxxx");
+        }
+        assertNotNull(getMatrixClient().account().password("ihatebananas", auth).join());
+    }
 
 }

@@ -576,7 +576,8 @@ public class RequestFactory {
                             }
 
                             if (error == null) {
-                                result.completeExceptionally(new MatrixException(MatrixException.M_INTERNAL, "Empty response.", status));
+                                result.completeExceptionally(
+                                    new MatrixException(MatrixException.M_INTERNAL, "Missing error response.", status));
                             } else {
                                 result.completeExceptionally(
                                     new MatrixException(error.getErrcode(), error.getError(), error.getRetryAfterMs(), status));

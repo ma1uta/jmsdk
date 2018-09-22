@@ -97,13 +97,15 @@ public class AccountMethods extends AbstractMethods {
      * Change password.
      *
      * @param password The new password.
+     * @param auth     Additional authentication information for the user-interactive authentication API.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> password(String password) {
+    public CompletableFuture<EmptyResponse> password(String password, AuthenticationData auth) {
         Objects.requireNonNull(password, "Password cannot be empty.");
 
         PasswordRequest request = new PasswordRequest();
         request.setNewPassword(password);
+        request.setAuth(auth);
         return factory().post(AccountApi.class, "password", defaults(), request, EmptyResponse.class);
     }
 
