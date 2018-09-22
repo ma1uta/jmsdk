@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -124,7 +123,7 @@ public class RequestFactory {
      * @return The prepared request.
      */
     protected Invocation.Builder buildRequest(Class<?> apiClass, String apiMethod, RequestParams params, String requestType) {
-        securityValidation(apiClass, apiMethod, params);
+        validateMethod(apiClass, apiMethod, params);
 
         UriBuilder builder = createUriBuilder(apiClass, apiMethod);
         URI uri = buildUri(params, builder);
@@ -145,15 +144,13 @@ public class RequestFactory {
      * @param params    The request params.
      * @throws IllegalArgumentException if the access token missing.
      */
-    protected void securityValidation(Class<?> apiClass, String apiMethod, RequestParams params) {
+    protected void validateMethod(Class<?> apiClass, String apiMethod, RequestParams params) {
         Method[] methods = AccessController.doPrivileged((PrivilegedAction<Method[]>) apiClass::getDeclaredMethods);
-        long secured = Arrays.stream(methods).filter(m -> m.getName().equals(apiMethod))
-            .map(Method::getDeclaredAnnotations)
-            .flatMap(Arrays::stream)
-            .map(Annotation::getClass)
-            .filter(a -> a.equals(Secured.class))
-            .count();
-        if (secured > 0 && (params.getAccessToken() == null || params.getAccessToken().trim().isEmpty())) {
+        Method method = Arrays.stream(methods).filter(m -> m.getName().equals(apiMethod)).findAny().orElseThrow(
+            () -> new IllegalArgumentException(String.format("Cannot find the method %s in the class %s", apiMethod, apiClass.getName())));
+
+        boolean secured = method.getAnnotation(Secured.class) != null;
+        if (secured && (params.getAccessToken() == null || params.getAccessToken().trim().isEmpty())) {
             throw new IllegalArgumentException("The `access_token` should be specified in order to access to the secured resource.");
         }
     }

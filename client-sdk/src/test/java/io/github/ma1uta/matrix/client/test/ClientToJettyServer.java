@@ -16,6 +16,8 @@
 
 package io.github.ma1uta.matrix.client.test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import io.github.ma1uta.matrix.client.MatrixClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -24,7 +26,17 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 public class ClientToJettyServer {
+
+    public static final String ACCESS_TOKEN = "$ome_sEcreT_t0keN";
+
+    public static final Pattern BEARER = Pattern.compile("Bearer (.*)");
 
     private ConfigurableServlet servlet;
     private MatrixClient matrixClient;
@@ -67,5 +79,28 @@ public class ClientToJettyServer {
     @AfterEach
     void tearDown() throws Exception {
         server.stop();
+    }
+
+    public boolean authenticated(HttpServletRequest req, HttpServletResponse res) {
+        String accessToken = null;
+        String authorization = req.getHeader("Authorization");
+        if (authorization == null || authorization.trim().isEmpty()) {
+            accessToken = req.getParameter("access_token");
+        } else {
+            Matcher matcher = BEARER.matcher(authorization);
+            if (matcher.matches()) {
+                accessToken = matcher.group(1);
+            }
+        }
+        if (!ACCESS_TOKEN.equals(accessToken)) {
+            try {
+                res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+            } catch (IOException e) {
+                fail();
+            }
+            return false;
+        }
+
+        return true;
     }
 }
