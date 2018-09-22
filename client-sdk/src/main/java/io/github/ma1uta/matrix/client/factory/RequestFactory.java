@@ -21,7 +21,9 @@ import static java.util.stream.Collectors.toMap;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.ErrorResponse;
 import io.github.ma1uta.matrix.Secured;
+import io.github.ma1uta.matrix.client.AuthenticationRequred;
 import io.github.ma1uta.matrix.client.methods.RequestParams;
+import io.github.ma1uta.matrix.client.model.auth.AuthenticationFlows;
 import io.github.ma1uta.matrix.exception.MatrixException;
 import io.github.ma1uta.matrix.exception.RateLimitedException;
 import org.slf4j.Logger;
@@ -70,6 +72,11 @@ public class RequestFactory {
      * Status code when request was finished with success.
      */
     public static final int SUCCESS = 200;
+
+    /**
+     * Status code when homeserver requires additional authentication information.
+     */
+    public static final int UNAUTHORIZED = 401;
 
     /**
      * Initial waiting timeout when rate-limited response is occurred.
@@ -535,6 +542,13 @@ public class RequestFactory {
                         case SUCCESS:
                             LOGGER.debug("Success.");
                             result.complete(extractor.apply(response));
+                            LOGGER.debug("Finish invoking.");
+                            break;
+                        case UNAUTHORIZED:
+                            LOGGER.debug("Authentication required.");
+                            AuthenticationFlows auth = response.readEntity(AuthenticationFlows.class);
+                            result.completeExceptionally(new AuthenticationRequred(auth));
+                            LOGGER.debug("Finish invoking.");
                             break;
                         case RATE_LIMITED:
                             LOGGER.warn("Rate limited.");

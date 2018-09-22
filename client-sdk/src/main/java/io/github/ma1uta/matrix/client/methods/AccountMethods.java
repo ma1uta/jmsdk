@@ -31,6 +31,7 @@ import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import io.github.ma1uta.matrix.thirdpid.SessionResponse;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -69,12 +70,12 @@ public class AccountMethods extends AbstractMethods {
      * @param requestToken The request token.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> emailRequestToken(EmailRequestToken requestToken) {
+    public CompletableFuture<SessionResponse> emailRequestToken(EmailRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
         Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "emailRequestToken", defaults(), requestToken, EmptyResponse.class);
+        return factory().post(AccountApi.class, "emailRequestToken", defaults(), requestToken, SessionResponse.class);
     }
 
     /**

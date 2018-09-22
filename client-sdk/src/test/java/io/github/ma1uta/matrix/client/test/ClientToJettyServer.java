@@ -18,6 +18,8 @@ package io.github.ma1uta.matrix.client.test;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -102,5 +105,14 @@ public class ClientToJettyServer {
         }
 
         return true;
+    }
+
+    public JsonNode incomingJson(HttpServletRequest request) {
+        try {
+            return new ObjectMapper().readValue(request.getReader().lines().collect(Collectors.joining()), JsonNode.class);
+        } catch (IOException e) {
+            fail();
+            return null;
+        }
     }
 }
