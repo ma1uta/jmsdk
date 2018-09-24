@@ -38,14 +38,15 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import java.io.IOException;
-import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
 public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
-    public void registerAndLogin() {
+    public void registerAndLogin() throws Exception {
         LoginResponse loginResponse = register(false, true);
 
         assertEquals("abc123", getMatrixClient().getDefaultParams().getAccessToken());
@@ -55,7 +56,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     @Test
-    public void onlyRegister() {
+    public void onlyRegister() throws Exception {
         LoginResponse loginResponse = register(true, true);
 
         assertNull(getMatrixClient().getDefaultParams().getAccessToken());
@@ -66,11 +67,11 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void tryToRegister() {
-        CompletionException e = assertThrows(CompletionException.class, () -> register(false, false));
+        ExecutionException e = assertThrows(ExecutionException.class, () -> register(false, false));
         assertTrue(e.getCause() instanceof AuthenticationRequred);
     }
 
-    public LoginResponse register(boolean inhibitLogin, boolean withAuth) {
+    public LoginResponse register(boolean inhibitLogin, boolean withAuth) throws Exception {
         getServlet().setPost((req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -119,7 +120,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             request.setAuth(auth);
         }
 
-        LoginResponse loginResponse = getMatrixClient().account().register(request).join();
+        LoginResponse loginResponse = getMatrixClient().account().register(request).get(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(loginResponse);
         assertEquals("@cheeky_monkey:matrix.org", loginResponse.getUserId());
@@ -128,7 +129,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     @Test
-    public void emailRequestToken() {
+    public void emailRequestToken() throws Exception {
         getServlet().setPost((req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register/email/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -157,14 +158,14 @@ public class AccountMethodsTest extends ClientToJettyServer {
         request.setSendAttempt(1L);
         request.setNextLink("https://example.org/congratulations.html");
         request.setIdServer("id.example.com");
-        SessionResponse sessionResponse = getMatrixClient().account().emailRequestToken(request).join();
+        SessionResponse sessionResponse = getMatrixClient().account().emailRequestToken(request).get(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(sessionResponse);
         assertEquals("123abc", sessionResponse.getSid());
     }
 
     @Test
-    public void phoneRequestToken() {
+    public void phoneRequestToken() throws Exception {
         getServlet().setPost((req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register/msisdn/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -195,14 +196,14 @@ public class AccountMethodsTest extends ClientToJettyServer {
         request.setSendAttempt(1L);
         request.setNextLink("https://example.org/congratulations.html");
         request.setIdServer("id.example.com");
-        SessionResponse sessionResponse = getMatrixClient().account().msisdnRequestToken(request).join();
+        SessionResponse sessionResponse = getMatrixClient().account().msisdnRequestToken(request).get(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(sessionResponse);
         assertEquals("123abc", sessionResponse.getSid());
     }
 
     @Test
-    public void password() {
+    public void password() throws Exception {
         password(true, true);
     }
 
@@ -213,11 +214,11 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void unauthincatedTryToPassword() {
-        CompletionException e = assertThrows(CompletionException.class, () -> password(true, false));
+        ExecutionException e = assertThrows(ExecutionException.class, () -> password(true, false));
         assertTrue(e.getCause() instanceof AuthenticationRequred);
     }
 
-    public void password(boolean withToken, boolean withAuth) {
+    public void password(boolean withToken, boolean withAuth) throws Exception {
         getServlet().setPost((req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -260,11 +261,11 @@ public class AccountMethodsTest extends ClientToJettyServer {
             auth.setType(AuthApi.AuthType.PASSWORD);
             auth.setSession("xxxxx");
         }
-        assertNotNull(getMatrixClient().account().password("ihatebananas", auth).join());
+        assertNotNull(getMatrixClient().account().password("ihatebananas", auth).get(1000, TimeUnit.MILLISECONDS));
     }
 
     @Test
-    public void passwordEmailRequestToken() {
+    public void passwordEmailRequestToken() throws Exception {
         getServlet().setPost((req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password/email/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -293,14 +294,14 @@ public class AccountMethodsTest extends ClientToJettyServer {
         request.setSendAttempt(1L);
         request.setNextLink("https://example.org/congratulations.html");
         request.setIdServer("id.example.com");
-        SessionResponse sessionResponse = getMatrixClient().account().passwordEmailRequestToken(request).join();
+        SessionResponse sessionResponse = getMatrixClient().account().passwordEmailRequestToken(request).get(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(sessionResponse);
         assertEquals("123abc", sessionResponse.getSid());
     }
 
     @Test
-    public void passwordPhoneRequestToken() {
+    public void passwordPhoneRequestToken() throws Exception {
         getServlet().setPost((req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password/msisdn/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -331,14 +332,14 @@ public class AccountMethodsTest extends ClientToJettyServer {
         request.setSendAttempt(1L);
         request.setNextLink("https://example.org/congratulations.html");
         request.setIdServer("id.example.com");
-        SessionResponse sessionResponse = getMatrixClient().account().passwordMsisdnRequestToken(request).join();
+        SessionResponse sessionResponse = getMatrixClient().account().passwordMsisdnRequestToken(request).get(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(sessionResponse);
         assertEquals("123abc", sessionResponse.getSid());
     }
 
     @Test
-    public void deactivate() {
+    public void deactivate() throws Exception {
         deactivate(true, true);
     }
 
@@ -349,11 +350,11 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void tryToDeactivateWithouAuth() {
-        CompletionException e = assertThrows(CompletionException.class, () -> deactivate(true, false));
+        ExecutionException e = assertThrows(ExecutionException.class, () -> deactivate(true, false));
         assertTrue(e.getCause() instanceof AuthenticationRequred);
     }
 
-    public void deactivate(boolean withToken, boolean withAuth) {
+    public void deactivate(boolean withToken, boolean withAuth) throws Exception {
         getServlet().setPost((req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/deactivate"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -395,8 +396,22 @@ public class AccountMethodsTest extends ClientToJettyServer {
             auth.setType(AuthApi.AuthType.PASSWORD);
             auth.setSession("sss");
         }
-        assertNotNull(getMatrixClient().account().deactivate(auth).join());
+        assertNotNull(getMatrixClient().account().deactivate(auth).get(1000, TimeUnit.MILLISECONDS));
     }
 
+    @Test
+    public void availableTest() throws Exception {
+        getServlet().setGet((req, res) -> {
+            try {
+                if ("my_cool_localpart".equals(req.getParameter("username"))) {
+                    res.setContentType(MediaType.APPLICATION_JSON);
+                    res.getWriter().println("{\"available\":true}");
+                }
+            } catch (Exception e) {
+                fail();
+            }
+        });
 
+        assertTrue(getMatrixClient().account().available("my_cool_localpart").get(1000, TimeUnit.MILLISECONDS));
+    }
 }
