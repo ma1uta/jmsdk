@@ -211,12 +211,12 @@ public class AccountMethods extends AbstractMethods {
      * @param requestToken The request token.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> threePidEmailRequestToken(EmailRequestToken requestToken) {
+    public CompletableFuture<SessionResponse> threePidEmailRequestToken(EmailRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
         Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "threePidEmailRequestToken", defaults(), requestToken, EmptyResponse.class);
+        return factory().post(AccountApi.class, "threePidEmailRequestToken", defaults(), requestToken, SessionResponse.class);
     }
 
     /**
@@ -225,13 +225,13 @@ public class AccountMethods extends AbstractMethods {
      * @param requestToken The request token.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> threePidMsisdnRequestToken(MsisdnRequestToken requestToken) {
+    public CompletableFuture<SessionResponse> threePidMsisdnRequestToken(MsisdnRequestToken requestToken) {
         Objects.requireNonNull(requestToken.getClientSecret(), "Client secret cannot be empty.");
         Objects.requireNonNull(requestToken.getCountry(), "Country cannot be empty.");
         Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "threePidMsisdnRequestToken", defaults(), requestToken, EmptyResponse.class);
+        return factory().post(AccountApi.class, "threePidMsisdnRequestToken", defaults(), requestToken, SessionResponse.class);
     }
 
     /**

@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.AuthenticationRequred;
 import io.github.ma1uta.matrix.client.api.AuthApi;
@@ -38,6 +37,7 @@ import io.github.ma1uta.matrix.client.model.account.ThirdPartyIdentifier;
 import io.github.ma1uta.matrix.client.model.account.ThreePidCred;
 import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
+import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
 import io.github.ma1uta.matrix.thirdpid.SessionResponse;
@@ -547,5 +547,99 @@ public class AccountMethodsTest extends ClientToJettyServer {
         }
         EmptyResponse res = getMatrixClient().account().deleteThreePid("email", "example@domain.com").get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(res);
+    }
+
+       @Test
+    public void email3PidRequestToken() throws Exception {
+        getServlet().setPost((req, res) -> {
+            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/3pid/email/requestToken"));
+            assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+
+            JsonNode jsonNode = incomingJson(req);
+
+            assertEquals("monkeys_are_GREAT", jsonNode.get("client_secret").asText());
+            assertEquals("alice@example.org", jsonNode.get("email").asText());
+            assertEquals(1, jsonNode.get("send_attempt").asInt());
+            assertEquals("https://example.org/congratulations.html", jsonNode.get("next_link").asText());
+            assertEquals("id.example.com", jsonNode.get("id_server").asText());
+
+            sidResponse(res);
+        });
+
+        EmailRequestToken request = new EmailRequestToken();
+        request.setClientSecret("monkeys_are_GREAT");
+        request.setEmail("alice@example.org");
+        request.setSendAttempt(1L);
+        request.setNextLink("https://example.org/congratulations.html");
+        request.setIdServer("id.example.com");
+        SessionResponse sessionResponse = getMatrixClient().account().threePidEmailRequestToken(request).get(1000, TimeUnit.MILLISECONDS);
+
+        assertNotNull(sessionResponse);
+        assertEquals("123abc", sessionResponse.getSid());
+    }
+
+    @Test
+    public void phone3PidRequestToken() throws Exception {
+        getServlet().setPost((req, res) -> {
+            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/3pid/msisdn/requestToken"));
+            assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+
+            JsonNode jsonNode = incomingJson(req);
+
+            assertEquals("monkeys_are_GREAT", jsonNode.get("client_secret").asText());
+            assertEquals("GB", jsonNode.get("country").asText());
+            assertEquals("07700900001", jsonNode.get("phone_number").asText());
+            assertEquals(1, jsonNode.get("send_attempt").asInt());
+            assertEquals("https://example.org/congratulations.html", jsonNode.get("next_link").asText());
+            assertEquals("id.example.com", jsonNode.get("id_server").asText());
+
+            sidResponse(res);
+        });
+
+        MsisdnRequestToken request = new MsisdnRequestToken();
+        request.setClientSecret("monkeys_are_GREAT");
+        request.setCountry("GB");
+        request.setPhoneNumber("07700900001");
+        request.setSendAttempt(1L);
+        request.setNextLink("https://example.org/congratulations.html");
+        request.setIdServer("id.example.com");
+        SessionResponse sessionResponse = getMatrixClient().account().threePidMsisdnRequestToken(request).get(1000, TimeUnit.MILLISECONDS);
+
+        assertNotNull(sessionResponse);
+        assertEquals("123abc", sessionResponse.getSid());
+    }
+
+    @Test
+    public void whoami() throws Exception {
+        whoami(true);
+    }
+
+    @Test
+    public void whoamiUnauthenticated() {
+        assertThrows(IllegalArgumentException.class, () -> whoami(false));
+    }
+
+    public void whoami(boolean withToken) throws Exception {
+        getServlet().setGet((req, res) -> {
+            try {
+                assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/whoami"));
+
+                if (authenticated(req, res)) {
+                    res.setContentType(MediaType.APPLICATION_JSON);
+                    res.getWriter().println("{\n" +
+                        "  \"user_id\": \"@joe:example.org\"\n" +
+                        "}");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        if (withToken) {
+            getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
+        }
+        WhoamiResponse whoamiResponse = getMatrixClient().account().whoami().get(1000, TimeUnit.MILLISECONDS);
+        assertNotNull(whoamiResponse);
+        assertEquals("@joe:example.org", whoamiResponse.getUserId());
     }
 }
