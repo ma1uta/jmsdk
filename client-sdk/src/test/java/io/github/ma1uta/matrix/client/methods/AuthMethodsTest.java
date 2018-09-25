@@ -18,11 +18,13 @@ package io.github.ma1uta.matrix.client.methods;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
@@ -107,5 +109,69 @@ class AuthMethodsTest extends ClientToJettyServer {
         assertEquals("@cheeky_monkey:matrix.org", loginResponse.getUserId());
         assertEquals("abc123", loginResponse.getAccessToken());
         assertEquals("GHTYAJCE", loginResponse.getDeviceId());
+    }
+
+    @Test
+    public void logout() throws Exception {
+        logout(true);
+    }
+
+    @Test
+    public void logoutUnAuthorized() {
+        assertThrows(IllegalArgumentException.class, () -> logout(false));
+    }
+
+    public void logout(boolean withToken) throws Exception {
+        getServlet().setPost((req, res) -> {
+            try {
+                assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/logout"));
+                assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+                if (authenticated(req, res)) {
+                    res.setContentType(MediaType.APPLICATION_JSON);
+                    res.getWriter().println("{}");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail();
+            }
+        });
+
+        if (withToken) {
+            getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
+        }
+        EmptyResponse res = getMatrixClient().auth().logout().get(1000, TimeUnit.MILLISECONDS);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void logoutAll() throws Exception {
+        logout(true);
+    }
+
+    @Test
+    public void logoutAllUnAuthorized() {
+        assertThrows(IllegalArgumentException.class, () -> logout(false));
+    }
+
+    public void logoutAll(boolean withToken) throws Exception {
+        getServlet().setPost((req, res) -> {
+            try {
+                assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/logoutAll"));
+                assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+                if (authenticated(req, res)) {
+                    res.setContentType(MediaType.APPLICATION_JSON);
+                    res.getWriter().println("{}");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail();
+            }
+        });
+
+        if (withToken) {
+            getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
+        }
+        EmptyResponse res = getMatrixClient().auth().logoutAll().get(1000, TimeUnit.MILLISECONDS);
+        assertNotNull(res);
     }
 }
