@@ -64,6 +64,7 @@ class ClientConfigMethodsTest extends ClientToJettyServer {
                     res.getWriter().println("{}");
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 fail();
             }
         });
@@ -86,7 +87,7 @@ class ClientConfigMethodsTest extends ClientToJettyServer {
 
     @Test
     public void addRoomConfig() throws Exception {
-        addConfig(true);
+        addRoomConfig(true);
     }
 
     void addRoomConfig(boolean withToken) throws Exception {
@@ -106,6 +107,7 @@ class ClientConfigMethodsTest extends ClientToJettyServer {
                     res.getWriter().println("{}");
                 }
             } catch (IOException e) {
+                e.printStackTrace();
                 fail();
             }
         });
@@ -116,8 +118,8 @@ class ClientConfigMethodsTest extends ClientToJettyServer {
         }
         Map<String, String> config = new HashMap<>();
         config.put("custom_account_data_key", "custom_config_value");
-        EmptyResponse emptyResponse = getMatrixClient().clientConfig().addRoomConfig("!726s6s6q", "org.example.custom.config", config)
-            .get(1000, TimeUnit.MILLISECONDS);
+        EmptyResponse emptyResponse = getMatrixClient().clientConfig()
+            .addRoomConfig("!726s6s6q:example.com", "org.example.custom.room.config", config).get(100000, TimeUnit.MILLISECONDS);
         assertNotNull(emptyResponse);
     }
 }
