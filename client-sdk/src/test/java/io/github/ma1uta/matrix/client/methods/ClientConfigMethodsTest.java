@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
+import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
+import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-class ClientConfigMethodsTest extends ClientToJettyServer {
+class ClientConfigMethodsTest extends MockServer {
 
     @Test
     public void addConfigUnAutentificated() {
@@ -49,7 +50,7 @@ class ClientConfigMethodsTest extends ClientToJettyServer {
     }
 
     void addConfig(boolean withToken) throws Exception {
-        getServlet().setPut((req, res) -> {
+        ConfigurableServlet.put = (req, res) -> {
             try {
 
                 if (authenticated(req, res)) {
@@ -67,7 +68,7 @@ class ClientConfigMethodsTest extends ClientToJettyServer {
                 e.printStackTrace();
                 fail();
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().userId("@alice:example.com");
@@ -91,7 +92,7 @@ class ClientConfigMethodsTest extends ClientToJettyServer {
     }
 
     void addRoomConfig(boolean withToken) throws Exception {
-        getServlet().setPut((req, res) -> {
+        ConfigurableServlet.put = (req, res) -> {
             try {
 
                 if (authenticated(req, res)) {
@@ -110,7 +111,7 @@ class ClientConfigMethodsTest extends ClientToJettyServer {
                 e.printStackTrace();
                 fail();
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().userId("@alice:example.com");

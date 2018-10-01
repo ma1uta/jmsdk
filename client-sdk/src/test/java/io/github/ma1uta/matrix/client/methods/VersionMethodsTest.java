@@ -21,18 +21,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
+import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
+import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.ws.rs.core.MediaType;
 
-class VersionMethodsTest extends ClientToJettyServer {
+class VersionMethodsTest extends MockServer {
 
     @Test
     void versions() {
-        getServlet().setGet((req, res) -> {
+        ConfigurableServlet.get = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/versions"));
             try {
                 res.setContentType(MediaType.APPLICATION_JSON);
@@ -41,7 +42,7 @@ class VersionMethodsTest extends ClientToJettyServer {
             } catch (IOException e) {
                 fail();
             }
-        });
+        };
 
         String[] versions = getMatrixClient().versions().versions().join();
         assertNotNull(versions);

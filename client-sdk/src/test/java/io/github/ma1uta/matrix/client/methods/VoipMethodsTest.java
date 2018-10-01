@@ -23,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import io.github.ma1uta.matrix.client.model.voip.VoipResponse;
-import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
+import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
+import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 
-class VoipMethodsTest extends ClientToJettyServer {
+class VoipMethodsTest extends MockServer {
 
     @Test
     public void secured() {
@@ -40,7 +41,7 @@ class VoipMethodsTest extends ClientToJettyServer {
 
     @Test
     public void voip() {
-        getServlet().setGet((req, res) -> {
+        ConfigurableServlet.get = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/voip"));
 
             if (authenticated(req, res)) {
@@ -61,7 +62,7 @@ class VoipMethodsTest extends ClientToJettyServer {
                     fail();
                 }
             }
-        });
+        };
 
         getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
         VoipResponse voip = getMatrixClient().turnServers().turnServers().join();

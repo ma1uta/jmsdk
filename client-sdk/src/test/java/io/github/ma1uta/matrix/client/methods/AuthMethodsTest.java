@@ -30,7 +30,8 @@ import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginType;
 import io.github.ma1uta.matrix.client.model.auth.UserIdentifier;
-import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
+import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
+import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -38,11 +39,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 
-class AuthMethodsTest extends ClientToJettyServer {
+class AuthMethodsTest extends MockServer {
 
     @Test
     public void getLogin() throws Exception {
-        getServlet().setGet((req, res) -> {
+        ConfigurableServlet.get = (req, res) -> {
             try {
                 assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/login"));
 
@@ -57,7 +58,7 @@ class AuthMethodsTest extends ClientToJettyServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        };
 
         List<LoginType> loginTypes = getMatrixClient().auth().loginTypes().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(loginTypes);
@@ -69,7 +70,7 @@ class AuthMethodsTest extends ClientToJettyServer {
 
     @Test
     public void login() throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             try {
                 assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/login"));
                 assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -94,7 +95,7 @@ class AuthMethodsTest extends ClientToJettyServer {
                 e.printStackTrace();
                 fail();
             }
-        });
+        };
 
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setType(AuthApi.AuthType.PASSWORD);
@@ -122,7 +123,7 @@ class AuthMethodsTest extends ClientToJettyServer {
     }
 
     public void logout(boolean withToken) throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             try {
                 assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/logout"));
                 assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -134,7 +135,7 @@ class AuthMethodsTest extends ClientToJettyServer {
                 e.printStackTrace();
                 fail();
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
@@ -154,7 +155,7 @@ class AuthMethodsTest extends ClientToJettyServer {
     }
 
     public void logoutAll(boolean withToken) throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             try {
                 assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/logoutAll"));
                 assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
@@ -166,7 +167,7 @@ class AuthMethodsTest extends ClientToJettyServer {
                 e.printStackTrace();
                 fail();
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);

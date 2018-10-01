@@ -21,33 +21,29 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.client.MatrixClient;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import io.undertow.Handlers;
+import io.undertow.Undertow;
+import io.undertow.server.handlers.PathHandler;
+import io.undertow.servlet.Servlets;
+import io.undertow.servlet.api.DeploymentInfo;
+import io.undertow.servlet.api.DeploymentManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class ClientToJettyServer {
+public class MockServer {
 
     public static final String ACCESS_TOKEN = "$ome_sEcreT_t0keN";
 
     public static final Pattern BEARER = Pattern.compile("Bearer (.*)");
 
-    private ConfigurableServlet servlet;
     private MatrixClient matrixClient;
-    private Server server;
-
-    public ConfigurableServlet getServlet() {
-        return servlet;
-    }
+    private Undertow server;
 
     public MatrixClient getMatrixClient() {
         return matrixClient;
@@ -55,28 +51,25 @@ public class ClientToJettyServer {
 
     @BeforeEach
     void setUp() throws Exception {
-        server = new Server();
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(0); // auto-bind to available port
-        server.addConnector(connector);
+        DeploymentInfo servletBuilder = Servlets.deployment()
+            .setClassLoader(getClass().getClassLoader())
+            .setContextPath("/")
+            .setDeploymentName("test.war")
+            .addServlets(
+                Servlets.servlet("DefaultServlet", ConfigurableServlet.class).addMapping("/*")
+            );
 
-        servlet = new ConfigurableServlet();
-        ServletContextHandler context = new ServletContextHandler();
-        ServletHolder aDefault = new ServletHolder("default", servlet);
-        aDefault.setInitParameter("resourceBase", System.getProperty("user.dir"));
-        aDefault.setInitParameter("dirAllowed", "true");
-        context.addServlet(aDefault, "/");
-        server.setHandler(context);
+        DeploymentManager manager = Servlets.defaultContainer().addDeployment(servletBuilder);
+        manager.deploy();
+        PathHandler path = Handlers.path(Handlers.redirect("/")).addPrefixPath("/", manager.start());
 
+        server = Undertow.builder()
+            .addHttpListener(8080, "localhost")
+            .setHandler(path)
+            .build();
         server.start();
 
-        String host = connector.getHost();
-        if (host == null) {
-            host = "localhost";
-        }
-        int port = connector.getLocalPort();
-
-        matrixClient = new MatrixClient(String.format("http://%s:%d", host, port));
+        matrixClient = new MatrixClient(String.format("http://%s:%d", "localhost", 8080));
     }
 
     @AfterEach
@@ -107,9 +100,18 @@ public class ClientToJettyServer {
         return true;
     }
 
+    public JsonNode incomingJson(String content) {
+        try {
+            return new ObjectMapper().readValue(content, JsonNode.class);
+        } catch (IOException e) {
+            fail();
+            return null;
+        }
+    }
+
     public JsonNode incomingJson(HttpServletRequest request) {
         try {
-            return new ObjectMapper().readValue(request.getReader().lines().collect(Collectors.joining()), JsonNode.class);
+            return new ObjectMapper().readValue(request.getInputStream(), JsonNode.class);
         } catch (IOException e) {
             fail();
             return null;

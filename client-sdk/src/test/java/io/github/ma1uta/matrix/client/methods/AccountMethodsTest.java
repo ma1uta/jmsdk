@@ -39,7 +39,8 @@ import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
-import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
+import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
+import io.github.ma1uta.matrix.client.test.MockServer;
 import io.github.ma1uta.matrix.thirdpid.SessionResponse;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
@@ -51,7 +52,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-public class AccountMethodsTest extends ClientToJettyServer {
+public class AccountMethodsTest extends MockServer {
 
     @Test
     public void registerAndLogin() throws Exception {
@@ -80,7 +81,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     public LoginResponse register(boolean inhibitLogin, boolean withAuth) throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -106,13 +107,15 @@ public class AccountMethodsTest extends ClientToJettyServer {
                         "  \"device_id\": \"GHTYAJCE\"\n") +
                         "}");
                 } else {
-                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    res.setContentType(MediaType.APPLICATION_JSON);
+                    res.getWriter().println("{}");
                 }
             } catch (IOException e) {
                 fail();
                 e.printStackTrace();
             }
-        });
+        };
 
         RegisterRequest request = new RegisterRequest();
         request.setUsername("cheeky_monkey");
@@ -139,7 +142,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void emailRequestToken() throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register/email/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -152,7 +155,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             assertEquals("id.example.com", jsonNode.get("id_server").asText());
 
             sidResponse(res);
-        });
+        };
 
         EmailRequestToken request = new EmailRequestToken();
         request.setClientSecret("monkeys_are_GREAT");
@@ -180,7 +183,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void phoneRequestToken() throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register/msisdn/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -194,7 +197,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             assertEquals("id.example.com", jsonNode.get("id_server").asText());
 
             sidResponse(res);
-        });
+        };
 
         MsisdnRequestToken request = new MsisdnRequestToken();
         request.setClientSecret("monkeys_are_GREAT");
@@ -226,41 +229,49 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     public void password(boolean withToken, boolean withAuth) throws Exception {
-        getServlet().setPost((req, res) -> {
-            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password"));
-            assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
+        ConfigurableServlet.post = (req, res) -> {
+            try {
+                assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password"));
+                assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
-            if (authenticated(req, res)) {
-                JsonNode jsonNode = incomingJson(req);
-
-                assertEquals("ihatebananas", jsonNode.get("new_password").asText());
-                JsonNode auth = jsonNode.get("auth");
-
-                if (auth == null || auth.isNull()) {
-                    try {
-                        res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
-                    } catch (IOException e) {
-                        fail();
-                        e.printStackTrace();
+                if (authenticated(req, res)) {
+                    if (req.getContentLength() == 0) {
+                        res.setContentType(MediaType.APPLICATION_JSON);
+                        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        res.getWriter().println("{}");
                     }
-                } else {
-                    try {
+                    String json = req.getReader().lines().collect(Collectors.joining());
+                    if (json.isEmpty()) {
+                        res.setContentType(MediaType.APPLICATION_JSON);
+                        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        res.getWriter().println("{}");
+                    }
+                    JsonNode jsonNode = incomingJson(json);
+
+                    assertEquals("ihatebananas", jsonNode.get("new_password").asText());
+                    JsonNode auth = jsonNode.get("auth");
+
+                    if (auth == null || auth.isNull()) {
+                        res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+                    } else {
                         try {
                             assertEquals("m.login.password", auth.get("type").asText());
                             assertEquals("xxxxx", auth.get("session").asText());
                         } catch (AssertionFailedError e) {
-                            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+                            res.setContentType(MediaType.APPLICATION_JSON);
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.getWriter().println("{}");
                         }
 
                         res.setContentType(MediaType.APPLICATION_JSON);
                         res.getWriter().println("{}");
-                    } catch (IOException e) {
-                        fail();
-                        e.printStackTrace();
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail();
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
@@ -275,7 +286,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void passwordEmailRequestToken() throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password/email/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -288,7 +299,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             assertEquals("id.example.com", jsonNode.get("id_server").asText());
 
             sidResponse(res);
-        });
+        };
 
         EmailRequestToken request = new EmailRequestToken();
         request.setClientSecret("monkeys_are_GREAT");
@@ -304,7 +315,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void passwordPhoneRequestToken() throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/password/msisdn/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -318,7 +329,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             assertEquals("id.example.com", jsonNode.get("id_server").asText());
 
             sidResponse(res);
-        });
+        };
 
         MsisdnRequestToken request = new MsisdnRequestToken();
         request.setClientSecret("monkeys_are_GREAT");
@@ -350,7 +361,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     public void deactivate(boolean withToken, boolean withAuth) throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/deactivate"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -372,7 +383,9 @@ public class AccountMethodsTest extends ClientToJettyServer {
                             assertEquals("m.login.password", auth.get("type").asText());
                             assertEquals("sss", auth.get("session").asText());
                         } catch (AssertionFailedError e) {
-                            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "{}");
+                            res.setContentType(MediaType.APPLICATION_JSON);
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.getWriter().println("{}");
                         }
 
                         res.setContentType(MediaType.APPLICATION_JSON);
@@ -383,7 +396,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
                     }
                 }
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
@@ -398,7 +411,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void availableTest() throws Exception {
-        getServlet().setGet((req, res) -> {
+        ConfigurableServlet.get = (req, res) -> {
             try {
                 assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/register/available"));
                 if ("my_cool_localpart".equals(req.getParameter("username"))) {
@@ -409,7 +422,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
                 fail();
                 e.printStackTrace();
             }
-        });
+        };
 
         assertTrue(getMatrixClient().account().available("my_cool_localpart").get(1000, TimeUnit.MILLISECONDS));
     }
@@ -425,7 +438,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     public void get3pid(boolean withToken) throws Exception {
-        getServlet().setGet((req, res) -> {
+        ConfigurableServlet.get = (req, res) -> {
             try {
                 assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/3pid"));
 
@@ -446,7 +459,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
                 fail();
                 e.printStackTrace();
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
@@ -474,7 +487,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     public void update3pid(boolean withToken) throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/3pid"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -497,7 +510,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
@@ -523,7 +536,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     public void delete3pid(boolean withToken) throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/3pid/delete"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -540,7 +553,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
                     fail();
                 }
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
@@ -549,9 +562,9 @@ public class AccountMethodsTest extends ClientToJettyServer {
         assertNotNull(res);
     }
 
-       @Test
+    @Test
     public void email3PidRequestToken() throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/3pid/email/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -564,7 +577,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             assertEquals("id.example.com", jsonNode.get("id_server").asText());
 
             sidResponse(res);
-        });
+        };
 
         EmailRequestToken request = new EmailRequestToken();
         request.setClientSecret("monkeys_are_GREAT");
@@ -580,7 +593,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
 
     @Test
     public void phone3PidRequestToken() throws Exception {
-        getServlet().setPost((req, res) -> {
+        ConfigurableServlet.post = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/3pid/msisdn/requestToken"));
             assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
 
@@ -594,7 +607,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             assertEquals("id.example.com", jsonNode.get("id_server").asText());
 
             sidResponse(res);
-        });
+        };
 
         MsisdnRequestToken request = new MsisdnRequestToken();
         request.setClientSecret("monkeys_are_GREAT");
@@ -620,7 +633,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
     }
 
     public void whoami(boolean withToken) throws Exception {
-        getServlet().setGet((req, res) -> {
+        ConfigurableServlet.get = (req, res) -> {
             try {
                 assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/account/whoami"));
 
@@ -633,7 +646,7 @@ public class AccountMethodsTest extends ClientToJettyServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        };
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);

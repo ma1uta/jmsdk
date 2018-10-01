@@ -22,12 +22,10 @@ import io.github.ma1uta.matrix.client.model.content.ContentConfig;
 import io.github.ma1uta.matrix.client.model.content.ContentUri;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Content methods.
@@ -41,14 +39,14 @@ public class ContentMethods extends AbstractMethods {
     /**
      * Upload some content to the content repository.
      *
-     * @param outputStream The file content.
-     * @param filename     The name of the file being uploaded.
-     * @param contentType  The content type of the file being uploaded.
+     * @param inputStream The file content.
+     * @param filename    The name of the file being uploaded.
+     * @param contentType The content type of the file being uploaded.
      * @return The MXC URI to the uploaded content.
      */
-    public CompletableFuture<String> upload(OutputStream outputStream, String filename, String contentType) {
+    public CompletableFuture<String> upload(InputStream inputStream, String filename, String contentType) {
         RequestParams params = defaults().clone().query("filename", filename).header("Content-Type", contentType);
-        return factory().post(ContentApi.class, "upload", params, outputStream, ContentUri.class, MediaType.MULTIPART_FORM_DATA)
+        return factory().post(ContentApi.class, "upload", params, inputStream, ContentUri.class, contentType)
             .thenApply(ContentUri::getContentUri);
     }
 

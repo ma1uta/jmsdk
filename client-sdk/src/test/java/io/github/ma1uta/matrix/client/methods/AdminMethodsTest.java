@@ -26,7 +26,8 @@ import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
 import io.github.ma1uta.matrix.client.model.admin.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.admin.DeviceInfo;
 import io.github.ma1uta.matrix.client.model.admin.SessionInfo;
-import io.github.ma1uta.matrix.client.test.ClientToJettyServer;
+import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
+import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.MediaType;
 
-class AdminMethodsTest extends ClientToJettyServer {
+class AdminMethodsTest extends MockServer {
 
     @Test
     public void secured() {
@@ -45,7 +46,7 @@ class AdminMethodsTest extends ClientToJettyServer {
 
     @Test
     public void whois() throws Exception {
-        getServlet().setGet((req, res) -> {
+        ConfigurableServlet.get = (req, res) -> {
             assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/admin/whois/%40peter%3Arabbit.rocks"));
 
             if (authenticated(req, res)) {
@@ -80,7 +81,7 @@ class AdminMethodsTest extends ClientToJettyServer {
                     fail();
                 }
             }
-        });
+        };
 
         getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
         AdminResponse res = getMatrixClient().admin().whois("@peter:rabbit.rocks").get(1000, TimeUnit.MILLISECONDS);

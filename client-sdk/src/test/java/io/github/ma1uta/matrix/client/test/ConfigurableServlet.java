@@ -25,47 +25,15 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ConfigurableServlet extends HttpServlet {
 
-    private BiConsumer<HttpServletRequest, HttpServletResponse> get;
-    private BiConsumer<HttpServletRequest, HttpServletResponse> post;
-    private BiConsumer<HttpServletRequest, HttpServletResponse> put;
-    private BiConsumer<HttpServletRequest, HttpServletResponse> delete;
-
-    public BiConsumer<HttpServletRequest, HttpServletResponse> getGet() {
-        return get;
-    }
-
-    public void setGet(BiConsumer<HttpServletRequest, HttpServletResponse> get) {
-        this.get = get;
-    }
-
-    public BiConsumer<HttpServletRequest, HttpServletResponse> getPost() {
-        return post;
-    }
-
-    public void setPost(BiConsumer<HttpServletRequest, HttpServletResponse> post) {
-        this.post = post;
-    }
-
-    public BiConsumer<HttpServletRequest, HttpServletResponse> getPut() {
-        return put;
-    }
-
-    public void setPut(BiConsumer<HttpServletRequest, HttpServletResponse> put) {
-        this.put = put;
-    }
-
-    public BiConsumer<HttpServletRequest, HttpServletResponse> getDelete() {
-        return delete;
-    }
-
-    public void setDelete(BiConsumer<HttpServletRequest, HttpServletResponse> delete) {
-        this.delete = delete;
-    }
+    public static BiConsumer<HttpServletRequest, HttpServletResponse> get;
+    public static BiConsumer<HttpServletRequest, HttpServletResponse> post;
+    public static BiConsumer<HttpServletRequest, HttpServletResponse> put;
+    public static BiConsumer<HttpServletRequest, HttpServletResponse> delete;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (getGet() != null) {
-            getGet().accept(req, resp);
+        if (get != null) {
+            get.accept(req, resp);
         } else {
             super.doGet(req, resp);
         }
@@ -73,8 +41,8 @@ public class ConfigurableServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (getPost() != null) {
-            getPost().accept(req, resp);
+        if (post != null) {
+            post.accept(req, resp);
         } else {
             super.doPost(req, resp);
         }
@@ -82,8 +50,8 @@ public class ConfigurableServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (getPut() != null) {
-            getPut().accept(req, resp);
+        if (put != null) {
+            put.accept(req, resp);
         } else {
             super.doPut(req, resp);
         }
@@ -91,8 +59,8 @@ public class ConfigurableServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (getDelete() != null) {
-            getDelete().accept(req, resp);
+        if (delete != null) {
+            delete.accept(req, resp);
         } else {
             super.doDelete(req, resp);
         }
