@@ -17,6 +17,7 @@
 package io.github.ma1uta.matrix.exception;
 
 import io.github.ma1uta.matrix.ErrorResponse;
+import io.github.ma1uta.matrix.RateLimitedErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +40,11 @@ public class ExceptionHandler implements ExceptionMapper<Throwable> {
         ErrorResponse message;
         Integer status = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
         if (exception instanceof MatrixException) {
-            MatrixException matrixException = (MatrixException) exception;
-            message = new ErrorResponse(matrixException.getErrcode(), matrixException.getMessage(), matrixException.getRetryAfterMs());
-            status = matrixException.getStatus();
+            MatrixException matrixExc = (MatrixException) exception;
+            message = matrixExc.getRetryAfterMs() != null
+                ? new RateLimitedErrorResponse(matrixExc.getErrcode(), matrixExc.getMessage(), matrixExc.getRetryAfterMs())
+                : new ErrorResponse(matrixExc.getErrcode(), matrixExc.getMessage());
+            status = matrixExc.getStatus();
         } else if (exception instanceof WebApplicationException) {
             WebApplicationException webApplicationException = (WebApplicationException) exception;
             message = new ErrorResponse(Integer.toString(webApplicationException.getResponse().getStatus()), exception.getMessage());
