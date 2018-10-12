@@ -18,9 +18,9 @@ package io.github.ma1uta.matrix.support.jsonb;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.github.ma1uta.matrix.events.RoomMessage;
-import io.github.ma1uta.matrix.events.messages.Notice;
-import io.github.ma1uta.matrix.events.messages.Text;
+import io.github.ma1uta.matrix.event.content.RoomMessageContent;
+import io.github.ma1uta.matrix.event.message.Notice;
+import io.github.ma1uta.matrix.event.message.Text;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.config.PropertyOrderStrategy;
 
-public class RoomMessageDeserializerTest {
+public class RoomMessageContentDeserializerTest {
 
     private Jsonb mapper;
 
@@ -51,7 +51,7 @@ public class RoomMessageDeserializerTest {
 
     @Test
     public void msgtype() throws Exception {
-        assertThrows(RuntimeException.class, () -> mapper.fromJson("{\"body\":\"exception\"}", RoomMessage.class));
+        assertThrows(RuntimeException.class, () -> mapper.fromJson("{\"body\":\"exception\"}", RoomMessageContent.class));
     }
 
     @ParameterizedTest
@@ -60,7 +60,7 @@ public class RoomMessageDeserializerTest {
         "{\"msgtype\":\"m.text\"};"
     }, delimiter = ';')
     public void text(String event, String body) throws Exception {
-        RoomMessage message = mapper.fromJson(event, RoomMessage.class);
+        RoomMessageContent message = mapper.fromJson(event, RoomMessageContent.class);
 
         Assertions.assertTrue(message instanceof Text);
 
@@ -74,7 +74,7 @@ public class RoomMessageDeserializerTest {
         "{\"msgtype\":\"m.notice\"};"
     }, delimiter = ';')
     public void notice(String event, String body) throws Exception {
-        RoomMessage message = mapper.fromJson(event, RoomMessage.class);
+        RoomMessageContent message = mapper.fromJson(event, RoomMessageContent.class);
 
         Assertions.assertTrue(message instanceof Notice);
 

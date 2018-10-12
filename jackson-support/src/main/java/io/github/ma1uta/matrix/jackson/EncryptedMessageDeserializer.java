@@ -22,10 +22,10 @@ import static io.github.ma1uta.matrix.Event.Encryption.OLM;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.ma1uta.matrix.events.RoomEncrypted;
-import io.github.ma1uta.matrix.events.encrypted.MegolmEncrypted;
-import io.github.ma1uta.matrix.events.encrypted.OlmEncrypted;
-import io.github.ma1uta.matrix.events.encrypted.RawEncrypted;
+import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
+import io.github.ma1uta.matrix.event.encrypted.MegolmEncryptedContent;
+import io.github.ma1uta.matrix.event.encrypted.OlmEncryptedContent;
+import io.github.ma1uta.matrix.event.encrypted.RawEncryptedContent;
 
 /**
  * The room message deserializer.
@@ -40,24 +40,24 @@ public class EncryptedMessageDeserializer {
      * @return deserialized value or null.
      * @throws JsonProcessingException when cannot deserialize the room message.
      */
-    public RoomEncrypted deserialize(JsonNode node, ObjectCodec codec) throws JsonProcessingException {
+    public RoomEncryptedContent deserialize(JsonNode node, ObjectCodec codec) throws JsonProcessingException {
         if (node == null) {
             return null;
         }
 
         JsonNode algorithmNode = node.get("algorithm");
         if (algorithmNode == null || !algorithmNode.isTextual()) {
-            return new RawEncrypted(node, null);
+            return new RawEncryptedContent(node, null);
         }
         String algorithm = algorithmNode.asText();
 
         switch (algorithm) {
             case MEGOLM:
-                return codec.treeToValue(node, MegolmEncrypted.class);
+                return codec.treeToValue(node, MegolmEncryptedContent.class);
             case OLM:
-                return codec.treeToValue(node, OlmEncrypted.class);
+                return codec.treeToValue(node, OlmEncryptedContent.class);
             default:
-                return new RawEncrypted(node, algorithm);
+                return new RawEncryptedContent(node, algorithm);
         }
     }
 }

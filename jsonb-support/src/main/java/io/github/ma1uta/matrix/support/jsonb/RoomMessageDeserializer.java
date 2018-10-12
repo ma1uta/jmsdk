@@ -25,24 +25,24 @@ import static io.github.ma1uta.matrix.Event.MessageType.NOTICE;
 import static io.github.ma1uta.matrix.Event.MessageType.TEXT;
 import static io.github.ma1uta.matrix.Event.MessageType.VIDEO;
 
-import io.github.ma1uta.matrix.events.RoomMessage;
-import io.github.ma1uta.matrix.events.messages.Audio;
-import io.github.ma1uta.matrix.events.messages.Emote;
-import io.github.ma1uta.matrix.events.messages.File;
-import io.github.ma1uta.matrix.events.messages.FormattedBody;
-import io.github.ma1uta.matrix.events.messages.Image;
-import io.github.ma1uta.matrix.events.messages.Location;
-import io.github.ma1uta.matrix.events.messages.Notice;
-import io.github.ma1uta.matrix.events.messages.RawMessage;
-import io.github.ma1uta.matrix.events.messages.Text;
-import io.github.ma1uta.matrix.events.messages.Video;
-import io.github.ma1uta.matrix.events.nested.AudioInfo;
-import io.github.ma1uta.matrix.events.nested.EncryptedFile;
-import io.github.ma1uta.matrix.events.nested.FileInfo;
-import io.github.ma1uta.matrix.events.nested.ImageInfo;
-import io.github.ma1uta.matrix.events.nested.LocationInfo;
-import io.github.ma1uta.matrix.events.nested.Relates;
-import io.github.ma1uta.matrix.events.nested.VideoInfo;
+import io.github.ma1uta.matrix.event.content.RoomMessageContent;
+import io.github.ma1uta.matrix.event.message.Audio;
+import io.github.ma1uta.matrix.event.message.Emote;
+import io.github.ma1uta.matrix.event.message.File;
+import io.github.ma1uta.matrix.event.message.FormattedBody;
+import io.github.ma1uta.matrix.event.message.Image;
+import io.github.ma1uta.matrix.event.message.Location;
+import io.github.ma1uta.matrix.event.message.Notice;
+import io.github.ma1uta.matrix.event.message.RawMessageContent;
+import io.github.ma1uta.matrix.event.message.Text;
+import io.github.ma1uta.matrix.event.message.Video;
+import io.github.ma1uta.matrix.event.nested.AudioInfo;
+import io.github.ma1uta.matrix.event.nested.EncryptedFile;
+import io.github.ma1uta.matrix.event.nested.FileInfo;
+import io.github.ma1uta.matrix.event.nested.ImageInfo;
+import io.github.ma1uta.matrix.event.nested.LocationInfo;
+import io.github.ma1uta.matrix.event.nested.Relates;
+import io.github.ma1uta.matrix.event.nested.VideoInfo;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -58,7 +58,7 @@ import javax.json.stream.JsonParserFactory;
 /**
  * JSON-B deserializer of the Room Messages.
  */
-public class RoomMessageDeserializer implements JsonbDeserializer<RoomMessage> {
+public class RoomMessageDeserializer implements JsonbDeserializer<RoomMessageContent> {
 
     private final JsonParserFactory factory = Json.createParserFactory(Collections.emptyMap());
 
@@ -67,7 +67,7 @@ public class RoomMessageDeserializer implements JsonbDeserializer<RoomMessage> {
     }
 
     @Override
-    public RoomMessage deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
+    public RoomMessageContent deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
         String msgtype = null;
         Map<String, JsonValue> props = new HashMap<>();
 
@@ -169,11 +169,11 @@ public class RoomMessageDeserializer implements JsonbDeserializer<RoomMessage> {
         return video;
     }
 
-    protected RawMessage raw(Map<String, JsonValue> props, String type, DeserializationContext ctx) {
-        return new RawMessage(props, type);
+    protected RawMessageContent raw(Map<String, JsonValue> props, String type, DeserializationContext ctx) {
+        return new RawMessageContent(props, type);
     }
 
-    protected <T extends RoomMessage> T body(T roomMessage, Map<String, JsonValue> props, DeserializationContext ctx) {
+    protected <T extends RoomMessageContent> T body(T roomMessage, Map<String, JsonValue> props, DeserializationContext ctx) {
         roomMessage.setBody(prop(props, ctx, "body"));
         roomMessage.setRelatesTo(info(props, ctx, "m.relates_to", Relates.class));
         return roomMessage;

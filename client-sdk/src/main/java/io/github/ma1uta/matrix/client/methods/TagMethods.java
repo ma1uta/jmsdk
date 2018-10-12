@@ -20,7 +20,7 @@ import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.TagApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.tag.Tags;
-import io.github.ma1uta.matrix.events.nested.TagInfo;
+import io.github.ma1uta.matrix.event.nested.TagInfo;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -80,7 +80,7 @@ public class TagMethods extends AbstractMethods {
         String userId = defaults().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        Objects.requireNonNull(tag, "Tag cannot be empty.");
+        Objects.requireNonNull(tag, "TagContent cannot be empty.");
 
         RequestParams params = defaults().clone().path("userId", userId).path("roomId", roomId).path("tag", tag);
         return factory().delete(TagApi.class, "deleteTag", params);

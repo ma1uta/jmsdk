@@ -19,11 +19,11 @@ package io.github.ma1uta.matrix.support.jsonb;
 import static java.util.stream.Collectors.toMap;
 
 import io.github.ma1uta.matrix.Event;
-import io.github.ma1uta.matrix.events.RoomEncrypted;
-import io.github.ma1uta.matrix.events.encrypted.MegolmEncrypted;
-import io.github.ma1uta.matrix.events.encrypted.OlmEncrypted;
-import io.github.ma1uta.matrix.events.encrypted.RawEncrypted;
-import io.github.ma1uta.matrix.events.nested.CiphertextInfo;
+import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
+import io.github.ma1uta.matrix.event.encrypted.MegolmEncryptedContent;
+import io.github.ma1uta.matrix.event.encrypted.OlmEncryptedContent;
+import io.github.ma1uta.matrix.event.encrypted.RawEncryptedContent;
+import io.github.ma1uta.matrix.event.nested.CiphertextInfo;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -35,10 +35,10 @@ import javax.json.stream.JsonParser;
 /**
  * The Jsonb deserializer of the room encrypted messages.
  */
-public class EncryptedMessageDeserializer implements JsonbDeserializer<RoomEncrypted> {
+public class EncryptedMessageDeserializer implements JsonbDeserializer<RoomEncryptedContent> {
 
     @Override
-    public RoomEncrypted deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
+    public RoomEncryptedContent deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
 
         JsonObject object = parser.getObject();
         String algorithm = object.getString("algorithm");
@@ -53,14 +53,14 @@ public class EncryptedMessageDeserializer implements JsonbDeserializer<RoomEncry
         }
     }
 
-    protected RoomEncrypted megolmEncrypted(JsonObject object, DeserializationContext ctx) {
-        MegolmEncrypted megolmEncrypted = commonProperties(new MegolmEncrypted(), object);
+    protected RoomEncryptedContent megolmEncrypted(JsonObject object, DeserializationContext ctx) {
+        MegolmEncryptedContent megolmEncrypted = commonProperties(new MegolmEncryptedContent(), object);
         megolmEncrypted.setCiphertext(object.getString("ciphertext"));
         return megolmEncrypted;
     }
 
-    protected RoomEncrypted olmEncrypted(JsonObject object, DeserializationContext ctx) {
-        OlmEncrypted olmEncrypted = commonProperties(new OlmEncrypted(), object);
+    protected RoomEncryptedContent olmEncrypted(JsonObject object, DeserializationContext ctx) {
+        OlmEncryptedContent olmEncrypted = commonProperties(new OlmEncryptedContent(), object);
         if (!object.isNull("ciphertext")) {
             olmEncrypted.setCiphertext(
                 object
@@ -86,14 +86,14 @@ public class EncryptedMessageDeserializer implements JsonbDeserializer<RoomEncry
         return olmEncrypted;
     }
 
-    protected <T extends RoomEncrypted> T commonProperties(T roomEncrypted, JsonObject object) {
+    protected <T extends RoomEncryptedContent> T commonProperties(T roomEncrypted, JsonObject object) {
         roomEncrypted.setSenderKey(object.getString("sender_key"));
         roomEncrypted.setDeviceId(object.getString("device_id"));
         roomEncrypted.setSessionId(object.getString("session_id"));
         return roomEncrypted;
     }
 
-    protected RoomEncrypted parse(JsonObject jsonObject, String algorithm, DeserializationContext ctx) {
-        return new RawEncrypted(jsonObject, algorithm);
+    protected RoomEncryptedContent parse(JsonObject jsonObject, String algorithm, DeserializationContext ctx) {
+        return new RawEncryptedContent(jsonObject, algorithm);
     }
 }

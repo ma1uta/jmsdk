@@ -28,16 +28,16 @@ import static io.github.ma1uta.matrix.Event.MessageType.VIDEO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.ma1uta.matrix.events.RoomMessage;
-import io.github.ma1uta.matrix.events.messages.Audio;
-import io.github.ma1uta.matrix.events.messages.Emote;
-import io.github.ma1uta.matrix.events.messages.File;
-import io.github.ma1uta.matrix.events.messages.Image;
-import io.github.ma1uta.matrix.events.messages.Location;
-import io.github.ma1uta.matrix.events.messages.Notice;
-import io.github.ma1uta.matrix.events.messages.RawMessage;
-import io.github.ma1uta.matrix.events.messages.Text;
-import io.github.ma1uta.matrix.events.messages.Video;
+import io.github.ma1uta.matrix.event.content.RoomMessageContent;
+import io.github.ma1uta.matrix.event.message.Audio;
+import io.github.ma1uta.matrix.event.message.Emote;
+import io.github.ma1uta.matrix.event.message.File;
+import io.github.ma1uta.matrix.event.message.Image;
+import io.github.ma1uta.matrix.event.message.Location;
+import io.github.ma1uta.matrix.event.message.Notice;
+import io.github.ma1uta.matrix.event.message.RawMessageContent;
+import io.github.ma1uta.matrix.event.message.Text;
+import io.github.ma1uta.matrix.event.message.Video;
 
 /**
  * The room message deserializer.
@@ -52,14 +52,14 @@ public class RoomMessageDeserializer {
      * @return deserialized value or null.
      * @throws JsonProcessingException when cannot deserialize the room message.
      */
-    public RoomMessage deserialize(JsonNode node, ObjectCodec codec) throws JsonProcessingException {
+    public RoomMessageContent deserialize(JsonNode node, ObjectCodec codec) throws JsonProcessingException {
         if (node == null) {
             return null;
         }
 
         JsonNode typeNode = node.get("msgtype");
         if (typeNode == null || !typeNode.isTextual()) {
-            return new RawMessage(node, null);
+            return new RawMessageContent(node, null);
         }
         String msgtype = typeNode.asText();
 
@@ -81,7 +81,7 @@ public class RoomMessageDeserializer {
             case VIDEO:
                 return codec.treeToValue(node, Video.class);
             default:
-                return new RawMessage(node, msgtype);
+                return new RawMessageContent(node, msgtype);
         }
     }
 }

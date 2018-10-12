@@ -54,40 +54,40 @@ import static io.github.ma1uta.matrix.Event.EventType.TYPING;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.ma1uta.matrix.EventContent;
-import io.github.ma1uta.matrix.events.CallAnswer;
-import io.github.ma1uta.matrix.events.CallCandidates;
-import io.github.ma1uta.matrix.events.CallHangup;
-import io.github.ma1uta.matrix.events.CallInvite;
-import io.github.ma1uta.matrix.events.Direct;
-import io.github.ma1uta.matrix.events.ForwardedRoomKey;
-import io.github.ma1uta.matrix.events.FullyRead;
-import io.github.ma1uta.matrix.events.IgnoredUserList;
-import io.github.ma1uta.matrix.events.Presence;
-import io.github.ma1uta.matrix.events.RawEventContent;
-import io.github.ma1uta.matrix.events.Receipt;
-import io.github.ma1uta.matrix.events.RoomAliases;
-import io.github.ma1uta.matrix.events.RoomAvatar;
-import io.github.ma1uta.matrix.events.RoomCanonicalAlias;
-import io.github.ma1uta.matrix.events.RoomCreate;
-import io.github.ma1uta.matrix.events.RoomEncryption;
-import io.github.ma1uta.matrix.events.RoomGuestAccess;
-import io.github.ma1uta.matrix.events.RoomHistoryVisibility;
-import io.github.ma1uta.matrix.events.RoomJoinRules;
-import io.github.ma1uta.matrix.events.RoomKey;
-import io.github.ma1uta.matrix.events.RoomKeyRequest;
-import io.github.ma1uta.matrix.events.RoomMember;
-import io.github.ma1uta.matrix.events.RoomMessageFeedback;
-import io.github.ma1uta.matrix.events.RoomName;
-import io.github.ma1uta.matrix.events.RoomPinned;
-import io.github.ma1uta.matrix.events.RoomPowerLevels;
-import io.github.ma1uta.matrix.events.RoomRedaction;
-import io.github.ma1uta.matrix.events.RoomServerAcl;
-import io.github.ma1uta.matrix.events.RoomThirdPartyInvite;
-import io.github.ma1uta.matrix.events.RoomTopic;
-import io.github.ma1uta.matrix.events.Sticker;
-import io.github.ma1uta.matrix.events.Tag;
-import io.github.ma1uta.matrix.events.Typing;
+import io.github.ma1uta.matrix.event.content.CallAnswerContent;
+import io.github.ma1uta.matrix.event.content.CallCandidatesContent;
+import io.github.ma1uta.matrix.event.content.CallHangupContent;
+import io.github.ma1uta.matrix.event.content.CallInviteContent;
+import io.github.ma1uta.matrix.event.content.DirectContent;
+import io.github.ma1uta.matrix.event.content.EventContent;
+import io.github.ma1uta.matrix.event.content.ForwardedRoomKeyContent;
+import io.github.ma1uta.matrix.event.content.FullyReadContent;
+import io.github.ma1uta.matrix.event.content.IgnoredUserListContent;
+import io.github.ma1uta.matrix.event.content.PresenceContent;
+import io.github.ma1uta.matrix.event.content.RawEventContent;
+import io.github.ma1uta.matrix.event.content.ReceiptContent;
+import io.github.ma1uta.matrix.event.content.RoomAliasesContent;
+import io.github.ma1uta.matrix.event.content.RoomAvatarContent;
+import io.github.ma1uta.matrix.event.content.RoomCanonicalAliasContent;
+import io.github.ma1uta.matrix.event.content.RoomCreateContent;
+import io.github.ma1uta.matrix.event.content.RoomEncryptionContent;
+import io.github.ma1uta.matrix.event.content.RoomGuestAccessContent;
+import io.github.ma1uta.matrix.event.content.RoomHistoryVisibilityContent;
+import io.github.ma1uta.matrix.event.content.RoomJoinRulesContent;
+import io.github.ma1uta.matrix.event.content.RoomKeyContent;
+import io.github.ma1uta.matrix.event.content.RoomKeyRequestContent;
+import io.github.ma1uta.matrix.event.content.RoomMemberContent;
+import io.github.ma1uta.matrix.event.content.RoomMessageFeedbackContent;
+import io.github.ma1uta.matrix.event.content.RoomNameContent;
+import io.github.ma1uta.matrix.event.content.RoomPinnedContent;
+import io.github.ma1uta.matrix.event.content.RoomPowerLevelsContent;
+import io.github.ma1uta.matrix.event.content.RoomRedactionContent;
+import io.github.ma1uta.matrix.event.content.RoomServerAclContent;
+import io.github.ma1uta.matrix.event.content.RoomThirdPartyInviteContent;
+import io.github.ma1uta.matrix.event.content.RoomTopicContent;
+import io.github.ma1uta.matrix.event.content.StickerContent;
+import io.github.ma1uta.matrix.event.content.TagContent;
+import io.github.ma1uta.matrix.event.content.TypingContent;
 
 /**
  * The deserializer of the event content.
@@ -110,75 +110,75 @@ public class EventContentDeserializer {
 
         switch (type) {
             case CALL_ANSWER:
-                return codec.treeToValue(node, CallAnswer.class);
+                return codec.treeToValue(node, CallAnswerContent.class);
             case CALL_CANDIDATES:
-                return codec.treeToValue(node, CallCandidates.class);
+                return codec.treeToValue(node, CallCandidatesContent.class);
             case CALL_HANGUP:
-                return codec.treeToValue(node, CallHangup.class);
+                return codec.treeToValue(node, CallHangupContent.class);
             case CALL_INVITE:
-                return codec.treeToValue(node, CallInvite.class);
+                return codec.treeToValue(node, CallInviteContent.class);
             case DIRECT:
-                return codec.treeToValue(node, Direct.class);
+                return codec.treeToValue(node, DirectContent.class);
             case FORWARDED_ROOM_KEY:
-                return codec.treeToValue(node, ForwardedRoomKey.class);
+                return codec.treeToValue(node, ForwardedRoomKeyContent.class);
             case FULLY_READ:
-                return codec.treeToValue(node, FullyRead.class);
+                return codec.treeToValue(node, FullyReadContent.class);
             case IGNORED_USER_LIST:
-                return codec.treeToValue(node, IgnoredUserList.class);
+                return codec.treeToValue(node, IgnoredUserListContent.class);
             case PRESENCE:
-                return codec.treeToValue(node, Presence.class);
+                return codec.treeToValue(node, PresenceContent.class);
             case RECEIPT:
-                return codec.treeToValue(node, Receipt.class);
+                return codec.treeToValue(node, ReceiptContent.class);
             case ROOM_ALIASES:
-                return codec.treeToValue(node, RoomAliases.class);
+                return codec.treeToValue(node, RoomAliasesContent.class);
             case ROOM_AVATAR:
-                return codec.treeToValue(node, RoomAvatar.class);
+                return codec.treeToValue(node, RoomAvatarContent.class);
             case ROOM_CANONICAL_ALIAS:
-                return codec.treeToValue(node, RoomCanonicalAlias.class);
+                return codec.treeToValue(node, RoomCanonicalAliasContent.class);
             case ROOM_CREATE:
-                return codec.treeToValue(node, RoomCreate.class);
+                return codec.treeToValue(node, RoomCreateContent.class);
             case ROOM_GUEST_ACCESS:
-                return codec.treeToValue(node, RoomGuestAccess.class);
+                return codec.treeToValue(node, RoomGuestAccessContent.class);
             case ROOM_ENCRIPTION:
-                return codec.treeToValue(node, RoomEncryption.class);
+                return codec.treeToValue(node, RoomEncryptionContent.class);
             case ROOM_ENCRYPTED:
                 return new EncryptedMessageDeserializer().deserialize(node, codec);
             case ROOM_HISTORY_VISIBILITY:
-                return codec.treeToValue(node, RoomHistoryVisibility.class);
+                return codec.treeToValue(node, RoomHistoryVisibilityContent.class);
             case ROOM_JOIN_RULES:
-                return codec.treeToValue(node, RoomJoinRules.class);
+                return codec.treeToValue(node, RoomJoinRulesContent.class);
             case ROOM_KEY:
-                return codec.treeToValue(node, RoomKey.class);
+                return codec.treeToValue(node, RoomKeyContent.class);
             case ROOM_KEY_REQUEST:
-                return codec.treeToValue(node, RoomKeyRequest.class);
+                return codec.treeToValue(node, RoomKeyRequestContent.class);
             case ROOM_MEMBER:
-                return codec.treeToValue(node, RoomMember.class);
+                return codec.treeToValue(node, RoomMemberContent.class);
             case ROOM_MESSAGE:
                 return new RoomMessageDeserializer().deserialize(node, codec);
             case ROOM_MESSAGE_FEEDBACK:
-                return codec.treeToValue(node, RoomMessageFeedback.class);
+                return codec.treeToValue(node, RoomMessageFeedbackContent.class);
             case ROOM_NAME:
-                return codec.treeToValue(node, RoomName.class);
+                return codec.treeToValue(node, RoomNameContent.class);
             case ROOM_PINNED_EVENTS:
-                return codec.treeToValue(node, RoomPinned.class);
+                return codec.treeToValue(node, RoomPinnedContent.class);
             case ROOM_POWER_LEVELS:
-                return codec.treeToValue(node, RoomPowerLevels.class);
+                return codec.treeToValue(node, RoomPowerLevelsContent.class);
             case ROOM_REDACTION:
-                return codec.treeToValue(node, RoomRedaction.class);
+                return codec.treeToValue(node, RoomRedactionContent.class);
             case ROOM_THIRD_PARTY_INVITE:
-                return codec.treeToValue(node, RoomThirdPartyInvite.class);
+                return codec.treeToValue(node, RoomThirdPartyInviteContent.class);
             case ROOM_TOPIC:
-                return codec.treeToValue(node, RoomTopic.class);
+                return codec.treeToValue(node, RoomTopicContent.class);
             case STICKER:
-                return codec.treeToValue(node, Sticker.class);
+                return codec.treeToValue(node, StickerContent.class);
             case TAG:
-                return codec.treeToValue(node, Tag.class);
+                return codec.treeToValue(node, TagContent.class);
             case TYPING:
-                return codec.treeToValue(node, Typing.class);
+                return codec.treeToValue(node, TypingContent.class);
             case ROOM_SERVER_ACL:
-                return codec.treeToValue(node, RoomServerAcl.class);
+                return codec.treeToValue(node, RoomServerAclContent.class);
             default:
-                return new RawEventContent(node);
+                return new RawEventContent(node, type);
         }
     }
 }

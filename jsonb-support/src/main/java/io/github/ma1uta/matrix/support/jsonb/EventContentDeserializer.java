@@ -51,42 +51,42 @@ import static io.github.ma1uta.matrix.Event.EventType.STICKER;
 import static io.github.ma1uta.matrix.Event.EventType.TAG;
 import static io.github.ma1uta.matrix.Event.EventType.TYPING;
 
-import io.github.ma1uta.matrix.EventContent;
-import io.github.ma1uta.matrix.events.CallAnswer;
-import io.github.ma1uta.matrix.events.CallCandidates;
-import io.github.ma1uta.matrix.events.CallHangup;
-import io.github.ma1uta.matrix.events.CallInvite;
-import io.github.ma1uta.matrix.events.Direct;
-import io.github.ma1uta.matrix.events.ForwardedRoomKey;
-import io.github.ma1uta.matrix.events.FullyRead;
-import io.github.ma1uta.matrix.events.IgnoredUserList;
-import io.github.ma1uta.matrix.events.Presence;
-import io.github.ma1uta.matrix.events.RawEventContent;
-import io.github.ma1uta.matrix.events.Receipt;
-import io.github.ma1uta.matrix.events.RoomAliases;
-import io.github.ma1uta.matrix.events.RoomAvatar;
-import io.github.ma1uta.matrix.events.RoomCanonicalAlias;
-import io.github.ma1uta.matrix.events.RoomCreate;
-import io.github.ma1uta.matrix.events.RoomEncrypted;
-import io.github.ma1uta.matrix.events.RoomEncryption;
-import io.github.ma1uta.matrix.events.RoomGuestAccess;
-import io.github.ma1uta.matrix.events.RoomHistoryVisibility;
-import io.github.ma1uta.matrix.events.RoomJoinRules;
-import io.github.ma1uta.matrix.events.RoomKey;
-import io.github.ma1uta.matrix.events.RoomKeyRequest;
-import io.github.ma1uta.matrix.events.RoomMember;
-import io.github.ma1uta.matrix.events.RoomMessage;
-import io.github.ma1uta.matrix.events.RoomMessageFeedback;
-import io.github.ma1uta.matrix.events.RoomName;
-import io.github.ma1uta.matrix.events.RoomPinned;
-import io.github.ma1uta.matrix.events.RoomPowerLevels;
-import io.github.ma1uta.matrix.events.RoomRedaction;
-import io.github.ma1uta.matrix.events.RoomServerAcl;
-import io.github.ma1uta.matrix.events.RoomThirdPartyInvite;
-import io.github.ma1uta.matrix.events.RoomTopic;
-import io.github.ma1uta.matrix.events.Sticker;
-import io.github.ma1uta.matrix.events.Tag;
-import io.github.ma1uta.matrix.events.Typing;
+import io.github.ma1uta.matrix.event.content.EventContent;
+import io.github.ma1uta.matrix.event.content.CallAnswerContent;
+import io.github.ma1uta.matrix.event.content.CallCandidatesContent;
+import io.github.ma1uta.matrix.event.content.CallHangupContent;
+import io.github.ma1uta.matrix.event.content.CallInviteContent;
+import io.github.ma1uta.matrix.event.content.DirectContent;
+import io.github.ma1uta.matrix.event.content.ForwardedRoomKeyContent;
+import io.github.ma1uta.matrix.event.content.FullyReadContent;
+import io.github.ma1uta.matrix.event.content.IgnoredUserListContent;
+import io.github.ma1uta.matrix.event.content.PresenceContent;
+import io.github.ma1uta.matrix.event.content.RawEventContent;
+import io.github.ma1uta.matrix.event.content.ReceiptContent;
+import io.github.ma1uta.matrix.event.content.RoomAliasesContent;
+import io.github.ma1uta.matrix.event.content.RoomAvatarContent;
+import io.github.ma1uta.matrix.event.content.RoomCanonicalAliasContent;
+import io.github.ma1uta.matrix.event.content.RoomCreateContent;
+import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
+import io.github.ma1uta.matrix.event.content.RoomEncryptionContent;
+import io.github.ma1uta.matrix.event.content.RoomGuestAccessContent;
+import io.github.ma1uta.matrix.event.content.RoomHistoryVisibilityContent;
+import io.github.ma1uta.matrix.event.content.RoomJoinRulesContent;
+import io.github.ma1uta.matrix.event.content.RoomKeyContent;
+import io.github.ma1uta.matrix.event.content.RoomKeyRequestContent;
+import io.github.ma1uta.matrix.event.content.RoomMemberContent;
+import io.github.ma1uta.matrix.event.content.RoomMessageContent;
+import io.github.ma1uta.matrix.event.content.RoomMessageFeedbackContent;
+import io.github.ma1uta.matrix.event.content.RoomNameContent;
+import io.github.ma1uta.matrix.event.content.RoomPinnedContent;
+import io.github.ma1uta.matrix.event.content.RoomPowerLevelsContent;
+import io.github.ma1uta.matrix.event.content.RoomRedactionContent;
+import io.github.ma1uta.matrix.event.content.RoomServerAclContent;
+import io.github.ma1uta.matrix.event.content.RoomThirdPartyInviteContent;
+import io.github.ma1uta.matrix.event.content.RoomTopicContent;
+import io.github.ma1uta.matrix.event.content.StickerContent;
+import io.github.ma1uta.matrix.event.content.TagContent;
+import io.github.ma1uta.matrix.event.content.TypingContent;
 
 import javax.json.bind.serializer.DeserializationContext;
 import javax.json.stream.JsonParser;
@@ -107,73 +107,73 @@ public class EventContentDeserializer {
     public EventContent deserialize(JsonParser parser, DeserializationContext ctx, String type) {
         switch (type) {
             case CALL_ANSWER:
-                return ctx.deserialize(CallAnswer.class, parser);
+                return ctx.deserialize(CallAnswerContent.class, parser);
             case CALL_CANDIDATES:
-                return ctx.deserialize(CallCandidates.class, parser);
+                return ctx.deserialize(CallCandidatesContent.class, parser);
             case CALL_HANGUP:
-                return ctx.deserialize(CallHangup.class, parser);
+                return ctx.deserialize(CallHangupContent.class, parser);
             case CALL_INVITE:
-                return ctx.deserialize(CallInvite.class, parser);
+                return ctx.deserialize(CallInviteContent.class, parser);
             case DIRECT:
-                return ctx.deserialize(Direct.class, parser);
+                return ctx.deserialize(DirectContent.class, parser);
             case FORWARDED_ROOM_KEY:
-                return ctx.deserialize(ForwardedRoomKey.class, parser);
+                return ctx.deserialize(ForwardedRoomKeyContent.class, parser);
             case FULLY_READ:
-                return ctx.deserialize(FullyRead.class, parser);
+                return ctx.deserialize(FullyReadContent.class, parser);
             case IGNORED_USER_LIST:
-                return ctx.deserialize(IgnoredUserList.class, parser);
+                return ctx.deserialize(IgnoredUserListContent.class, parser);
             case PRESENCE:
-                return ctx.deserialize(Presence.class, parser);
+                return ctx.deserialize(PresenceContent.class, parser);
             case RECEIPT:
-                return ctx.deserialize(Receipt.class, parser);
+                return ctx.deserialize(ReceiptContent.class, parser);
             case ROOM_ALIASES:
-                return ctx.deserialize(RoomAliases.class, parser);
+                return ctx.deserialize(RoomAliasesContent.class, parser);
             case ROOM_AVATAR:
-                return ctx.deserialize(RoomAvatar.class, parser);
+                return ctx.deserialize(RoomAvatarContent.class, parser);
             case ROOM_CANONICAL_ALIAS:
-                return ctx.deserialize(RoomCanonicalAlias.class, parser);
+                return ctx.deserialize(RoomCanonicalAliasContent.class, parser);
             case ROOM_CREATE:
-                return ctx.deserialize(RoomCreate.class, parser);
+                return ctx.deserialize(RoomCreateContent.class, parser);
             case ROOM_GUEST_ACCESS:
-                return ctx.deserialize(RoomGuestAccess.class, parser);
+                return ctx.deserialize(RoomGuestAccessContent.class, parser);
             case ROOM_ENCRIPTION:
-                return ctx.deserialize(RoomEncryption.class, parser);
+                return ctx.deserialize(RoomEncryptionContent.class, parser);
             case ROOM_ENCRYPTED:
-                return ctx.deserialize(RoomEncrypted.class, parser);
+                return ctx.deserialize(RoomEncryptedContent.class, parser);
             case ROOM_HISTORY_VISIBILITY:
-                return ctx.deserialize(RoomHistoryVisibility.class, parser);
+                return ctx.deserialize(RoomHistoryVisibilityContent.class, parser);
             case ROOM_JOIN_RULES:
-                return ctx.deserialize(RoomJoinRules.class, parser);
+                return ctx.deserialize(RoomJoinRulesContent.class, parser);
             case ROOM_KEY:
-                return ctx.deserialize(RoomKey.class, parser);
+                return ctx.deserialize(RoomKeyContent.class, parser);
             case ROOM_KEY_REQUEST:
-                return ctx.deserialize(RoomKeyRequest.class, parser);
+                return ctx.deserialize(RoomKeyRequestContent.class, parser);
             case ROOM_MEMBER:
-                return ctx.deserialize(RoomMember.class, parser);
+                return ctx.deserialize(RoomMemberContent.class, parser);
             case ROOM_MESSAGE:
-                return ctx.deserialize(RoomMessage.class, parser);
+                return ctx.deserialize(RoomMessageContent.class, parser);
             case ROOM_MESSAGE_FEEDBACK:
-                return ctx.deserialize(RoomMessageFeedback.class, parser);
+                return ctx.deserialize(RoomMessageFeedbackContent.class, parser);
             case ROOM_NAME:
-                return ctx.deserialize(RoomName.class, parser);
+                return ctx.deserialize(RoomNameContent.class, parser);
             case ROOM_PINNED_EVENTS:
-                return ctx.deserialize(RoomPinned.class, parser);
+                return ctx.deserialize(RoomPinnedContent.class, parser);
             case ROOM_POWER_LEVELS:
-                return ctx.deserialize(RoomPowerLevels.class, parser);
+                return ctx.deserialize(RoomPowerLevelsContent.class, parser);
             case ROOM_REDACTION:
-                return ctx.deserialize(RoomRedaction.class, parser);
+                return ctx.deserialize(RoomRedactionContent.class, parser);
             case ROOM_THIRD_PARTY_INVITE:
-                return ctx.deserialize(RoomThirdPartyInvite.class, parser);
+                return ctx.deserialize(RoomThirdPartyInviteContent.class, parser);
             case ROOM_TOPIC:
-                return ctx.deserialize(RoomTopic.class, parser);
+                return ctx.deserialize(RoomTopicContent.class, parser);
             case STICKER:
-                return ctx.deserialize(Sticker.class, parser);
+                return ctx.deserialize(StickerContent.class, parser);
             case TAG:
-                return ctx.deserialize(Tag.class, parser);
+                return ctx.deserialize(TagContent.class, parser);
             case TYPING:
-                return ctx.deserialize(Typing.class, parser);
+                return ctx.deserialize(TypingContent.class, parser);
             case ROOM_SERVER_ACL:
-                return ctx.deserialize(RoomServerAcl.class, parser);
+                return ctx.deserialize(RoomServerAclContent.class, parser);
             default:
                 return parse(parser, ctx, type);
         }
