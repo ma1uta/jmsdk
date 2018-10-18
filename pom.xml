@@ -70,7 +70,7 @@
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
         <nexus.staging.maven.plugin.version>1.6.8</nexus.staging.maven.plugin.version>
-        <checkstyle.version>8.12</checkstyle.version>
+        <checkstyle.version>8.13</checkstyle.version>
         <jacoco.maven.plugin.version>0.8.2</jacoco.maven.plugin.version>
         <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
         <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
@@ -421,7 +421,7 @@
         <profile>
             <id>jackson-support</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
                 <module>jackson-support</module>
