@@ -16,38 +16,34 @@
 
 package io.github.ma1uta.matrix.jackson;
 
-import static io.github.ma1uta.matrix.Event.Encryption.MEGOLM;
-import static io.github.ma1uta.matrix.Event.Encryption.OLM;
+import static io.github.ma1uta.matrix.event.Event.Encryption.MEGOLM;
+import static io.github.ma1uta.matrix.event.Event.Encryption.OLM;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
 import io.github.ma1uta.matrix.event.encrypted.MegolmEncryptedContent;
 import io.github.ma1uta.matrix.event.encrypted.OlmEncryptedContent;
 import io.github.ma1uta.matrix.event.encrypted.RawEncryptedContent;
 
+import java.io.IOException;
+
 /**
  * The room message deserializer.
  */
-public class EncryptedMessageDeserializer {
+public class RoomEncryptedMessageContentDeserializer extends JsonDeserializer<RoomEncryptedContent> {
 
-    /**
-     * Deserialize the room message.
-     *
-     * @param node  the json node with the message.
-     * @param codec the json codec.
-     * @return deserialized value or null.
-     * @throws JsonProcessingException when cannot deserialize the room message.
-     */
-    public RoomEncryptedContent deserialize(JsonNode node, ObjectCodec codec) throws JsonProcessingException {
-        if (node == null) {
-            return null;
-        }
+    @Override
+    public RoomEncryptedContent deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+        ObjectCodec codec = parser.getCodec();
+        JsonNode node = codec.readTree(parser);
 
         JsonNode algorithmNode = node.get("algorithm");
         if (algorithmNode == null || !algorithmNode.isTextual()) {
-            return new RawEncryptedContent(node, null);
+            return parse(node, ctxt, codec, null);
         }
         String algorithm = algorithmNode.asText();
 
@@ -57,7 +53,11 @@ public class EncryptedMessageDeserializer {
             case OLM:
                 return codec.treeToValue(node, OlmEncryptedContent.class);
             default:
-                return new RawEncryptedContent(node, algorithm);
+                return parse(node, ctxt, codec, algorithm);
         }
+    }
+
+    protected RoomEncryptedContent parse(JsonNode jsonNode, DeserializationContext ctxt, ObjectCodec codec, String algorithm) {
+        return new RawEncryptedContent(jsonNode, algorithm);
     }
 }

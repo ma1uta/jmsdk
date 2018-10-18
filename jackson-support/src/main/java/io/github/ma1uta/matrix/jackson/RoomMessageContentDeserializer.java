@@ -16,17 +16,19 @@
 
 package io.github.ma1uta.matrix.jackson;
 
-import static io.github.ma1uta.matrix.Event.MessageType.AUDIO;
-import static io.github.ma1uta.matrix.Event.MessageType.EMOTE;
-import static io.github.ma1uta.matrix.Event.MessageType.FILE;
-import static io.github.ma1uta.matrix.Event.MessageType.IMAGE;
-import static io.github.ma1uta.matrix.Event.MessageType.LOCATION;
-import static io.github.ma1uta.matrix.Event.MessageType.NOTICE;
-import static io.github.ma1uta.matrix.Event.MessageType.TEXT;
-import static io.github.ma1uta.matrix.Event.MessageType.VIDEO;
+import static io.github.ma1uta.matrix.event.Event.MessageType.AUDIO;
+import static io.github.ma1uta.matrix.event.Event.MessageType.EMOTE;
+import static io.github.ma1uta.matrix.event.Event.MessageType.FILE;
+import static io.github.ma1uta.matrix.event.Event.MessageType.IMAGE;
+import static io.github.ma1uta.matrix.event.Event.MessageType.LOCATION;
+import static io.github.ma1uta.matrix.event.Event.MessageType.NOTICE;
+import static io.github.ma1uta.matrix.event.Event.MessageType.TEXT;
+import static io.github.ma1uta.matrix.event.Event.MessageType.VIDEO;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.message.Audio;
@@ -39,30 +41,27 @@ import io.github.ma1uta.matrix.event.message.RawMessageContent;
 import io.github.ma1uta.matrix.event.message.Text;
 import io.github.ma1uta.matrix.event.message.Video;
 
+import java.io.IOException;
+
 /**
  * The room message deserializer.
  */
-public class RoomMessageDeserializer {
+public class RoomMessageContentDeserializer extends JsonDeserializer<RoomMessageContent> {
 
-    /**
-     * Deserialize the room message.
-     *
-     * @param node  the json node with the message.
-     * @param codec the json codec.
-     * @return deserialized value or null.
-     * @throws JsonProcessingException when cannot deserialize the room message.
-     */
-    public RoomMessageContent deserialize(JsonNode node, ObjectCodec codec) throws JsonProcessingException {
+    @Override
+    public RoomMessageContent deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+        ObjectCodec codec = parser.getCodec();
+        JsonNode node = codec.readTree(parser);
+
         if (node == null) {
             return null;
         }
 
         JsonNode typeNode = node.get("msgtype");
         if (typeNode == null || !typeNode.isTextual()) {
-            return new RawMessageContent(node, null);
+            return parse(node, ctxt, codec, null);
         }
         String msgtype = typeNode.asText();
-
         switch (msgtype) {
             case AUDIO:
                 return codec.treeToValue(node, Audio.class);
@@ -81,7 +80,11 @@ public class RoomMessageDeserializer {
             case VIDEO:
                 return codec.treeToValue(node, Video.class);
             default:
-                return new RawMessageContent(node, msgtype);
+                return parse(node, ctxt, codec, msgtype);
         }
+    }
+
+    protected RoomMessageContent parse(JsonNode jsonNode, DeserializationContext ctxt, ObjectCodec codec, String msgtype) {
+        return new RawMessageContent(jsonNode, msgtype);
     }
 }
