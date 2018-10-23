@@ -26,6 +26,7 @@ import io.github.ma1uta.matrix.support.Converter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,5 +62,15 @@ public class JacksonConverter extends Converter {
     @Override
     protected Map streamToMap(InputStream source) throws IOException {
         return mapper.readValue(source, Map.class);
+    }
+
+    @Override
+    protected List bytesToList(byte[] source) throws IOException {
+        return mapper.readValue(source, List.class);
+    }
+
+    @Override
+    protected List streamToList(InputStream source) throws IOException {
+        return mapper.readValue(source, List.class);
     }
 }
