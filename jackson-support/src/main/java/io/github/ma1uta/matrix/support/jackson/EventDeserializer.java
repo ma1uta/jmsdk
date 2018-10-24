@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.support.jsonb;
+package io.github.ma1uta.matrix.support.jackson;
 
 import static io.github.ma1uta.matrix.event.Event.EventType.CALL_ANSWER;
 import static io.github.ma1uta.matrix.event.Event.EventType.CALL_CANDIDATES;
@@ -51,6 +51,12 @@ import static io.github.ma1uta.matrix.event.Event.EventType.STICKER;
 import static io.github.ma1uta.matrix.event.Event.EventType.TAG;
 import static io.github.ma1uta.matrix.event.Event.EventType.TYPING;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.github.ma1uta.matrix.event.CallAnswer;
 import io.github.ma1uta.matrix.event.CallCandidates;
 import io.github.ma1uta.matrix.event.CallHangup;
@@ -88,110 +94,99 @@ import io.github.ma1uta.matrix.event.Sticker;
 import io.github.ma1uta.matrix.event.Tag;
 import io.github.ma1uta.matrix.event.Typing;
 
-import java.lang.reflect.Type;
+import java.io.IOException;
 import java.util.Map;
-import javax.json.JsonObject;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.serializer.DeserializationContext;
-import javax.json.bind.serializer.JsonbDeserializer;
-import javax.json.stream.JsonParser;
 
 /**
- * The Deserializer to the Event.
+ * Event deserializer.
  */
-public class EventDeserializer implements JsonbDeserializer<Event> {
-
-    private Jsonb jsonb = JsonbBuilder.create();
-
-    protected Jsonb jsonb() {
-        return jsonb;
-    }
+public class EventDeserializer extends JsonDeserializer<Event> {
 
     @Override
-    public Event deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        JsonObject object = parser.getObject();
-        String event = object.toString();
-        if (object.get("type") == null || object.isNull("type")) {
-            return parse(event, ctx, null);
-        }
-        String type = object.getString("type");
+    public Event deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+        ObjectCodec codec = parser.getCodec();
+        JsonNode node = codec.readTree(parser);
 
-        switch (type) {
+        JsonNode type = node.get("type");
+        if (type == null || !type.isTextual()) {
+            return parse(node, codec, ctxt, null);
+        }
+
+        switch (type.asText()) {
             case CALL_ANSWER:
-                return jsonb().fromJson(event, CallAnswer.class);
+                return codec.treeToValue(node, CallAnswer.class);
             case CALL_CANDIDATES:
-                return jsonb().fromJson(event, CallCandidates.class);
+                return codec.treeToValue(node, CallCandidates.class);
             case CALL_HANGUP:
-                return jsonb().fromJson(event, CallHangup.class);
+                return codec.treeToValue(node, CallHangup.class);
             case CALL_INVITE:
-                return jsonb().fromJson(event, CallInvite.class);
+                return codec.treeToValue(node, CallInvite.class);
             case DIRECT:
-                return jsonb().fromJson(event, Direct.class);
+                return codec.treeToValue(node, Direct.class);
             case FORWARDED_ROOM_KEY:
-                return jsonb().fromJson(event, ForwardedRoomKey.class);
+                return codec.treeToValue(node, ForwardedRoomKey.class);
             case FULLY_READ:
-                return jsonb().fromJson(event, FullyRead.class);
+                return codec.treeToValue(node, FullyRead.class);
             case IGNORED_USER_LIST:
-                return jsonb().fromJson(event, IgnoredUserList.class);
+                return codec.treeToValue(node, IgnoredUserList.class);
             case PRESENCE:
-                return jsonb().fromJson(event, Presence.class);
+                return codec.treeToValue(node, Presence.class);
             case RECEIPT:
-                return jsonb().fromJson(event, Receipt.class);
+                return codec.treeToValue(node, Receipt.class);
             case ROOM_ALIASES:
-                return jsonb().fromJson(event, RoomAliases.class);
+                return codec.treeToValue(node, RoomAliases.class);
             case ROOM_AVATAR:
-                return jsonb().fromJson(event, RoomAvatar.class);
+                return codec.treeToValue(node, RoomAvatar.class);
             case ROOM_CANONICAL_ALIAS:
-                return jsonb().fromJson(event, RoomCanonicalAlias.class);
+                return codec.treeToValue(node, RoomCanonicalAlias.class);
             case ROOM_CREATE:
-                return jsonb().fromJson(event, RoomCreate.class);
+                return codec.treeToValue(node, RoomCreate.class);
             case ROOM_GUEST_ACCESS:
-                return jsonb().fromJson(event, RoomGuestAccess.class);
+                return codec.treeToValue(node, RoomGuestAccess.class);
             case ROOM_ENCRIPTION:
-                return jsonb().fromJson(event, RoomEncryption.class);
+                return codec.treeToValue(node, RoomEncryption.class);
             case ROOM_ENCRYPTED:
-                return jsonb().fromJson(event, RoomEncrypted.class);
+                return codec.treeToValue(node, RoomEncrypted.class);
             case ROOM_HISTORY_VISIBILITY:
-                return jsonb().fromJson(event, RoomHistoryVisibility.class);
+                return codec.treeToValue(node, RoomHistoryVisibility.class);
             case ROOM_JOIN_RULES:
-                return jsonb().fromJson(event, RoomJoinRules.class);
+                return codec.treeToValue(node, RoomJoinRules.class);
             case ROOM_KEY:
-                return jsonb().fromJson(event, RoomKey.class);
+                return codec.treeToValue(node, RoomKey.class);
             case ROOM_KEY_REQUEST:
-                return jsonb().fromJson(event, RoomKeyRequest.class);
+                return codec.treeToValue(node, RoomKeyRequest.class);
             case ROOM_MEMBER:
-                return jsonb().fromJson(event, RoomMember.class);
+                return codec.treeToValue(node, RoomMember.class);
             case ROOM_MESSAGE:
-                return jsonb().fromJson(event, RoomMessage.class);
+                return codec.treeToValue(node, RoomMessage.class);
             case ROOM_MESSAGE_FEEDBACK:
-                return jsonb().fromJson(event, RoomMessageFeedback.class);
+                return codec.treeToValue(node, RoomMessageFeedback.class);
             case ROOM_NAME:
-                return jsonb().fromJson(event, RoomName.class);
+                return codec.treeToValue(node, RoomName.class);
             case ROOM_PINNED_EVENTS:
-                return jsonb().fromJson(event, RoomPinned.class);
+                return codec.treeToValue(node, RoomPinned.class);
             case ROOM_POWER_LEVELS:
-                return jsonb().fromJson(event, RoomPowerLevels.class);
+                return codec.treeToValue(node, RoomPowerLevels.class);
             case ROOM_REDACTION:
-                return jsonb().fromJson(event, RoomRedaction.class);
+                return codec.treeToValue(node, RoomRedaction.class);
             case ROOM_THIRD_PARTY_INVITE:
-                return jsonb().fromJson(event, RoomThirdPartyInvite.class);
+                return codec.treeToValue(node, RoomThirdPartyInvite.class);
             case ROOM_TOPIC:
-                return jsonb().fromJson(event, RoomTopic.class);
+                return codec.treeToValue(node, RoomTopic.class);
             case STICKER:
-                return jsonb().fromJson(event, Sticker.class);
+                return codec.treeToValue(node, Sticker.class);
             case TAG:
-                return jsonb().fromJson(event, Tag.class);
+                return codec.treeToValue(node, Tag.class);
             case TYPING:
-                return jsonb().fromJson(event, Typing.class);
+                return codec.treeToValue(node, Typing.class);
             case ROOM_SERVER_ACL:
-                return jsonb().fromJson(event, RoomServerAcl.class);
+                return codec.treeToValue(node, RoomServerAcl.class);
             default:
-                return parse(event, ctx, type);
+                return parse(node, codec, ctxt, type.asText());
         }
     }
 
-    protected Event parse(String event, DeserializationContext ctx, String type) {
-        return new RawEvent(jsonb().fromJson(event, Map.class), type);
+    protected Event parse(JsonNode jsonNode, ObjectCodec codec, DeserializationContext ctxt, String type) throws JsonProcessingException {
+        return new RawEvent(codec.treeToValue(jsonNode, Map.class), type);
     }
 }

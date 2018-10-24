@@ -14,37 +14,55 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.jackson;
+package io.github.ma1uta.matrix.support.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomName;
 import io.github.ma1uta.matrix.event.RoomTopic;
+import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.content.RoomNameContent;
 import io.github.ma1uta.matrix.event.content.RoomTopicContent;
 import io.github.ma1uta.matrix.event.message.Notice;
+import io.github.ma1uta.matrix.event.message.RawMessageContent;
 import io.github.ma1uta.matrix.event.message.Text;
-import io.github.ma1uta.matrix.support.EventDeserializer;
-import io.github.ma1uta.matrix.support.RoomMessageDeserializer;
+import io.github.ma1uta.matrix.support.jackson.EventDeserializer;
+import io.github.ma1uta.matrix.support.jackson.RoomEncryptedContentDeserializer;
+import io.github.ma1uta.matrix.support.jackson.RoomMessageContentDeserializer;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class RoomMessageContentDeserializerTest {
 
+    private ObjectMapper mapper;
+
+    @BeforeEach
+    public void before() {
+        mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Event.class, new EventDeserializer());
+        module.addDeserializer(RoomMessageContent.class, new RoomMessageContentDeserializer());
+        module.addDeserializer(RoomEncryptedContent.class, new RoomEncryptedContentDeserializer());
+        mapper.registerModule(module);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+
     @Test
-    public void msgtype() {
-        assertThrows(RuntimeException.class, () -> RoomMessageDeserializer.getInstance()
-            .deserialize("{\"body\":\"exception\"}".getBytes(StandardCharsets.UTF_8)));
+    public void msgtype() throws IOException {
+        RoomMessageContent content = mapper.readValue("{\"body\":\"exception\"}", RoomMessageContent.class);
+        assertTrue(content instanceof RawMessageContent);
     }
 
     @ParameterizedTest
@@ -53,7 +71,7 @@ public class RoomMessageContentDeserializerTest {
         "{\"msgtype\":\"m.text\"};"
     }, delimiter = ';')
     public void text(String eventArg, String bodyArg) throws Exception {
-        RoomMessageContent message = RoomMessageDeserializer.getInstance().deserialize(eventArg.getBytes(StandardCharsets.UTF_8));
+        RoomMessageContent message = mapper.readValue(eventArg, RoomMessageContent.class);
 
         Assertions.assertTrue(message instanceof Text);
 
@@ -67,7 +85,7 @@ public class RoomMessageContentDeserializerTest {
         "{\"msgtype\":\"m.notice\"};"
     }, delimiter = ';')
     public void notice(String eventArg, String bodyArg) throws IOException {
-        RoomMessageContent message = RoomMessageDeserializer.getInstance().deserialize(eventArg.getBytes(StandardCharsets.UTF_8));
+        RoomMessageContent message = mapper.readValue(eventArg, RoomMessageContent.class);
 
         Assertions.assertTrue(message instanceof Notice);
 
@@ -80,7 +98,7 @@ public class RoomMessageContentDeserializerTest {
         "{\"type\":\"m.room.name\",\"content\":{\"name\":\"test\"}};test",
     }, delimiter = ';')
     public void roomName(String eventArg, String nameArg) throws IOException {
-        Event event = EventDeserializer.getInstance().deserialize(eventArg.getBytes(StandardCharsets.UTF_8));
+        Event event = mapper.readValue(eventArg, Event.class);
 
         assertTrue(event instanceof RoomName);
         RoomName roomName = (RoomName) event;
@@ -96,7 +114,7 @@ public class RoomMessageContentDeserializerTest {
         "{\"type\":\"m.room.topic\",\"content\":{\"topic\":\"Topic name\"},\"prev_content\":{\"topic\":\"Old topic\"}};Topic name;Old topic;RoomTopic",
     }, delimiter = ';')
     public void roomTopic(String eventArg, String newContent, String oldContent, String eventClass) throws IOException {
-        Event eventObject = EventDeserializer.getInstance().deserialize(eventArg.getBytes(StandardCharsets.UTF_8));
+        Event eventObject = mapper.readValue(eventArg, Event.class);
 
         assertEquals(eventClass, eventObject.getClass().getSimpleName());
         assertTrue(eventObject instanceof RoomTopic);
@@ -113,3 +131,4 @@ public class RoomMessageContentDeserializerTest {
         assertEquals(oldContent, prevContent.getTopic());
     }
 }
+

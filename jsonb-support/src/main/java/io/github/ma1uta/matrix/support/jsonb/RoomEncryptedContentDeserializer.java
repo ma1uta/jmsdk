@@ -33,7 +33,7 @@ import javax.json.stream.JsonParser;
 /**
  * The Jsonb deserializer of the room encrypted messages.
  */
-public class RoomEncryptedMessageContentDeserializer implements JsonbDeserializer<RoomEncryptedContent> {
+public class RoomEncryptedContentDeserializer implements JsonbDeserializer<RoomEncryptedContent> {
 
     private Jsonb jsonb = JsonbBuilder.create();
 
