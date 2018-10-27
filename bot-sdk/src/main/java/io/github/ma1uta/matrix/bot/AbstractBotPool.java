@@ -16,13 +16,13 @@
 
 package io.github.ma1uta.matrix.bot;
 
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.client.Client;
 
 /**
  * Bot service.
@@ -38,11 +38,9 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBotPool.class);
 
-    private final String homeserverUrl;
+    private final RequestFactory requestFactory;
 
     private final String displayName;
-
-    private final Client client;
 
     private final S service;
 
@@ -50,25 +48,20 @@ public abstract class AbstractBotPool<C extends BotConfig, D extends BotDao<C>, 
 
     private Map<String, B> botMap = new HashMap<>();
 
-    public AbstractBotPool(String homeserverUrl, String displayName, Client client, S service,
+    public AbstractBotPool(RequestFactory requestFactory, String displayName, S service,
                            List<Class<? extends Command<C, D, S, E>>> commandClasses) {
+        this.requestFactory = requestFactory;
         this.service = service;
         this.commandClasses = commandClasses;
-        this.homeserverUrl = homeserverUrl;
         this.displayName = displayName;
-        this.client = client;
     }
 
-    public String getHomeserverUrl() {
-        return homeserverUrl;
+    public RequestFactory getRequestFactory() {
+        return requestFactory;
     }
 
     public String getDisplayName() {
         return displayName;
-    }
-
-    public Client getClient() {
-        return client;
     }
 
     public S getService() {

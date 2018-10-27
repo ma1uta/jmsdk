@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.client.MatrixClient;
+import io.github.ma1uta.matrix.client.factory.jaxrs.JaxRsRequestFactory;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.PathHandler;
@@ -35,6 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.ClientBuilder;
 
 public class MockServer {
 
@@ -69,7 +71,9 @@ public class MockServer {
             .build();
         server.start();
 
-        matrixClient = new MatrixClient(String.format("http://%s:%d", "localhost", 8080));
+        JaxRsRequestFactory factory = new JaxRsRequestFactory(ClientBuilder.newClient(),
+            String.format("http://%s:%d", "localhost", 8080));
+        matrixClient = new MatrixClient(factory);
     }
 
     @AfterEach

@@ -17,6 +17,7 @@
 package io.github.ma1uta.matrix.bot;
 
 import io.github.ma1uta.matrix.client.MatrixClient;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.sync.InvitedRoom;
 import io.github.ma1uta.matrix.client.model.sync.JoinedRoom;
 import io.github.ma1uta.matrix.client.model.sync.LeftRoom;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import javax.ws.rs.client.Client;
 
 /**
  * Matrix bot client.
@@ -46,9 +46,9 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandaloneBot.class);
 
-    public StandaloneBot(Client client, String homeserverUrl, boolean exitOnEmptyRooms, C config, S service,
+    public StandaloneBot(RequestFactory factory, boolean exitOnEmptyRooms, C config, S service,
                          List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        super(client, homeserverUrl, null, exitOnEmptyRooms, config, service, commandsClasses);
+        super(factory, null, exitOnEmptyRooms, config, service, commandsClasses);
     }
 
     @Override

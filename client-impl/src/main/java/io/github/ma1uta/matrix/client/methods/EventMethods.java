@@ -16,11 +16,6 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.Page;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.EventApi;
@@ -34,14 +29,12 @@ import io.github.ma1uta.matrix.event.content.EventContent;
 import io.github.ma1uta.matrix.event.message.FormattedBody;
 import io.github.ma1uta.matrix.event.message.Notice;
 import io.github.ma1uta.matrix.event.message.Text;
-import io.github.ma1uta.matrix.support.jackson.EventContentDeserializer;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.GenericType;
 
 /**
  * EventMethods api.
@@ -84,7 +77,8 @@ public class EventMethods extends AbstractMethods {
 
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
             .path("stateKey", stateKey);
-        return factory().get(EventApi.class, "roomEventWithTypeAndState", params, String.class).thenApply(r -> deserialize(r, eventType));
+        return factory().get(EventApi.class, "roomEventWithTypeAndState", params, String.class)
+            .thenApply(r -> factory().deserialize(r, eventType));
     }
 
     /**
@@ -100,20 +94,7 @@ public class EventMethods extends AbstractMethods {
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
 
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType);
-        return factory().get(EventApi.class, "roomEventWithType", params, String.class).thenApply(r -> deserialize(r, eventType));
-    }
-
-    protected EventContent deserialize(String response, String eventType) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            JsonParser parser = objectMapper.getFactory().createParser(response);
-            ObjectCodec codec = parser.getCodec();
-            JsonNode node = codec.readTree(parser);
-            return new EventContentDeserializer().deserialize(node, eventType, codec);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return factory().get(EventApi.class, "roomEventWithType", params, String.class).thenApply(r -> factory().deserialize(r, eventType));
     }
 
     /**
@@ -126,8 +107,7 @@ public class EventMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
 
         RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().get(EventApi.class, "roomState", params, new GenericType<List<Event>>() {
-        });
+        return factory().get(EventApi.class, "roomState", params, new ArrayList<Event>());
     }
 
     /**
@@ -179,8 +159,7 @@ public class EventMethods extends AbstractMethods {
             .query("dir", dir)
             .query("filter", filter)
             .query("limit", limit);
-        return factory().get(EventApi.class, "messages", params, new GenericType<Page<Event>>() {
-        });
+        return factory().get(EventApi.class, "messages", params, new Page<Event>());
     }
 
     /**

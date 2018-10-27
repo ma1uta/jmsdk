@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.bot;
 
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
 import io.github.ma1uta.matrix.event.RoomMember;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.ws.rs.client.Client;
 
 /**
  * Bot service.
@@ -42,9 +42,9 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
 
     private final String appToken;
 
-    public AbstractApplicationServiceBotPool(String homeserverUrl, String displayName, Client client, String appToken, S service,
+    public AbstractApplicationServiceBotPool(RequestFactory requestFactory, String displayName, String appToken, S service,
                                              List<Class<? extends Command<C, D, S, E>>> commandClasses) {
-        super(homeserverUrl, displayName, client, service, commandClasses);
+        super(requestFactory, displayName, service, commandClasses);
         this.appToken = appToken;
     }
 
@@ -106,7 +106,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
 
     @Override
     protected ApplicationServiceBot<C, D, S, E> createBotInstance(C config) {
-        return new ApplicationServiceBot<>(getClient(), getHomeserverUrl(), getAppToken(), true, config, getService(), getCommandClasses());
+        return new ApplicationServiceBot<>(getRequestFactory(), getAppToken(), true, config, getService(), getCommandClasses());
     }
 
     @Override

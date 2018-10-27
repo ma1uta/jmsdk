@@ -19,6 +19,7 @@ package io.github.ma1uta.matrix.bot;
 import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.RequestParams;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.RoomEventFilter;
@@ -41,7 +42,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.Client;
 
 /**
  * Matrix bot client.
@@ -65,9 +65,9 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
     private final Set<String> skipTimelineRooms = new HashSet<>();
 
-    public Bot(Client client, String homeserverUrl, String asToken, boolean exitOnEmptyRooms, C config, S service,
+    public Bot(RequestFactory factory, String asToken, boolean exitOnEmptyRooms, C config, S service,
                List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        this.context = init(client, homeserverUrl, asToken, config, service);
+        this.context = init(factory, asToken, config, service);
         this.exitOnEmptyRooms = exitOnEmptyRooms;
         this.commands = new HashMap<>(commandsClasses.size());
         commandsClasses.forEach(cl -> {
@@ -80,9 +80,8 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         });
     }
 
-    protected Context<C, D, S, E> init(Client client, String homeserverUrl, String asToken, C config, S service) {
-        MatrixClient matrixClient = new MatrixClient(homeserverUrl, client,
-            new RequestParams().userId(config.getUserId()).accessToken(asToken));
+    protected Context<C, D, S, E> init(RequestFactory factory, String asToken, C config, S service) {
+        MatrixClient matrixClient = new MatrixClient(factory, new RequestParams().userId(config.getUserId()).accessToken(asToken));
         Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
         context.setConfig(config);
         return context;

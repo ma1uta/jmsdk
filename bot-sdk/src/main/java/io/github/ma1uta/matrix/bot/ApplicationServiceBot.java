@@ -18,6 +18,7 @@ package io.github.ma1uta.matrix.bot;
 
 import io.github.ma1uta.matrix.client.AppServiceClient;
 import io.github.ma1uta.matrix.client.RequestParams;
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
 import org.slf4j.Logger;
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-import javax.ws.rs.client.Client;
 
 /**
  * Matrix bot client.
@@ -42,15 +42,14 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationServiceBot.class);
 
-    public ApplicationServiceBot(Client client, String homeserverUrl, String asToken, boolean exitOnEmptyRooms, C config, S service,
+    public ApplicationServiceBot(RequestFactory factory, String asToken, boolean exitOnEmptyRooms, C config, S service,
                                  List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        super(client, homeserverUrl, asToken, exitOnEmptyRooms, config, service, commandsClasses);
+        super(factory, asToken, exitOnEmptyRooms, config, service, commandsClasses);
     }
 
     @Override
-    protected Context<C, D, S, E> init(Client client, String homeserverUrl, String asToken, C config, S service) {
-        AppServiceClient matrixClient = new AppServiceClient(homeserverUrl, client,
-            new RequestParams().userId(config.getUserId()).accessToken(asToken));
+    protected Context<C, D, S, E> init(RequestFactory factory, String asToken, C config, S service) {
+        AppServiceClient matrixClient = new AppServiceClient(factory, new RequestParams().userId(config.getUserId()).accessToken(asToken));
         Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
         context.setConfig(config);
         return context;

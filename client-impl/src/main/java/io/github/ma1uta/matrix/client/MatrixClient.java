@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.methods.AccountMethods;
@@ -45,56 +44,25 @@ import io.github.ma1uta.matrix.client.methods.UserDirectoryMethods;
 import io.github.ma1uta.matrix.client.methods.VersionMethods;
 import io.github.ma1uta.matrix.client.methods.VoipMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.util.Objects;
-import java.util.concurrent.Executor;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 
 /**
  * Matrix client.
  */
 public class MatrixClient implements Closeable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatrixClient.class);
-
     private final RequestFactory requestFactory;
     private final RequestParams defaultParams;
 
-    public MatrixClient(String homeserverUrl) {
-        this(homeserverUrl, ClientBuilder.newBuilder().register(JacksonJsonProvider.class).build(), new RequestParams());
+    public MatrixClient(RequestFactory requestFactory) {
+        this(requestFactory, new RequestParams());
     }
 
-    public MatrixClient(String homeserverUrl, Client client) {
-        this(homeserverUrl, client, new RequestParams());
-    }
-
-    public MatrixClient(String homeserverUrl, Client client, RequestParams defaultParams) {
-        this(homeserverUrl, client, defaultParams, null);
-    }
-
-    public MatrixClient(String homeserverUrl, Client client, RequestParams defaultParams, Executor executor) {
+    public MatrixClient(RequestFactory requestFactory, RequestParams defaultParams) {
         this.defaultParams = Objects.requireNonNull(defaultParams, "The default `RequestParams` should be specified.");
-        this.requestFactory = initFactory(client, homeserverUrl, executor);
-    }
-
-    /**
-     * Init the request factory.
-     *
-     * @param client        The http client.
-     * @param homeserverUrl The homeserver url.
-     * @param executor      The executor service to provide asynchronous requests.
-     * @return The {@link RequestFactory} instance.
-     */
-    protected RequestFactory initFactory(Client client, String homeserverUrl, Executor executor) {
-        return new RequestFactory(
-            Objects.requireNonNull(client, "The `client` should be specified."),
-            Objects.requireNonNull(homeserverUrl, "The `homeserverUrl` should be specified."),
-            executor
-        );
+        this.requestFactory = requestFactory;
     }
 
     /**
@@ -408,7 +376,7 @@ public class MatrixClient implements Closeable {
 
         @Override
         public MatrixClient newInstance() {
-            return new MatrixClient(getHomeserverUrl(), getClient(), getDefaultParams());
+            return new MatrixClient(getFactory(), getDefaultParams());
         }
     }
 }

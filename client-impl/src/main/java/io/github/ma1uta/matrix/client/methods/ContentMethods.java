@@ -23,10 +23,10 @@ import io.github.ma1uta.matrix.client.model.content.ContentConfig;
 import io.github.ma1uta.matrix.client.model.content.ContentUri;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.GenericType;
 
 /**
  * Content methods.
@@ -106,8 +106,7 @@ public class ContentMethods extends AbstractMethods {
     public CompletableFuture<Map<String, String>> previewInfo(String url, String ts) {
         Objects.requireNonNull(url, "Url cannot be empty.");
         RequestParams params = defaults().clone().query("url", url).query("ts", ts);
-        return factory().get(ContentApi.class, "previewUrl", params, new GenericType<Map<String, String>>() {
-        });
+        return factory().get(ContentApi.class, "previewUrl", params, new HashMap<String, String>());
     }
 
     /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client.factory;
+package io.github.ma1uta.matrix.client.factory.jaxrs;
 
 import io.github.ma1uta.matrix.client.RequestParams;
 
@@ -27,15 +27,15 @@ import javax.ws.rs.client.WebTarget;
  * <br>
  * Used by the {@link io.github.ma1uta.matrix.client.AppServiceClient}.
  * <br>
- * The only difference from the {@link RequestFactory} is adding the `user_id` query params to the request.
+ * The only difference from the {@link JaxRsRequestFactory} is adding the `user_id` query params to the request.
  */
-public class AppRequestFactory extends RequestFactory {
+public class AppJaxRsRequestFactory extends JaxRsRequestFactory {
 
-    public AppRequestFactory(Client client, String homeserverUrl) {
+    public AppJaxRsRequestFactory(Client client, String homeserverUrl) {
         super(client, homeserverUrl);
     }
 
-    public AppRequestFactory(Client client, String homeserverUrl, Executor executor) {
+    public AppJaxRsRequestFactory(Client client, String homeserverUrl, Executor executor) {
         super(client, homeserverUrl, executor);
     }
 

@@ -16,8 +16,9 @@
 
 package io.github.ma1uta.matrix.client;
 
+import io.github.ma1uta.matrix.client.factory.RequestFactory;
+
 import java.util.Objects;
-import javax.ws.rs.client.Client;
 
 /**
  * A Client builder.
@@ -27,8 +28,7 @@ import javax.ws.rs.client.Client;
 public abstract class AbstractClientBuilder<C> {
 
     private RequestParams defaultParams = new RequestParams();
-    private String homeserverUrl;
-    private Client client;
+    private RequestFactory factory;
 
     protected AbstractClientBuilder() {
     }
@@ -37,12 +37,8 @@ public abstract class AbstractClientBuilder<C> {
         return defaultParams;
     }
 
-    protected String getHomeserverUrl() {
-        return homeserverUrl;
-    }
-
-    protected Client getClient() {
-        return client;
+    public RequestFactory getFactory() {
+        return factory;
     }
 
     /**
@@ -68,24 +64,13 @@ public abstract class AbstractClientBuilder<C> {
     }
 
     /**
-     * Specify a homeserver URL.
+     * Specify a request factory.
      *
-     * @param homeserverUrl The homeserver URL.
+     * @param factory The request factory.
      * @return This builder.
      */
-    public AbstractClientBuilder<C> homeserver(String homeserverUrl) {
-        this.homeserverUrl = homeserverUrl;
-        return this;
-    }
-
-    /**
-     * Specify A http client.
-     *
-     * @param client The http client.
-     * @return This builder.
-     */
-    public AbstractClientBuilder<C> client(Client client) {
-        this.client = client;
+    public AbstractClientBuilder<C> requestFactory(RequestFactory factory) {
+        this.factory = factory;
         return this;
     }
 
@@ -95,8 +80,7 @@ public abstract class AbstractClientBuilder<C> {
      * @return The new client.
      */
     public C build() {
-        Objects.requireNonNull(this.homeserverUrl, "Homeserver URL is empty.");
-        Objects.requireNonNull(this.client, "Http client is empty.");
+        Objects.requireNonNull(this.factory, "Request factory must be set.");
         return newInstance();
     }
 

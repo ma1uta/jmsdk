@@ -17,46 +17,19 @@
 package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.factory.AppRequestFactory;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
-
-import java.util.Objects;
-import java.util.concurrent.Executor;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 
 /**
  * Application Service Client.
  */
 public class AppServiceClient extends MatrixClient {
 
-    public AppServiceClient(String homeserverUrl, String userId) {
-        this(homeserverUrl, ClientBuilder.newClient(), userId);
-    }
-
-    public AppServiceClient(String homeserverUrl, Client client, String userId) {
-        this(homeserverUrl, client, new RequestParams().userId(userId));
-    }
-
-    public AppServiceClient(String homeserverUrl, Client client, RequestParams defaultParams) {
-        this(homeserverUrl, client, defaultParams, null);
-    }
-
-    public AppServiceClient(String homeserverUrl, Client client, RequestParams defaultParams, Executor executor) {
-        super(homeserverUrl, client, defaultParams, executor);
+    public AppServiceClient(RequestFactory factory, RequestParams defaultParams) {
+        super(factory, defaultParams);
         if (defaultParams.getUserId() == null || defaultParams.getUserId().trim().isEmpty()) {
             throw new NullPointerException("The `user_id` should be specified.");
         }
-    }
-
-    @Override
-    protected RequestFactory initFactory(Client client, String homeserverUrl, Executor executor) {
-        return new AppRequestFactory(
-            Objects.requireNonNull(client, "The `client` should be specified."),
-            Objects.requireNonNull(homeserverUrl, "The `homeserverUrl` should be specified."),
-            executor
-        );
     }
 
     /**
@@ -66,7 +39,7 @@ public class AppServiceClient extends MatrixClient {
      * @return The new AppService client.
      */
     public AppServiceClient userId(String userId) {
-        return new AppServiceClient(getHomeserverUrl(), getRequestFactory().getClient(), getDefaultParams().clone().userId(userId));
+        return new AppServiceClient(getRequestFactory(), getDefaultParams().clone().userId(userId));
     }
 
     @Override
@@ -86,7 +59,7 @@ public class AppServiceClient extends MatrixClient {
 
         @Override
         public AppServiceClient newInstance() {
-            return new AppServiceClient(getHomeserverUrl(), getClient(), getDefaultParams());
+            return new AppServiceClient(getFactory(), getDefaultParams());
         }
     }
 }

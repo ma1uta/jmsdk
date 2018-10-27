@@ -367,6 +367,7 @@
                 <module>bot-sdk</module>
                 <module>jackson-support</module>
                 <module>jsonb-support</module>
+                <module>client-jaxrs-resteasy</module>
             </modules>
         </profile>
         <profile>
@@ -430,6 +431,15 @@
             </activation>
             <modules>
                 <module>jackson-support</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>client-jaxrs-resteasy</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>client-jaxrs-resteasy</module>
             </modules>
         </profile>
     </profiles>
