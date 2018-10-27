@@ -16,10 +16,10 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Event;
-import io.github.ma1uta.matrix.StrippedState;
 import io.github.ma1uta.matrix.client.AppServiceClient;
-import io.github.ma1uta.matrix.client.methods.RequestParams;
+import io.github.ma1uta.matrix.client.RequestParams;
+import io.github.ma1uta.matrix.event.Event;
+import io.github.ma1uta.matrix.event.RoomEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
      *
      * @param event event.
      */
-    public void send(Event event) {
+    public void send(RoomEvent event) {
         LoopState state = LoopState.RUN;
         LOGGER.debug("State: {}", state);
         switch (getContext().getConfig().getState()) {
@@ -78,14 +78,8 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
                 state = newState();
                 break;
             case REGISTERED:
-                StrippedState strippedState = new StrippedState();
-                strippedState.setSender(event.getSender());
-                strippedState.setStateKey(event.getStateKey());
-                strippedState.setContent(event.getContent());
-                strippedState.setType(event.getType());
-
-                Map<String, List<StrippedState>> eventMap = new HashMap<>();
-                eventMap.put(event.getRoomId(), Collections.singletonList(strippedState));
+                Map<String, List<Event>> eventMap = new HashMap<>();
+                eventMap.put(event.getRoomId(), Collections.singletonList(event));
                 state = registeredState(eventMap);
                 break;
             case JOINED:

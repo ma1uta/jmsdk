@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.bot.command;
 
-import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.Command;
@@ -24,6 +23,7 @@ import io.github.ma1uta.matrix.bot.Context;
 import io.github.ma1uta.matrix.bot.PersistentService;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.model.room.RoomId;
+import io.github.ma1uta.matrix.event.RoomEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class Join<C extends BotConfig, D extends BotDao<C>, S extends Persistent
     }
 
     @Override
-    public boolean invoke(Context<C, D, S, E> context, String roomId, Event event, String arguments) {
+    public boolean invoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments) {
         C config = context.getConfig();
         MatrixClient matrixClient = context.getMatrixClient();
         if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {

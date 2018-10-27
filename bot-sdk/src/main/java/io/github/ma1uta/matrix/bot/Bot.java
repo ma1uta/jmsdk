@@ -16,18 +16,19 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.Id;
-import io.github.ma1uta.matrix.StrippedState;
 import io.github.ma1uta.matrix.client.MatrixClient;
-import io.github.ma1uta.matrix.client.methods.RequestParams;
+import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.RoomEventFilter;
 import io.github.ma1uta.matrix.client.model.filter.RoomFilter;
-import io.github.ma1uta.matrix.events.RoomMember;
-import io.github.ma1uta.matrix.events.RoomMessage;
-import io.github.ma1uta.matrix.events.messages.Text;
+import io.github.ma1uta.matrix.event.Event;
+import io.github.ma1uta.matrix.event.RoomEvent;
+import io.github.ma1uta.matrix.event.RoomMember;
+import io.github.ma1uta.matrix.event.RoomMessage;
+import io.github.ma1uta.matrix.event.content.RoomMessageContent;
+import io.github.ma1uta.matrix.event.message.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +140,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             BotConfig config = context.getConfig();
 
             RegisterRequest registerRequest = new RegisterRequest();
-            registerRequest.setUsername(Id.localpart(config.getUserId()));
+            registerRequest.setUsername(Id.getInstance().localpart(config.getUserId()));
             registerRequest.setInitialDeviceDisplayName(config.getDisplayName());
             registerRequest.setDeviceId(config.getDeviceId());
 
@@ -164,7 +165,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         return LoopState.NEXT_STATE;
     }
 
-    protected LoopState registeredState(Map<String, List<StrippedState>> eventMap) {
+    protected LoopState registeredState(Map<String, List<Event>> eventMap) {
         LOGGER.debug("Wait for invite");
         if (!eventMap.isEmpty()) {
             return joinRoom(eventMap) ? LoopState.NEXT_STATE : LoopState.RUN;
@@ -179,34 +180,37 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @param eventMap invited eventMap. Map &lt;roomId&gt; - &lt;[event]&gt; room_id to invite_state.
      * @return true if bot joined else false.
      */
-    public boolean joinRoom(Map<String, List<StrippedState>> eventMap) {
+    public boolean joinRoom(Map<String, List<Event>> eventMap) {
         return getContext().runInTransaction((context, dao) -> {
             LOGGER.debug("Start joining.");
             boolean joined = false;
-            for (Map.Entry<String, List<StrippedState>> eventEntry : eventMap.entrySet()) {
-                List<StrippedState> inviteEvents = eventEntry.getValue().stream().peek(state -> {
+            for (Map.Entry<String, List<Event>> eventEntry : eventMap.entrySet()) {
+                List<Event> inviteEvents = eventEntry.getValue().stream().peek(state -> {
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Event type: {}", state.getType());
                     }
                 }).filter(state -> {
-                    if (state.getContent() instanceof RoomMember) {
-                        RoomMember content = (RoomMember) state.getContent();
-                        LOGGER.debug("Membership: {}", content.getMembership());
-                        return Event.MembershipState.INVITE.equals(content.getMembership());
+                    if (state instanceof RoomMember) {
+                        RoomMember roomMember = (RoomMember) state;
+                        String membership = roomMember.getContent().getMembership();
+                        LOGGER.debug("Membership: {}", membership);
+                        return Event.MembershipState.INVITE.equals(membership);
                     }
                     return false;
                 }).collect(Collectors.toList());
 
-                for (StrippedState state : inviteEvents) {
-                    String roomId = eventEntry.getKey();
-                    LOGGER.debug("Join to room {}", roomId);
-                    context.getMatrixClient().room().joinByIdOrAlias(roomId);
+                for (Event state : inviteEvents) {
+                    if (state instanceof RoomEvent) {
+                        String roomId = eventEntry.getKey();
+                        LOGGER.debug("Join to room {}", roomId);
+                        context.getMatrixClient().room().joinByIdOrAlias(roomId);
 
-                    C config = context.getConfig();
-                    config.setState(BotState.JOINED);
-                    config.setOwner(state.getSender());
-                    LOGGER.debug("Finish joining");
-                    joined = true;
+                        C config = context.getConfig();
+                        config.setState(BotState.JOINED);
+                        config.setOwner(((RoomEvent) state).getSender());
+                        LOGGER.debug("Finish joining");
+                        joined = true;
+                    }
                 }
             }
             return joined;
@@ -246,9 +250,12 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             } else {
                 LOGGER.debug("Skip timelines");
             }
-            if (event.getOriginServerTs() != null && event.getOriginServerTs() > lastOriginTs) {
-                lastOriginTs = event.getOriginServerTs();
-                lastEvent = event.getEventId();
+            if (event instanceof RoomEvent) {
+                RoomEvent roomEvent = (RoomEvent) event;
+                if (roomEvent.getOriginServerTs() != null && roomEvent.getOriginServerTs() > lastOriginTs) {
+                    lastOriginTs = roomEvent.getOriginServerTs();
+                    lastEvent = roomEvent.getEventId();
+                }
             }
         }
         C config = getContext().getConfig();
@@ -277,23 +284,24 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         MatrixClient matrixClient = getContext().getMatrixClient();
         C config = getContext().getConfig();
         boolean invoked = false;
-        if (event.getContent() instanceof RoomMessage) {
-            RoomMessage content = (RoomMessage) event.getContent();
+        if (event instanceof RoomMessage) {
+            RoomMessage roomMessage = (RoomMessage) event;
+            RoomMessageContent content = roomMessage.getContent();
             String body = content.getBody().trim();
             boolean permit = permit(event);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Sender: {}", event.getSender());
+                LOGGER.debug("Sender: {}", roomMessage.getSender());
                 LOGGER.debug("Msgtype: {}", content.getMsgtype());
                 LOGGER.debug("Permit: {}", permit);
             }
             boolean defaultCommand = config.getDefaultCommand() != null && !config.getDefaultCommand().trim().isEmpty();
-            if (!matrixClient.getUserId().equals(event.getSender())
+            if (!matrixClient.getUserId().equals(roomMessage.getSender())
                 && content instanceof Text
                 && permit
                 && (body.startsWith(getPrefix()) || defaultCommand)) {
                 try {
                     invoked = getContext().runInTransaction((context, dao) -> {
-                        return processAction(roomId, event, body);
+                        return processAction(roomId, roomMessage, body);
                     });
                 } catch (Exception e) {
                     LOGGER.error(String.format("Cannot perform action '%s'", body), e);
@@ -313,7 +321,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         C config = getContext().getConfig();
         return config.getPolicy() == null
             || AccessPolicy.ALL.equals(config.getPolicy())
-            || config.getOwner().equals(event.getSender());
+            || (event instanceof RoomEvent && config.getOwner().equals(((RoomEvent) event).getSender()));
     }
 
     /**
@@ -335,7 +343,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @param content command.
      * @return {@code true} if invoked command, else {@code false}.
      */
-    protected boolean processAction(String roomId, Event event, String content) {
+    protected boolean processAction(String roomId, RoomEvent event, String content) {
         String contentWithoutPrefix = content.substring(getPrefix().length());
         String[] arguments = contentWithoutPrefix.trim().split("\\s");
         String commandName = arguments[0];

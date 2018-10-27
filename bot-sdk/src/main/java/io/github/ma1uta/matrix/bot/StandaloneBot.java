@@ -16,13 +16,13 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.StrippedState;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.model.sync.InvitedRoom;
 import io.github.ma1uta.matrix.client.model.sync.JoinedRoom;
 import io.github.ma1uta.matrix.client.model.sync.LeftRoom;
 import io.github.ma1uta.matrix.client.model.sync.Rooms;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
+import io.github.ma1uta.matrix.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +135,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
     protected LoopState registeredState() {
         return loop(sync -> {
             Map<String, InvitedRoom> invite = sync.getRooms().getInvite();
-            Map<String, List<StrippedState>> eventMap = new HashMap<>();
+            Map<String, List<Event>> eventMap = new HashMap<>();
             for (Map.Entry<String, InvitedRoom> entry : invite.entrySet()) {
                 eventMap.put(entry.getKey(), entry.getValue().getInviteState().getEvents());
             }

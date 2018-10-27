@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Event;
+import io.github.ma1uta.matrix.event.RoomEvent;
 
 /**
  * Command interface.
@@ -38,13 +38,13 @@ public interface Command<C extends BotConfig, D extends BotDao<C>, S extends Per
     /**
      * Invoking command.
      *
-     * @param context    bot's context.
+     * @param context   bot's context.
      * @param roomId    room id.
      * @param event     event with command.
      * @param arguments (without command).
      * @return {@code true} if invoked, else {@code false}.
      */
-    boolean invoke(Context<C, D, S, E> context, String roomId, Event event, String arguments);
+    boolean invoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments);
 
     /**
      * Help information.

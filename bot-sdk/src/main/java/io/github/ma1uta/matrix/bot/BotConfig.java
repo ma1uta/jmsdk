@@ -54,7 +54,7 @@ public class BotConfig {
     /**
      * Bot's password.
      */
-    private String password;
+    private char[] password;
 
     /**
      * Bot's device id.
@@ -138,11 +138,11 @@ public class BotConfig {
         this.userId = userId;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 

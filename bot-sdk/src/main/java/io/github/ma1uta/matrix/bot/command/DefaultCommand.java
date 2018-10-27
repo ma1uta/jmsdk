@@ -16,11 +16,11 @@
 
 package io.github.ma1uta.matrix.bot.command;
 
-import io.github.ma1uta.matrix.Event;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.Context;
 import io.github.ma1uta.matrix.bot.PersistentService;
+import io.github.ma1uta.matrix.event.RoomEvent;
 
 /**
  * Set or show default command.
@@ -38,7 +38,7 @@ public class DefaultCommand<C extends BotConfig, D extends BotDao<C>, S extends 
     }
 
     @Override
-    public boolean ownerInvoke(Context<C, D, S, E> context, String roomId, Event event, String arguments) {
+    public boolean ownerInvoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments) {
         if (arguments == null || arguments.trim().isEmpty()) {
             context.getConfig().setDefaultCommand(null);
             return true;

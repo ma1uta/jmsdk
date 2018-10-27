@@ -16,8 +16,9 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Event;
-import io.github.ma1uta.matrix.events.RoomMember;
+import io.github.ma1uta.matrix.event.Event;
+import io.github.ma1uta.matrix.event.RoomEvent;
+import io.github.ma1uta.matrix.event.RoomMember;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,10 +80,10 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
                 if (joinedRooms.contains(roomId)) {
                     return true;
                 }
-                if (event.getContent() instanceof RoomMember) {
-                    RoomMember content = (RoomMember) event.getContent();
-                    String stateKey = event.getStateKey();
-                    String membership = content.getMembership();
+                if (event instanceof RoomMember) {
+                    RoomMember roomMember = (RoomMember) event;
+                    String stateKey = roomMember.getStateKey();
+                    String membership = roomMember.getContent().getMembership();
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Membership: {}", membership);
                         LOGGER.debug("Event type: {}", event.getType());
@@ -93,9 +94,9 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
                 return false;
             }).map(Map.Entry::getValue).findFirst();
 
-        if (bot.isPresent()) {
+        if (bot.isPresent() && event instanceof RoomEvent) {
             LOGGER.debug("Bot \"{}\" is found.", bot.get().getContext().getConfig().getUserId());
-            bot.get().send(event);
+            bot.get().send((RoomEvent) event);
             return true;
         } else {
             LOGGER.debug("Bot didn't found.");

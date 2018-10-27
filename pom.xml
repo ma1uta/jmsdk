@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.ma1uta.matrix</groupId>
     <artifactId>jmsdk</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <licenses>
         <license>
@@ -70,7 +70,7 @@
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
         <nexus.staging.maven.plugin.version>1.6.8</nexus.staging.maven.plugin.version>
-        <checkstyle.version>8.13</checkstyle.version>
+        <checkstyle.version>8.14</checkstyle.version>
         <jacoco.maven.plugin.version>0.8.2</jacoco.maven.plugin.version>
         <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
         <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
@@ -81,9 +81,12 @@
         <javax.ws.rs.api.version>2.1.1</javax.ws.rs.api.version>
         <jackson.annotations.version>2.9.7</jackson.annotations.version>
         <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
-        <hibernate.jpa.api.version>1.0.2</hibernate.jpa.api.version>
+        <hibernate.jpa.api.version>1.0.2.Final</hibernate.jpa.api.version>
         <junit5.bom.version>5.3.1</junit5.bom.version>
         <jetty.server.version>9.4.12.v20180830</jetty.server.version>
+        <jersey.client.version>2.27</jersey.client.version>
+        <jersey.rx.client.version>2.27</jersey.rx.client.version>
+        <jersey.media.json.jackson.version>2.27</jersey.media.json.jackson.version>
         <jackson.jaxrs.json.provider.version>2.9.7</jackson.jaxrs.json.provider.version>
         <jackson.databind.version>2.9.7</jackson.databind.version>
         <resteasy.client.version>4.0.0.Beta5</resteasy.client.version>
@@ -359,9 +362,11 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>common-sdk</module>
-                <module>client-sdk</module>
+                <module>common-impl</module>
+                <module>client-impl</module>
                 <module>bot-sdk</module>
+                <module>jackson-support</module>
+                <module>jsonb-support</module>
             </modules>
         </profile>
         <profile>
@@ -370,7 +375,7 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
-                <module>common-sdk</module>
+                <module>common-impl</module>
             </modules>
         </profile>
         <profile>
@@ -379,7 +384,7 @@
                 <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
-                <module>client-sdk</module>
+                <module>client-impl</module>
             </modules>
         </profile>
         <profile>
@@ -412,7 +417,7 @@
         <profile>
             <id>jsonb-support</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>jsonb-support</module>
@@ -421,7 +426,7 @@
         <profile>
             <id>jackson-support</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <modules>
                 <module>jackson-support</module>
