@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix;
+package io.github.ma1uta.matrix.impl;
 
+import io.github.ma1uta.matrix.Id;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +45,6 @@ public class MatrixId extends Id {
      */
     public static final Pattern DOMAIN = Pattern
         .compile("(\\d{3}.\\d{3}.\\d{3}.\\d{3}|\\[[0-9\\p{Alpha}:]{0,39}]|[0-9\\-.\\p{Alpha}]{1,255})(:[\\d]+)?");
-
-    protected MatrixId() {
-        // singleton.
-    }
 
     @Override
     protected Matcher validate(String id) {

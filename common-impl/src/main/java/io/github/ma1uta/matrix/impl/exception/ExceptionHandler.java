@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.exception;
+package io.github.ma1uta.matrix.impl.exception;
 
 import io.github.ma1uta.matrix.ErrorResponse;
 import io.github.ma1uta.matrix.RateLimitedErrorResponse;

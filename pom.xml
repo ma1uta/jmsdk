@@ -63,6 +63,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <base.java.version>1.8</base.java.version>
+        <arguments>-Dmulti_release=true</arguments>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
@@ -73,10 +75,15 @@
         <checkstyle.version>8.14</checkstyle.version>
         <jacoco.maven.plugin.version>0.8.2</jacoco.maven.plugin.version>
         <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>2.22.0</maven.failsafe.plugin.version>
         <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
         <maven.javadoc.plugin.version>3.0.1</maven.javadoc.plugin.version>
         <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
         <maven.project.info.plugin.version>3.0.0</maven.project.info.plugin.version>
+        <maven.toolchain.plugin>1.1</maven.toolchain.plugin>
+        <maven.jar.plugin>3.1.0</maven.jar.plugin>
+
+        <asm.version>7.0-beta</asm.version>
         <slf4j.api.version>1.8.0-beta2</slf4j.api.version>
         <javax.ws.rs.api.version>2.1.1</javax.ws.rs.api.version>
         <jackson.annotations.version>2.9.7</jackson.annotations.version>
@@ -93,15 +100,61 @@
         <resteasy.undertow.version>4.0.0.Beta5</resteasy.undertow.version>
         <javax.json.bind.api.version>1.0</javax.json.bind.api.version>
         <javax.json.api.version>1.1.3</javax.json.api.version>
-     </properties>
+        <javax.activation.version>1.2.0</javax.activation.version>
+    </properties>
 
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-toolchains-plugin</artifactId>
+                    <version>${maven.toolchain.plugin}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>toolchain</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <toolchains>
+                            <jdk>
+                                <version>${base.java.version}</version>
+                            </jdk>
+                        </toolchains>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
+                    <executions>
+                        <!-- for Java 11 -->
+                        <execution>
+                            <id>java11</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <release>11</release>
+                                <jdkToolchain>
+                                    <version>11</version>
+                                </jdkToolchain>
+                                <compileSourceRoots>
+                                    <compileSourceRoot>${project.basedir}/src/main/java-mr/11</compileSourceRoot>
+                                </compileSourceRoots>
+                                <multiReleaseOutput>true</multiReleaseOutput>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.ow2.asm</groupId>
+                            <artifactId>asm</artifactId>
+                            <version>${asm.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -150,6 +203,7 @@
                     <version>${maven.checkstyle.plugin.version}</version>
                     <configuration>
                         <configLocation>config/checkstyle/checkstyle.xml</configLocation>
+                        <excludes>**/module-info.java</excludes>
                     </configuration>
                     <executions>
                         <execution>
@@ -188,6 +242,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.ow2.asm</groupId>
+                            <artifactId>asm</artifactId>
+                            <version>${asm.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -211,6 +272,27 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven.failsafe.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <argLine>
+                            --illegal-access=permit
+                        </argLine>
+                        <includes>
+                            <include>**/*Test.java</include>
+                        </includes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
                     <version>${maven.site.plugin.version}</version>
                 </plugin>
@@ -222,6 +304,10 @@
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-toolchains-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -317,7 +403,12 @@
                 <artifactId>javax.json-api</artifactId>
                 <version>${javax.json.api.version}</version>
             </dependency>
-         </dependencies>
+            <dependency>
+                <groupId>com.sun.activation</groupId>
+                <artifactId>javax.activation</artifactId>
+                <version>${javax.activation.version}</version>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
     <profiles>
@@ -356,91 +447,102 @@
                 </plugins>
             </build>
         </profile>
+        <!-- enable java11 compilation -->
         <profile>
-            <id>all</id>
+            <id>compile-java11</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <jdk>[11,)</jdk>
             </activation>
-            <modules>
-                <module>common-impl</module>
-                <module>client-impl</module>
-                <module>bot-sdk</module>
-                <module>jackson-support</module>
-                <module>jsonb-support</module>
-                <module>client-jaxrs-resteasy</module>
-            </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>java11</id>
+                                <phase>compile</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
+
         <profile>
-            <id>common</id>
+            <id>test-toolchains-bypass</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>!multi_release</name>
+                </property>
             </activation>
-            <modules>
-                <module>common-impl</module>
-            </modules>
+
+            <build>
+                <plugins>
+                    <!-- Run the unit tests with the JVM used to run maven -->
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <jvm>${env.JAVA_HOME}/bin/java</jvm>
+                            <!-- this shows that the Java 11 code isn't tested -->
+                            <testFailureIgnore>true</testFailureIgnore>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
+
         <profile>
-            <id>client</id>
+            <id>multi-jar</id>
             <activation>
-                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>multi_release</name>
+                </property>
             </activation>
-            <modules>
-                <module>client-impl</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>bot</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>bot-sdk</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>id</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>identity-sdk</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>hs</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>homeserver-sdk</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>jsonb-support</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>jsonb-support</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>jackson-support</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>jackson-support</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>client-jaxrs-resteasy</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>client-jaxrs-resteasy</module>
-            </modules>
+
+            <build>
+                <plugins>
+                    <!-- enable java11 compilations -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>java11</id>
+                                <phase>compile</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- add the multi-release:true manifest entry -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>${maven.jar.plugin}</version>
+                        <configuration>
+                            <archive>
+                                <manifestEntries>
+                                    <Multi-Release>true</Multi-Release>
+                                </manifestEntries>
+                            </archive>
+                            <excludes>
+                                <exclude>**/javac*</exclude>
+                                <exclude>**/org.codehaus.plexus.compiler.javac.JavacCompiler*arguments</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
+
+    <modules>
+        <module>common-impl</module>
+        <module>client-impl</module>
+        <module>bot-sdk</module>
+        <module>jackson-support</module>
+        <module>jsonb-support</module>
+        <module>client-jaxrs-resteasy</module>
+        <module>client-java11</module>
+    </modules>
 </project>
