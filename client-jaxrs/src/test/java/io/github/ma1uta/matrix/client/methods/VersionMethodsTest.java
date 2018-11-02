@@ -16,34 +16,25 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
 import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
-import javax.ws.rs.core.MediaType;
 
 class VersionMethodsTest extends MockServer {
 
     @Test
     void versions() {
-        ConfigurableServlet.get = (req, res) -> {
-            assertTrue(req.getRequestURI().startsWith("/_matrix/client/versions"));
-            try {
-                res.setContentType(MediaType.APPLICATION_JSON);
-                PrintWriter writer = res.getWriter();
-                writer.println("{\"versions\":[\"r0.4.0\",\"r0.3.0\"]}");
-            } catch (IOException e) {
-                fail();
-            }
-        };
+        wireMockServer.stubFor(get(urlMatching("/_matrix/client/versions/?"))
+            .willReturn(okJson("{\"versions\":[\"r0.4.0\",\"r0.3.0\"]}")
+            )
+        );
 
         List<String> versions = getMatrixClient().versions().versions().join();
         assertNotNull(versions);

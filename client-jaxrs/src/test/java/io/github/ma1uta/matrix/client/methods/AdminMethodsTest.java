@@ -16,72 +16,57 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
 import io.github.ma1uta.matrix.client.model.admin.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.admin.DeviceInfo;
 import io.github.ma1uta.matrix.client.model.admin.SessionInfo;
-import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
 import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.core.MediaType;
 
 class AdminMethodsTest extends MockServer {
 
     @Test
-    public void secured() {
-        assertThrows(IllegalArgumentException.class, () -> getMatrixClient().turnServers().turnServers());
-    }
-
-    @Test
     public void whois() throws Exception {
-        ConfigurableServlet.get = (req, res) -> {
-            assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/admin/whois/%40peter%3Arabbit.rocks"));
-
-            if (authenticated(req, res)) {
-                try {
-                    res.setContentType(MediaType.APPLICATION_JSON);
-                    PrintWriter writer = res.getWriter();
-                    writer.println("{\n" +
-                        "  \"user_id\": \"@peter:rabbit.rocks\",\n" +
-                        "  \"devices\": {\n" +
-                        "    \"teapot\": {\n" +
-                        "      \"sessions\": [\n" +
-                        "        {\n" +
-                        "          \"connections\": [\n" +
-                        "            {\n" +
-                        "              \"ip\": \"127.0.0.1\",\n" +
-                        "              \"last_seen\": 1411996332123,\n" +
-                        "              \"user_agent\": \"curl/7.31.0-DEV\"\n" +
-                        "            },\n" +
-                        "            {\n" +
-                        "              \"ip\": \"10.0.0.2\",\n" +
-                        "              \"last_seen\": 1411996332123,\n" +
-                        "              \"user_agent\": \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)" +
-                        " Chrome/37.0.2062.120 Safari/537.36\"\n" +
-                        "            }\n" +
-                        "          ]\n" +
-                        "        }\n" +
-                        "      ]\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}");
-                } catch (IOException e) {
-                    fail();
-                }
-            }
-        };
+        wireMockServer.stubFor(
+            get(urlEqualTo("/_matrix/client/r0/admin/whois/%40peter%3Arabbit.rocks"))
+                .withHeader("Authorization", equalTo("Bearer " + ACCESS_TOKEN))
+                .willReturn(okJson("{\n" +
+                    "  \"user_id\": \"@peter:rabbit.rocks\",\n" +
+                    "  \"devices\": {\n" +
+                    "    \"teapot\": {\n" +
+                    "      \"sessions\": [\n" +
+                    "        {\n" +
+                    "          \"connections\": [\n" +
+                    "            {\n" +
+                    "              \"ip\": \"127.0.0.1\",\n" +
+                    "              \"last_seen\": 1411996332123,\n" +
+                    "              \"user_agent\": \"curl/7.31.0-DEV\"\n" +
+                    "            },\n" +
+                    "            {\n" +
+                    "              \"ip\": \"10.0.0.2\",\n" +
+                    "              \"last_seen\": 1411996332123,\n" +
+                    "              \"user_agent\": \"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)" +
+                    " Chrome/37.0.2062.120 Safari/537.36\"\n" +
+                    "            }\n" +
+                    "          ]\n" +
+                    "        }\n" +
+                    "      ]\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}")
+                )
+        );
 
         getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
         AdminResponse res = getMatrixClient().admin().whois("@peter:rabbit.rocks").get(1000, TimeUnit.MILLISECONDS);

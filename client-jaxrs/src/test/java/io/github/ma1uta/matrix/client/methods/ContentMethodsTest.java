@@ -16,37 +16,30 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
 import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 
 class ContentMethodsTest extends MockServer {
 
     @Test
     void upload() throws Exception {
-        ConfigurableServlet.post = (req, res) -> {
-            try {
-                assertTrue(req.getRequestURI().startsWith("/_matrix/media/r0/upload"));
-                assertEquals(MediaType.TEXT_PLAIN, req.getContentType());
-                assertEquals("content.txt", req.getParameter("filename"));
-                assertEquals("Sample.", req.getReader().lines().collect(Collectors.joining()));
-
-                res.setContentType("application/json");
-                res.getWriter().println("{\"content_uri\":\"mxc://example.com/AQwafuaFswefuhsfAFAgsw\"}");
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail();
-            }
-        };
+        wireMockServer.stubFor(post(urlPathMatching("/_matrix/media/r0/upload/?"))
+            .withHeader("Content-Type", equalTo(MediaType.TEXT_PLAIN))
+            .withHeader("Authorization", equalTo("Bearer " + ACCESS_TOKEN))
+            .withQueryParam("filename", equalTo("content.txt"))
+            .willReturn(okJson("{\"content_uri\":\"mxc://example.com/AQwafuaFswefuhsfAFAgsw\"}")
+            )
+        );
 
         try (InputStream inputStream = getClass().getResourceAsStream("/content.txt")) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);

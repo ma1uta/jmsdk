@@ -16,49 +16,45 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginType;
 import io.github.ma1uta.matrix.client.model.auth.UserIdentifier;
-import io.github.ma1uta.matrix.client.test.ConfigurableServlet;
 import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 
 class AuthMethodsTest extends MockServer {
 
     @Test
     public void getLogin() throws Exception {
-        ConfigurableServlet.get = (req, res) -> {
-            try {
-                assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/login"));
-
-                res.setContentType(MediaType.APPLICATION_JSON);
-                res.getWriter().println("{\n" +
+        wireMockServer.stubFor(
+            get(urlPathMatching("/_matrix/client/r0/login/?"))
+                .willReturn(okJson("{\n" +
                     "  \"flows\": [\n" +
                     "    {\n" +
                     "      \"type\": \"m.login.password\"\n" +
                     "    }\n" +
                     "  ]\n" +
-                    "}");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
+                    "}")
+                )
+        );
 
         List<LoginType> loginTypes = getMatrixClient().auth().loginTypes().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(loginTypes);
@@ -70,32 +66,19 @@ class AuthMethodsTest extends MockServer {
 
     @Test
     public void login() throws Exception {
-        ConfigurableServlet.post = (req, res) -> {
-            try {
-                assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/login"));
-                assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
-
-                JsonNode jsonNode = new ObjectMapper().readValue(req.getReader().lines().collect(Collectors.joining()), JsonNode.class);
-                assertEquals(AuthApi.AuthType.PASSWORD, jsonNode.get("type").asText());
-                assertEquals("ilovebananas", jsonNode.get("password").asText());
-                assertEquals("Jungle Phone", jsonNode.get("initial_device_display_name").asText());
-
-                JsonNode identifier = jsonNode.get("identifier");
-                assertNotNull(identifier);
-                assertEquals("m.id.user", identifier.get("type").asText());
-                assertEquals("cheeky_monkey", identifier.get("user").asText());
-
-                res.setContentType(MediaType.APPLICATION_JSON);
-                res.getWriter().println("{\n" +
+        wireMockServer.stubFor(
+            post(urlEqualTo("/_matrix/client/r0/login"))
+                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON))
+                .withRequestBody(equalToJson("{\"type\":\"" + AuthApi.AuthType.PASSWORD + "\"," +
+                    "\"password\":\"ilovebananas\",\"initial_device_display_name\":\"Jungle Phone\"," +
+                    "\"identifier\":{\"type\":\"m.id.user\",\"user\":\"cheeky_monkey\"}}"))
+                .willReturn(okJson("{\n" +
                     "  \"user_id\": \"@cheeky_monkey:matrix.org\",\n" +
                     "  \"access_token\": \"abc123\",\n" +
                     "  \"device_id\": \"GHTYAJCE\"\n" +
-                    "}");
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail();
-            }
-        };
+                    "}")
+                )
+        );
 
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setType(AuthApi.AuthType.PASSWORD);
@@ -123,19 +106,12 @@ class AuthMethodsTest extends MockServer {
     }
 
     public void logout(boolean withToken) throws Exception {
-        ConfigurableServlet.post = (req, res) -> {
-            try {
-                assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/logout"));
-                assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
-                if (authenticated(req, res)) {
-                    res.setContentType(MediaType.APPLICATION_JSON);
-                    res.getWriter().println("{}");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail();
-            }
-        };
+        wireMockServer.stubFor(
+            post(urlEqualTo("/_matrix/client/r0/logout"))
+                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON))
+                .withHeader("Authorization", equalTo("Bearer " + ACCESS_TOKEN))
+                .willReturn(okJson("{}"))
+        );
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
@@ -146,28 +122,21 @@ class AuthMethodsTest extends MockServer {
 
     @Test
     public void logoutAll() throws Exception {
-        logout(true);
+        logoutAll(true);
     }
 
     @Test
     public void logoutAllUnAuthorized() {
-        assertThrows(IllegalArgumentException.class, () -> logout(false));
+        assertThrows(IllegalArgumentException.class, () -> logoutAll(false));
     }
 
     public void logoutAll(boolean withToken) throws Exception {
-        ConfigurableServlet.post = (req, res) -> {
-            try {
-                assertTrue(req.getRequestURI().startsWith("/_matrix/client/r0/logoutAll"));
-                assertEquals(MediaType.APPLICATION_JSON, req.getContentType());
-                if (authenticated(req, res)) {
-                    res.setContentType(MediaType.APPLICATION_JSON);
-                    res.getWriter().println("{}");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail();
-            }
-        };
+        wireMockServer.stubFor(
+            post(urlEqualTo("/_matrix/client/r0/logout/all"))
+                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON))
+                .withHeader("Authorization", equalTo("Bearer " + ACCESS_TOKEN))
+                .willReturn(okJson("{}"))
+        );
 
         if (withToken) {
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);

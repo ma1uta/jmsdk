@@ -18,10 +18,6 @@ package io.github.ma1uta.matrix.client.factory.jaxrs;
 
 import static java.util.stream.Collectors.toMap;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.ErrorResponse;
@@ -35,6 +31,7 @@ import io.github.ma1uta.matrix.event.content.EventContent;
 import io.github.ma1uta.matrix.impl.exception.MatrixException;
 import io.github.ma1uta.matrix.impl.exception.RateLimitedException;
 import io.github.ma1uta.matrix.support.jackson.EventContentDeserializer;
+import io.github.ma1uta.matrix.support.jackson.JacksonContextResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +55,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
@@ -76,6 +74,11 @@ public class JaxRsRequestFactory implements RequestFactory {
     private final Client client;
     private final String homeserverUrl;
     private Executor executor;
+
+    public JaxRsRequestFactory(String homeserverUrl) {
+        this.client = ClientBuilder.newBuilder().register(new JacksonContextResolver()).build();
+        this.homeserverUrl = homeserverUrl;
+    }
 
     public JaxRsRequestFactory(Client client, String homeserverUrl) {
         this.client = client;
@@ -339,14 +342,18 @@ public class JaxRsRequestFactory implements RequestFactory {
     }
 
     @Override
-    public EventContent deserialize(String response, String eventType) {
+    public EventContent deserialize(byte[] response, String eventType) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            JsonParser parser = objectMapper.getFactory().createParser(response);
-            ObjectCodec codec = parser.getCodec();
-            JsonNode node = codec.readTree(parser);
-            return new EventContentDeserializer().deserialize(node, eventType, codec);
+            ObjectMapper mapper = getClient()
+                .getConfiguration()
+                .getInstances()
+                .stream()
+                .filter(o -> o instanceof JacksonContextResolver)
+                .map(JacksonContextResolver.class::cast)
+                .findFirst()
+                .orElse(new JacksonContextResolver())
+                .getContext(EventContent.class);
+            return new EventContentDeserializer().deserialize(response, eventType, mapper);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -396,12 +403,14 @@ public class JaxRsRequestFactory implements RequestFactory {
                             result.complete(extractor.apply(response));
                             LOGGER.debug("Finish invoking.");
                             break;
+
                         case UNAUTHORIZED:
                             LOGGER.debug("Authentication required.");
                             AuthenticationFlows auth = response.readEntity(AuthenticationFlows.class);
                             result.completeExceptionally(new AuthenticationRequred(auth));
                             LOGGER.debug("Finish invoking.");
                             break;
+
                         case RATE_LIMITED:
                             LOGGER.warn("Rate limited.");
                             RateLimitedErrorResponse rateLimited = response.readEntity(RateLimitedErrorResponse.class);
@@ -418,6 +427,7 @@ public class JaxRsRequestFactory implements RequestFactory {
                             Thread.sleep(timeout);
                             LOGGER.debug("Wake up!");
                             break;
+
                         default:
                             LOGGER.debug("Other error.");
                             ErrorResponse error = response.readEntity(ErrorResponse.class);
@@ -458,7 +468,6 @@ public class JaxRsRequestFactory implements RequestFactory {
                 LOGGER.debug("Exception: {}", result.isCompletedExceptionally());
             }
         }
-
     }
 }
 
