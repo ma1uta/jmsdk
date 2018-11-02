@@ -51,9 +51,7 @@ import static io.github.ma1uta.matrix.event.Event.EventType.STICKER;
 import static io.github.ma1uta.matrix.event.Event.EventType.TAG;
 import static io.github.ma1uta.matrix.event.Event.EventType.TYPING;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.event.content.CallAnswerContent;
 import io.github.ma1uta.matrix.event.content.CallCandidatesContent;
 import io.github.ma1uta.matrix.event.content.CallHangupContent;
@@ -91,6 +89,7 @@ import io.github.ma1uta.matrix.event.content.StickerContent;
 import io.github.ma1uta.matrix.event.content.TagContent;
 import io.github.ma1uta.matrix.event.content.TypingContent;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -101,92 +100,88 @@ public class EventContentDeserializer {
     /**
      * Deserialize the event content.
      *
-     * @param node  the json node with the event content.
-     * @param type  the type of the event.
-     * @param codec the json codec.
+     * @param content the content to deserialize.
+     * @param type    the type of the event.
+     * @param mapper  the object mapper.
      * @return the deserialized event content or null
-     * @throws JsonProcessingException when missing the `msgtype` of the message.
+     * @throws IOException when deserialization was failed.
      */
-    public EventContent deserialize(JsonNode node, String type, ObjectCodec codec) throws JsonProcessingException {
-        if (node == null || node.isNull()) {
-            return null;
-        }
-
+    public EventContent deserialize(byte[] content, String type, ObjectMapper mapper) throws IOException {
         switch (type) {
             case CALL_ANSWER:
-                return codec.treeToValue(node, CallAnswerContent.class);
+                return mapper.readValue(content, CallAnswerContent.class);
             case CALL_CANDIDATES:
-                return codec.treeToValue(node, CallCandidatesContent.class);
+                return mapper.readValue(content, CallCandidatesContent.class);
             case CALL_HANGUP:
-                return codec.treeToValue(node, CallHangupContent.class);
+                return mapper.readValue(content, CallHangupContent.class);
             case CALL_INVITE:
-                return codec.treeToValue(node, CallInviteContent.class);
+                return mapper.readValue(content, CallInviteContent.class);
             case DIRECT:
-                return codec.treeToValue(node, DirectContent.class);
+                return mapper.readValue(content, DirectContent.class);
             case FORWARDED_ROOM_KEY:
-                return codec.treeToValue(node, ForwardedRoomKeyContent.class);
+                return mapper.readValue(content, ForwardedRoomKeyContent.class);
             case FULLY_READ:
-                return codec.treeToValue(node, FullyReadContent.class);
+                return mapper.readValue(content, FullyReadContent.class);
             case IGNORED_USER_LIST:
-                return codec.treeToValue(node, IgnoredUserListContent.class);
+                return mapper.readValue(content, IgnoredUserListContent.class);
             case PRESENCE:
-                return codec.treeToValue(node, PresenceContent.class);
+                return mapper.readValue(content, PresenceContent.class);
             case RECEIPT:
-                return codec.treeToValue(node, ReceiptContent.class);
+                return mapper.readValue(content, ReceiptContent.class);
             case ROOM_ALIASES:
-                return codec.treeToValue(node, RoomAliasesContent.class);
+                return mapper.readValue(content, RoomAliasesContent.class);
             case ROOM_AVATAR:
-                return codec.treeToValue(node, RoomAvatarContent.class);
+                return mapper.readValue(content, RoomAvatarContent.class);
             case ROOM_CANONICAL_ALIAS:
-                return codec.treeToValue(node, RoomCanonicalAliasContent.class);
+                return mapper.readValue(content, RoomCanonicalAliasContent.class);
             case ROOM_CREATE:
-                return codec.treeToValue(node, RoomCreateContent.class);
+                return mapper.readValue(content, RoomCreateContent.class);
             case ROOM_GUEST_ACCESS:
-                return codec.treeToValue(node, RoomGuestAccessContent.class);
+                return mapper.readValue(content, RoomGuestAccessContent.class);
             case ROOM_ENCRIPTION:
-                return codec.treeToValue(node, RoomEncryptionContent.class);
+                return mapper.readValue(content, RoomEncryptionContent.class);
             case ROOM_ENCRYPTED:
-                return codec.treeToValue(node, RoomEncryptedContent.class);
+                return mapper.readValue(content, RoomEncryptedContent.class);
             case ROOM_HISTORY_VISIBILITY:
-                return codec.treeToValue(node, RoomHistoryVisibilityContent.class);
+                return mapper.readValue(content, RoomHistoryVisibilityContent.class);
             case ROOM_JOIN_RULES:
-                return codec.treeToValue(node, RoomJoinRulesContent.class);
+                return mapper.readValue(content, RoomJoinRulesContent.class);
             case ROOM_KEY:
-                return codec.treeToValue(node, RoomKeyContent.class);
+                return mapper.readValue(content, RoomKeyContent.class);
             case ROOM_KEY_REQUEST:
-                return codec.treeToValue(node, RoomKeyRequestContent.class);
+                return mapper.readValue(content, RoomKeyRequestContent.class);
             case ROOM_MEMBER:
-                return codec.treeToValue(node, RoomMemberContent.class);
+                return mapper.readValue(content, RoomMemberContent.class);
             case ROOM_MESSAGE:
-                return codec.treeToValue(node, RoomMessageContent.class);
+                return mapper.readValue(content, RoomMessageContent.class);
             case ROOM_MESSAGE_FEEDBACK:
-                return codec.treeToValue(node, RoomMessageFeedbackContent.class);
+                return mapper.readValue(content, RoomMessageFeedbackContent.class);
             case ROOM_NAME:
-                return codec.treeToValue(node, RoomNameContent.class);
+                return mapper.readValue(content, RoomNameContent.class);
             case ROOM_PINNED_EVENTS:
-                return codec.treeToValue(node, RoomPinnedContent.class);
+                return mapper.readValue(content, RoomPinnedContent.class);
             case ROOM_POWER_LEVELS:
-                return codec.treeToValue(node, RoomPowerLevelsContent.class);
+                return mapper.readValue(content, RoomPowerLevelsContent.class);
             case ROOM_REDACTION:
-                return codec.treeToValue(node, RoomRedactionContent.class);
+                return mapper.readValue(content, RoomRedactionContent.class);
             case ROOM_THIRD_PARTY_INVITE:
-                return codec.treeToValue(node, RoomThirdPartyInviteContent.class);
+                return mapper.readValue(content, RoomThirdPartyInviteContent.class);
             case ROOM_TOPIC:
-                return codec.treeToValue(node, RoomTopicContent.class);
+                return mapper.readValue(content, RoomTopicContent.class);
             case STICKER:
-                return codec.treeToValue(node, StickerContent.class);
+                return mapper.readValue(content, StickerContent.class);
             case TAG:
-                return codec.treeToValue(node, TagContent.class);
+                return mapper.readValue(content, TagContent.class);
             case TYPING:
-                return codec.treeToValue(node, TypingContent.class);
+                return mapper.readValue(content, TypingContent.class);
             case ROOM_SERVER_ACL:
-                return codec.treeToValue(node, RoomServerAclContent.class);
+                return mapper.readValue(content, RoomServerAclContent.class);
             default:
-                return parse(node, codec);
+                return parse(content, mapper);
         }
     }
 
-    protected EventContent parse(JsonNode jsonNode, ObjectCodec codec) throws JsonProcessingException {
-        return new RawEventContent(codec.treeToValue(jsonNode, Map.class));
+    protected EventContent parse(byte[] content, ObjectMapper mapper) throws IOException {
+        return new RawEventContent(mapper.readValue(content, Map.class));
     }
 }
