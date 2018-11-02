@@ -1,6 +1,0 @@
-DROP TABLE IF EXISTS "token";
-DROP TABLE IF EXISTS "member";
-DROP TABLE IF EXISTS "room";
-DROP TABLE IF EXISTS "device";
-DROP TABLE IF EXISTS "user";
-DROP TABLE IF EXISTS "flyway_schema_history";

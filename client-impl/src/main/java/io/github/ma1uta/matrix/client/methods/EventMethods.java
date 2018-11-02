@@ -77,7 +77,7 @@ public class EventMethods extends AbstractMethods {
 
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType)
             .path("stateKey", stateKey);
-        return factory().get(EventApi.class, "roomEventWithTypeAndState", params, String.class)
+        return factory().get(EventApi.class, "roomEventWithTypeAndState", params, byte[].class)
             .thenApply(r -> factory().deserialize(r, eventType));
     }
 
@@ -94,7 +94,7 @@ public class EventMethods extends AbstractMethods {
         Objects.requireNonNull(eventType, "EventType cannot be empty.");
 
         RequestParams params = defaults().clone().path("roomId", roomId).path("eventType", eventType);
-        return factory().get(EventApi.class, "roomEventWithType", params, String.class).thenApply(r -> factory().deserialize(r, eventType));
+        return factory().get(EventApi.class, "roomEventWithType", params, byte[].class).thenApply(r -> factory().deserialize(r, eventType));
     }
 
     /**

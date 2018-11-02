@@ -163,7 +163,7 @@ public interface RequestFactory {
      * @param eventType The event content type.
      * @return The deserialized event content.
      */
-    EventContent deserialize(String content, String eventType);
+    EventContent deserialize(byte[] content, String eventType);
 }
 
 
