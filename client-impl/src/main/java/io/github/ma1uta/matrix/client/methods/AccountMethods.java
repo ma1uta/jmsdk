@@ -182,9 +182,6 @@ public class AccountMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> updateThreePid(ThreePidRequest request) {
         String error = "Threepids cannot be empty.";
         Objects.requireNonNull(request.getThreePidCreds(), error);
-        if (request.getThreePidCreds().isEmpty()) {
-            throw new NullPointerException(error);
-        }
 
         return factory().post(AccountApi.class, "updateThreePid", defaults(), request, EmptyResponse.class);
     }
