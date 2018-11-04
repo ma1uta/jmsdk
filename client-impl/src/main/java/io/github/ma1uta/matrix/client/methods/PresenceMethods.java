@@ -24,10 +24,10 @@ import io.github.ma1uta.matrix.client.model.presence.PresenceList;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
 import io.github.ma1uta.matrix.event.Event;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Presence methods.
@@ -93,6 +93,7 @@ public class PresenceMethods extends AbstractMethods {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
         RequestParams params = defaults().clone().path("userId", userId);
-        return factory().get(PresenceApi.class, "getPresenceList", params, new ArrayList<Event>());
+        return factory().get(PresenceApi.class, "getPresenceList", params, new GenericType<List<Event>>() {
+        });
     }
 }

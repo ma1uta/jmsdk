@@ -24,6 +24,7 @@ import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 import io.github.ma1uta.matrix.event.Event;
 
 import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Sync method.
@@ -69,6 +70,7 @@ public class SyncMethods extends AbstractMethods {
             .query("from", from)
             .query("roomId", roomId)
             .query("timeout", timeout);
-        return factory().get(SyncApi.class, "events", params, new Page<Event>());
+        return factory().get(SyncApi.class, "events", params, new GenericType<Page<Event>>() {
+        });
     }
 }

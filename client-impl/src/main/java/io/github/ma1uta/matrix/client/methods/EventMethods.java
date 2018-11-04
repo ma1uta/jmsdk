@@ -30,11 +30,11 @@ import io.github.ma1uta.matrix.event.message.FormattedBody;
 import io.github.ma1uta.matrix.event.message.Notice;
 import io.github.ma1uta.matrix.event.message.Text;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.core.GenericType;
 
 /**
  * EventMethods api.
@@ -107,7 +107,8 @@ public class EventMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
 
         RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().get(EventApi.class, "roomState", params, new ArrayList<Event>());
+        return factory().get(EventApi.class, "roomState", params, new GenericType<List<Event>>() {
+        });
     }
 
     /**
@@ -159,7 +160,8 @@ public class EventMethods extends AbstractMethods {
             .query("dir", dir)
             .query("filter", filter)
             .query("limit", limit);
-        return factory().get(EventApi.class, "messages", params, new Page<Event>());
+        return factory().get(EventApi.class, "messages", params, new GenericType<Page<Event>>() {
+        });
     }
 
     /**

@@ -20,7 +20,9 @@ import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.event.content.EventContent;
 
+import java.net.HttpURLConnection;
 import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Factory to invoke API.
@@ -35,28 +37,23 @@ public interface RequestFactory {
     /**
      * Status code when request was finished with success.
      */
-    int SUCCESS = 200;
+    int SUCCESS = HttpURLConnection.HTTP_OK;
 
     /**
      * Status code when homeserver requires additional authentication information.
      */
-    int UNAUTHORIZED = 401;
-
-    /**
-     * Initial waiting timeout when rate-limited response is occurred.
-     */
-    long INITIAL_TIMEOUT = 5 * 1000L;
+    int UNAUTHORIZED = HttpURLConnection.HTTP_UNAUTHORIZED;
 
     /**
      * When an one request finish with rate-limited response the next request will be send
-     * after {@code timeout * TIMEOUT_FACTOR} milliseconds.
+     * after {@code delay * DELAY_FACTOR} milliseconds.
      */
-    long TIMEOUT_FACTOR = 2;
+    long DELAY_FACTOR = 2;
 
     /**
      * Maximum timeout when client will stop send request.
      */
-    long MAX_TIMEOUT = 5 * 60 * 1000;
+    long MAX_DELAY = 5 * 60 * 1000L;
 
     /**
      * Get the homeserver.
@@ -98,14 +95,14 @@ public interface RequestFactory {
     /**
      * Send the GET request.
      *
-     * @param apiClass        The target API.
-     * @param apiMethod       The concrete API method.
-     * @param params          The request params (query, path and header).
-     * @param genericInstance The generic example instance of the response body.
-     * @param <R>             The class of the response body.
+     * @param apiClass    The target API.
+     * @param apiMethod   The concrete API method.
+     * @param params      The request params (query, path and header).
+     * @param genericType The generic type of the response body.
+     * @param <R>         The class of the response body.
      * @return the {@link CompletableFuture} instance to make async request.
      */
-    <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, Object genericInstance);
+    <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, GenericType<R> genericType);
 
     /**
      * Send the GET request.
@@ -118,19 +115,6 @@ public interface RequestFactory {
      * @return the {@link CompletableFuture} instance to make async request.
      */
     <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass);
-
-    /**
-     * Send the GET request.
-     *
-     * @param apiClass      The target API.
-     * @param apiMethod     The concrete API method.
-     * @param params        The request params (query, path and header).
-     * @param responseClass The class instance of the response body.
-     * @param requestType   The 'Content-Type' of the request.
-     * @param <R>           The class of the response body.
-     * @return the {@link CompletableFuture} instance to make async request.
-     */
-    <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass, String requestType);
 
     /**
      * Send the PUT request.

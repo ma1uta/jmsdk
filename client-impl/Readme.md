@@ -34,7 +34,7 @@ mxClient.auth().logout();
 There are two ways to receive events from the server:
 1. invoke api
     ```$java
-    CompletableFuture<SyncResponse> response = mxClient.sync().sync(filterId, nextBatch, fullState, presence, timeout);
+    CompletableFuture<SyncResponse> response = mxClient.sync().sync(filterId, nextBatch, fullState, presence, delay);
     ```
     Also it should organize loop to cycle `sync`-method.
 2. run `SyncLoop` in the separate thread.
@@ -55,7 +55,7 @@ There are two ways to receive events from the server:
     params.setFilter("myFilter");
     // set presence "offline" or null (optional)
     params.setPresence(null);
-    // set long-polling timeout in milliseconds (recommended to set bigger than 0 to avoid spam server)
+    // set long-polling delay in milliseconds (recommended to set bigger than 0 to avoid spam server)
     params.setTimeout(10 * 1000);
     
     syncLoop.setInit(params);

@@ -18,7 +18,7 @@ package io.github.ma1uta.matrix.client.factory.jaxrs;
 
 import io.github.ma1uta.matrix.client.RequestParams;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
@@ -31,12 +31,16 @@ import javax.ws.rs.client.WebTarget;
  */
 public class AppJaxRsRequestFactory extends JaxRsRequestFactory {
 
+    public AppJaxRsRequestFactory(String homeserverUrl) {
+        super(homeserverUrl);
+    }
+
     public AppJaxRsRequestFactory(Client client, String homeserverUrl) {
         super(client, homeserverUrl);
     }
 
-    public AppJaxRsRequestFactory(Client client, String homeserverUrl, Executor executor) {
-        super(client, homeserverUrl, executor);
+    public AppJaxRsRequestFactory(Client client, String homeserverUrl, ScheduledExecutorService service) {
+        super(client, homeserverUrl, service);
     }
 
     @Override

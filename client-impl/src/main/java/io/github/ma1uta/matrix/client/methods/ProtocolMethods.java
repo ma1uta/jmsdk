@@ -22,12 +22,11 @@ import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.protocol.Protocol;
 import io.github.ma1uta.matrix.protocol.ProtocolLocation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Protocol methods.
@@ -45,7 +44,8 @@ public class ProtocolMethods extends AbstractMethods {
      * @return The protocols map.
      */
     public CompletableFuture<Map<String, Protocol>> protocols() {
-        return factory().get(ThirdPartyProtocolApi.class, "protocols", defaults(), new HashMap<String, Protocol>());
+        return factory().get(ThirdPartyProtocolApi.class, "protocols", defaults(), new GenericType<Map<String, Protocol>>() {
+        });
     }
 
     /**
@@ -78,7 +78,8 @@ public class ProtocolMethods extends AbstractMethods {
 
         RequestParams params = defaults().clone().path("protocol", protocol);
         params.getQueryParams().putAll(queryParams);
-        return factory().get(ThirdPartyProtocolApi.class, "locationProtocol", params, new ArrayList<Protocol>());
+        return factory().get(ThirdPartyProtocolApi.class, "locationProtocol", params, new GenericType<List<Protocol>>() {
+        });
     }
 
     /**
@@ -93,7 +94,8 @@ public class ProtocolMethods extends AbstractMethods {
 
         RequestParams params = defaults().clone().path("protocol", protocol);
         params.getQueryParams().putAll(queryParams);
-        return factory().get(ThirdPartyProtocolApi.class, "userProtocol", params, new ArrayList<Protocol>());
+        return factory().get(ThirdPartyProtocolApi.class, "userProtocol", params, new GenericType<List<Protocol>>() {
+        });
     }
 
     /**
@@ -106,7 +108,8 @@ public class ProtocolMethods extends AbstractMethods {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
 
         RequestParams params = defaults().clone().query("alias", alias);
-        return factory().get(ThirdPartyProtocolApi.class, "location", params, new ArrayList<ProtocolLocation>());
+        return factory().get(ThirdPartyProtocolApi.class, "location", params, new GenericType<List<ProtocolLocation>>() {
+        });
     }
 
     /**
@@ -119,6 +122,7 @@ public class ProtocolMethods extends AbstractMethods {
         Objects.requireNonNull(userId, "userId cannot be empty.");
 
         RequestParams params = defaults().clone().query("userid", userId);
-        return factory().get(ThirdPartyProtocolApi.class, "user", params, new ArrayList<ProtocolLocation>());
+        return factory().get(ThirdPartyProtocolApi.class, "user", params, new GenericType<List<ProtocolLocation>>() {
+        });
     }
 }

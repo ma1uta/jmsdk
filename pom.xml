@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.ma1uta.matrix</groupId>
     <artifactId>jmsdk</artifactId>
-    <version>0.6.0</version>
+    <version>0.6.0-beta1</version>
     <packaging>pom</packaging>
     <licenses>
         <license>

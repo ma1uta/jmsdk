@@ -23,14 +23,14 @@
     <parent>
         <groupId>io.github.ma1uta.matrix</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.6.0</version>
+        <version>0.6.0-beta1</version>
     </parent>
     <artifactId>client-impl</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.0-beta1</version>
 
     <properties>
-        <client.api.version>r0.4.0-3</client.api.version>
-        <common.impl.version>0.5.0</common.impl.version>
+        <client.api.version>r0.4.0-3-beta1</client.api.version>
+        <common.impl.version>0.5.0-beta1</common.impl.version>
     </properties>
 
     <dependencies>

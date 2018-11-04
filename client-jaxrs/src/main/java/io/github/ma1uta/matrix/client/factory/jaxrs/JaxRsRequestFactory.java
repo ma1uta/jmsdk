@@ -46,16 +46,15 @@ import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import javax.ws.rs.client.AsyncInvoker;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.CompletionStageRxInvoker;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
@@ -73,21 +72,20 @@ public class JaxRsRequestFactory implements RequestFactory {
 
     private final Client client;
     private final String homeserverUrl;
-    private Executor executor;
+    private final ScheduledExecutorService service;
 
     public JaxRsRequestFactory(String homeserverUrl) {
-        this.client = ClientBuilder.newBuilder().register(new JacksonContextResolver()).build();
-        this.homeserverUrl = homeserverUrl;
+        this(ClientBuilder.newBuilder().register(new JacksonContextResolver()).build(), homeserverUrl);
     }
 
     public JaxRsRequestFactory(Client client, String homeserverUrl) {
-        this.client = client;
-        this.homeserverUrl = homeserverUrl;
+        this(client, homeserverUrl, Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() / 2));
     }
 
-    public JaxRsRequestFactory(Client client, String homeserverUrl, Executor executor) {
-        this(client, homeserverUrl);
-        this.executor = executor;
+    public JaxRsRequestFactory(Client client, String homeserverUrl, ScheduledExecutorService service) {
+        this.client = client;
+        this.homeserverUrl = homeserverUrl;
+        this.service = service;
     }
 
     public Client getClient() {
@@ -96,10 +94,6 @@ public class JaxRsRequestFactory implements RequestFactory {
 
     public String getHomeserverUrl() {
         return homeserverUrl;
-    }
-
-    public Executor getExecutor() {
-        return executor;
     }
 
     /**
@@ -276,26 +270,6 @@ public class JaxRsRequestFactory implements RequestFactory {
         return response -> response.readEntity(responseClass);
     }
 
-    /**
-     * Invoke request in async mode.
-     *
-     * @param action    The action.
-     * @param extractor The function to extract an entity from the response.
-     * @param <R>       Class of the entity.
-     * @return {@link CompletableFuture} the async result.
-     */
-    protected <R> CompletableFuture<R> invoke(Supplier<Future<Response>> action, Function<Response, R> extractor) {
-        CompletableFuture<R> result = new CompletableFuture<>();
-
-        if (getExecutor() != null) {
-            CompletableFuture.runAsync(new Stage<>(result, action, extractor), getExecutor());
-        } else {
-            CompletableFuture.runAsync(new Stage<>(result, action, extractor));
-        }
-
-        return result;
-    }
-
     @Override
     public <T, R> CompletableFuture<R> post(Class<?> apiClass, String apiMethod, RequestParams params, T payload, Class<R> responseClass) {
         return post(apiClass, apiMethod, params, payload, responseClass, MediaType.APPLICATION_JSON);
@@ -304,41 +278,34 @@ public class JaxRsRequestFactory implements RequestFactory {
     @Override
     public <T, R> CompletableFuture<R> post(Class<?> apiClass, String apiMethod, RequestParams params, T payload, Class<R> responseClass,
                                             String requestType) {
-        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, requestType).async();
+        CompletionStageRxInvoker rx = buildRequest(apiClass, apiMethod, params, requestType).rx();
         Entity<T> entity = Entity.entity(payload, requestType);
-        return invoke(() -> action.post(entity), extractor(responseClass));
+        return invoke(() -> rx.post(entity), extractor(responseClass));
     }
 
     @Override
     public <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass) {
-        return get(apiClass, apiMethod, params, responseClass, MediaType.APPLICATION_JSON);
+        CompletionStageRxInvoker rx = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).rx();
+        return invoke(rx::get, extractor(responseClass));
     }
 
     @Override
-    public <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, Class<R> responseClass,
-                                        String requestType) {
-        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, requestType).async();
-        return invoke(action::get, extractor(responseClass));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, Object genericInstance) {
-        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async();
-        return invoke(action::get, extractor(GenericType.forInstance(genericInstance)));
+    public <R> CompletableFuture<R> get(Class<?> apiClass, String apiMethod, RequestParams params, GenericType<R> genericType) {
+        CompletionStageRxInvoker rx = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).rx();
+        return invoke(rx::get, extractor(genericType));
     }
 
     @Override
     public <T, R> CompletableFuture<R> put(Class<?> apiClass, String apiMethod, RequestParams params, T payload, Class<R> responseClass) {
-        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async();
+        CompletionStageRxInvoker rx = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).rx();
         Entity<T> json = Entity.json(payload);
-        return invoke(() -> action.put(json), extractor(responseClass));
+        return invoke(() -> rx.put(json), extractor(responseClass));
     }
 
     @Override
     public CompletableFuture<EmptyResponse> delete(Class<?> apiClass, String apiMethod, RequestParams params) {
-        AsyncInvoker action = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).async();
-        return invoke(action::delete, extractor(EmptyResponse.class));
+        CompletionStageRxInvoker rx = buildRequest(apiClass, apiMethod, params, MediaType.APPLICATION_JSON).rx();
+        return invoke(rx::delete, extractor(EmptyResponse.class));
     }
 
     @Override
@@ -360,105 +327,57 @@ public class JaxRsRequestFactory implements RequestFactory {
     }
 
     /**
-     * Async stage.
+     * Invoke request in async mode.
      *
-     * @param <T> The response class.
+     * @param <R>       Class of the entity.
+     * @param action    The action.
+     * @param extractor The function to extract an entity from the response.
+     * @return {@link CompletableFuture} the async result.
      */
-    public static class Stage<T> implements Runnable {
+    protected <R> CompletableFuture<R> invoke(Supplier<CompletionStage<Response>> action, Function<Response, R> extractor) {
+        CompletableFuture<R> result = new CompletableFuture<>();
 
-        private final CompletableFuture<T> result;
+        service.execute(() -> invokeAction(action, extractor, result, 0L));
 
-        private final Supplier<Future<Response>> action;
+        return result;
+    }
 
-        private final Function<Response, T> extractor;
-
-        public Stage(CompletableFuture<T> result, Supplier<Future<Response>> action, Function<Response, T> extractor) {
-            this.result = result;
-            this.action = action;
-            this.extractor = extractor;
-        }
-
-        @Override
-        public void run() {
-            long timeout = INITIAL_TIMEOUT;
+    /**
+     * Invoke request in async mode.
+     *
+     * @param action    The action.
+     * @param extractor The function to extract an entity from the response.
+     * @param delay     The action delay.
+     * @param <R>       Class of the entity.
+     */
+    protected <R> void invokeAction(Supplier<CompletionStage<Response>> action, Function<Response, R> extractor,
+                                    CompletableFuture<R> result, long delay) {
+        action.get().thenAccept(response -> {
             try {
-                while (!(result.isDone() || result.isCancelled() || result.isCompletedExceptionally())) {
-                    LOGGER.debug("Try to send request.");
-                    if (timeout > MAX_TIMEOUT) {
-                        String msg = "Cannot send request, maximum timeout was reached";
-                        LOGGER.error(msg);
-                        result.completeExceptionally(new RateLimitedException(null, msg, null));
-
-                        LOGGER.debug("Finish invoking.");
+                int status = response.getStatus();
+                LOGGER.debug("Response status: {}", status);
+                switch (status) {
+                    case SUCCESS:
+                        success(result, response, extractor);
                         break;
-                    }
 
-                    Response response = action.get().get(timeout, TimeUnit.MILLISECONDS);
+                    case UNAUTHORIZED:
+                        unauthorized(result, response);
+                        break;
 
-                    int status = response.getStatus();
-                    LOGGER.debug("Response status: {}", status);
-                    switch (status) {
-                        case SUCCESS:
-                            LOGGER.debug("Success.");
-                            result.complete(extractor.apply(response));
-                            LOGGER.debug("Finish invoking.");
-                            break;
+                    case RATE_LIMITED:
+                        rateLimited(result, response, action, extractor, delay);
+                        break;
 
-                        case UNAUTHORIZED:
-                            LOGGER.debug("Authentication required.");
-                            AuthenticationFlows auth = response.readEntity(AuthenticationFlows.class);
-                            result.completeExceptionally(new AuthenticationRequred(auth));
-                            LOGGER.debug("Finish invoking.");
-                            break;
-
-                        case RATE_LIMITED:
-                            LOGGER.warn("Rate limited.");
-                            RateLimitedErrorResponse rateLimited = response.readEntity(RateLimitedErrorResponse.class);
-
-                            if (LOGGER.isDebugEnabled()) {
-                                LOGGER.debug("Retry after milliseconds: {}", rateLimited.getRetryAfterMs());
-                                LOGGER.debug("Errcode: {}", rateLimited.getErrcode());
-                                LOGGER.debug("Error: {}", rateLimited.getError());
-                            }
-
-                            timeout = rateLimited.getRetryAfterMs() != null ? rateLimited.getRetryAfterMs() : timeout * TIMEOUT_FACTOR;
-
-                            LOGGER.debug("Sleep milliseconds: {}", timeout);
-                            Thread.sleep(timeout);
-                            LOGGER.debug("Wake up!");
-                            break;
-
-                        default:
-                            LOGGER.debug("Other error.");
-                            ErrorResponse error = response.readEntity(ErrorResponse.class);
-
-                            if (LOGGER.isDebugEnabled()) {
-                                LOGGER.debug("Errcode: {}", error.getErrcode());
-                                LOGGER.debug("Error: {}", error.getError());
-                            }
-
-                            if (error == null) {
-                                result.completeExceptionally(
-                                    new MatrixException(MatrixException.M_INTERNAL, "Missing error response.", status));
-                            } else {
-                                result.completeExceptionally(
-                                    new MatrixException(error.getErrcode(), error.getError(), status));
-                            }
-                            LOGGER.debug("Finish invoking.");
-                    }
+                    default:
+                        error(result, response);
                 }
 
-            } catch (InterruptedException e) {
-                LOGGER.error("Interrupted", e);
-                result.completeExceptionally(e);
-            } catch (ExecutionException e) {
-                LOGGER.error("Cannot invoke request", e);
-                result.completeExceptionally(e);
-            } catch (TimeoutException e) {
-                LOGGER.error("Timeout expired");
-                result.completeExceptionally(e);
             } catch (Exception e) {
-                LOGGER.error("Unknown exception", e);
+                LOGGER.error("Unknown exception.", e);
+                result.completeExceptionally(e);
+            } catch (Throwable e) {
+                LOGGER.error("Throwable!", e);
                 result.completeExceptionally(e);
             }
 
@@ -467,6 +386,60 @@ public class JaxRsRequestFactory implements RequestFactory {
                 LOGGER.debug("Cancelled: {}", result.isCancelled());
                 LOGGER.debug("Exception: {}", result.isCompletedExceptionally());
             }
+        });
+    }
+
+    protected <R> void success(CompletableFuture<R> result, Response response, Function<Response, R> extractor) {
+        LOGGER.debug("Success.");
+        result.complete(extractor.apply(response));
+    }
+
+    protected <R> void unauthorized(CompletableFuture<R> result, Response response) {
+        LOGGER.debug("Authentication required.");
+        result.completeExceptionally(new AuthenticationRequred(response.readEntity(AuthenticationFlows.class)));
+    }
+
+    protected <R> void rateLimited(CompletableFuture<R> result,
+                                   Response response, Supplier<CompletionStage<Response>> action,
+                                   Function<Response, R> extractor,
+                                   long delay) {
+        LOGGER.warn("Rate limited.");
+        RateLimitedErrorResponse rateLimited = response.readEntity(RateLimitedErrorResponse.class);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Retry after milliseconds: {}", rateLimited.getRetryAfterMs());
+            LOGGER.debug("Errcode: {}", rateLimited.getErrcode());
+            LOGGER.debug("Error: {}", rateLimited.getError());
+        }
+
+        long newDelay = rateLimited.getRetryAfterMs() != null ? rateLimited.getRetryAfterMs() : delay * DELAY_FACTOR;
+
+        if (delay > MAX_DELAY) {
+            LOGGER.error("Cannot send request, maximum delay was reached.");
+            result.completeExceptionally(
+                new RateLimitedException(rateLimited.getErrcode(), rateLimited.getError(), rateLimited.getRetryAfterMs()));
+        } else {
+            LOGGER.debug("Sleep milliseconds: {}", delay);
+            service.schedule(() -> invokeAction(action, extractor, result, newDelay), newDelay, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    protected <R> void error(CompletableFuture<R> result, Response response) {
+        LOGGER.debug("Error.");
+        ErrorResponse error = response.readEntity(ErrorResponse.class);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Errcode: {}", error.getErrcode());
+            LOGGER.debug("Error: {}", error.getError());
+        }
+
+        int status = response.getStatus();
+        if (error == null) {
+            result.completeExceptionally(
+                new MatrixException(MatrixException.M_INTERNAL, "Missing error response.", status));
+        } else {
+            result.completeExceptionally(
+                new MatrixException(error.getErrcode(), error.getError(), status));
         }
     }
 }
