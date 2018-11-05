@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client.test;
+package io.github.ma1uta.matrix.client.factory.jaxrs;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 

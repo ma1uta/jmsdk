@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client.methods;
+package io.github.ma1uta.matrix.client.factory.jaxrs;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -33,7 +33,6 @@ import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginType;
 import io.github.ma1uta.matrix.client.model.auth.UserIdentifier;
-import io.github.ma1uta.matrix.client.test.MockServer;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

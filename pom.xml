@@ -61,18 +61,16 @@
     </distributionManagement>
 
     <properties>
+        <!-- common properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <base.java.version>1.8</base.java.version>
-        <arguments>-Dmulti_release=true</arguments>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
 
+        <!-- plugins versions -->
         <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
         <nexus.staging.maven.plugin.version>1.6.8</nexus.staging.maven.plugin.version>
-        <checkstyle.version>8.14</checkstyle.version>
         <jacoco.maven.plugin.version>0.8.2</jacoco.maven.plugin.version>
         <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>2.22.0</maven.failsafe.plugin.version>
@@ -80,13 +78,16 @@
         <maven.javadoc.plugin.version>3.0.1</maven.javadoc.plugin.version>
         <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
         <maven.project.info.plugin.version>3.0.0</maven.project.info.plugin.version>
-        <maven.toolchain.plugin>1.1</maven.toolchain.plugin>
-        <maven.jar.plugin>3.1.0</maven.jar.plugin>
+        <maven.jar.plugin.version>3.1.0</maven.jar.plugin.version>
+        <maven.bundle.plugin.version>3.3.0</maven.bundle.plugin.version>
+        <buildnumber.maven.plugin.version>1.3</buildnumber.maven.plugin.version>
 
+        <!-- plugin dependencies -->
+        <checkstyle.version>8.14</checkstyle.version>
         <asm.version>7.0</asm.version>
+
+        <!-- dependencies -->
         <slf4j.api.version>1.8.0-beta2</slf4j.api.version>
-        <javax.ws.rs.api.version>2.1.1</javax.ws.rs.api.version>
-        <jackson.annotations.version>2.9.7</jackson.annotations.version>
         <jackson.databind.version>2.9.7</jackson.databind.version>
         <hibernate.jpa.api.version>1.0.2.Final</hibernate.jpa.api.version>
         <junit5.bom.version>5.3.1</junit5.bom.version>
@@ -94,9 +95,10 @@
         <jersey.hk2.version>2.27</jersey.hk2.version>
         <jersey.media.json.jackson.version>2.27</jersey.media.json.jackson.version>
         <jackson.jaxrs.json.provider.version>2.9.7</jackson.jaxrs.json.provider.version>
-        <jackson.databind.version>2.9.7</jackson.databind.version>
         <javax.json.bind.api.version>1.0</javax.json.bind.api.version>
         <javax.json.api.version>1.1.3</javax.json.api.version>
+
+        <!-- compatibility -->
         <javax.activation.version>1.2.0</javax.activation.version>
     </properties>
 
@@ -105,46 +107,8 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-toolchains-plugin</artifactId>
-                    <version>${maven.toolchain.plugin}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>toolchain</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <toolchains>
-                            <jdk>
-                                <version>${base.java.version}</version>
-                            </jdk>
-                        </toolchains>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
-                    <executions>
-                        <!-- for Java 11 -->
-                        <execution>
-                            <id>java11</id>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                            <configuration>
-                                <release>11</release>
-                                <jdkToolchain>
-                                    <version>11</version>
-                                </jdkToolchain>
-                                <compileSourceRoots>
-                                    <compileSourceRoot>${project.basedir}/src/main/java-mr/11</compileSourceRoot>
-                                </compileSourceRoots>
-                                <multiReleaseOutput>true</multiReleaseOutput>
-                            </configuration>
-                        </execution>
-                    </executions>
                     <dependencies>
                         <dependency>
                             <groupId>org.ow2.asm</groupId>
@@ -152,6 +116,53 @@
                             <version>${asm.version}</version>
                         </dependency>
                     </dependencies>
+                </plugin>
+                <plugin>
+                    <!-- This plugin generates the buildNumber property used in maven-bundle-plugin -->
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>${buildnumber.maven.plugin.version}</version>
+                    <configuration>
+                        <format>{0,date,MM/dd/yyyy hh:mm aa}</format>
+                        <items>
+                            <item>timestamp</item>
+                        </items>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>create</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>${maven.bundle.plugin.version}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <instructions>
+                            <_failok>true</_failok>
+                            <Build-Id>${buildNumber}</Build-Id>
+                            <Bundle-Description>Matrix Java API</Bundle-Description>
+                            <Bundle-Version>${project.version}</Bundle-Version>
+                            <Bundle-SymbolicName>${project.name}</Bundle-SymbolicName>
+                            <DynamicImport-Package>*</DynamicImport-Package>
+                            <Specification-Vendor>ma1uta</Specification-Vendor>
+                            <_nodefaultversion>false</_nodefaultversion>
+                        </instructions>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>osgi-bundle</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>bundle</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -287,9 +298,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <argLine>
-                            --illegal-access=permit
-                        </argLine>
+                        <argLine>--illegal-access=permit</argLine>
                         <includes>
                             <include>**/*Test.java</include>
                         </includes>
@@ -309,8 +318,12 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-toolchains-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -319,6 +332,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -345,16 +362,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.ws.rs</groupId>
-                <artifactId>javax.ws.rs-api</artifactId>
-                <version>${javax.ws.rs.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -433,51 +440,8 @@
                         <configuration>
                             <serverId>ossrh</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <!-- enable java11 compilation -->
-        <profile>
-            <id>compile-java11</id>
-            <activation>
-                <jdk>[11,)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>java11</id>
-                                <phase>compile</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>test-toolchains-bypass</id>
-            <activation>
-                <property>
-                    <name>!multi_release</name>
-                </property>
-            </activation>
-
-            <build>
-                <plugins>
-                    <!-- Run the unit tests with the JVM used to run maven -->
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <jvm>${env.JAVA_HOME}/bin/java</jvm>
-                            <!-- this shows that the Java 11 code isn't tested -->
-                            <testFailureIgnore>true</testFailureIgnore>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -485,45 +449,86 @@
         </profile>
 
         <profile>
-            <id>multi-jar</id>
+            <id>jdk9+</id>
             <activation>
-                <property>
-                    <name>multi_release</name>
-                </property>
+                <jdk>[9,)</jdk>
             </activation>
-
+            <properties>
+                <packaging.type>jar</packaging.type>
+            </properties>
             <build>
-                <plugins>
-                    <!-- enable java11 compilations -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>java11</id>
-                                <phase>compile</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-compiler-plugin</artifactId>
+                            <version>${maven.compiler.plugin.version}</version>
+                            <executions>
+                                <execution>
+                                    <id>default-compile</id>
+                                    <configuration>
+                                        <!-- compile everything to ensure module-info contains right entries -->
+                                        <release>9</release>
+                                    </configuration>
+                                </execution>
+                                <execution>
+                                    <id>base-compile</id>
+                                    <goals>
+                                        <goal>compile</goal>
+                                    </goals>
+                                    <!-- recompile everything for target VM except the module-info.java -->
+                                    <configuration>
+                                        <excludes>
+                                            <exclude>module-info.java</exclude>
+                                        </excludes>
+                                        <source>${java.version}</source>
+                                        <target>${java.version}</target>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                            <configuration>
+                                <source>${java.version}</source>
+                                <target>${java.version}</target>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <configuration>
+                                <forkCount>0</forkCount>
+                                <argLine>--add-modules java.xml.bind --illegal-access=permit</argLine>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
 
-                    <!-- add the multi-release:true manifest entry -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>${maven.jar.plugin}</version>
-                        <configuration>
-                            <archive>
-                                <manifestEntries>
-                                    <Multi-Release>true</Multi-Release>
-                                </manifestEntries>
-                            </archive>
-                            <excludes>
-                                <exclude>**/javac*</exclude>
-                                <exclude>**/org.codehaus.plexus.compiler.javac.JavacCompiler*arguments</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
+        </profile>
+
+        <profile>
+            <id>jdk8-</id>
+            <activation>
+                <jdk>(,9)</jdk>
+            </activation>
+            <properties>
+                <packaging.type>bundle</packaging.type>
+            </properties>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-compiler-plugin</artifactId>
+                            <version>${maven.compiler.plugin.version}</version>
+                            <configuration>
+                                <source>${java.version}</source>
+                                <target>${java.version}</target>
+                                <excludes>
+                                    <exclude>module-info.java</exclude>
+                                </excludes>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
             </build>
         </profile>
     </profiles>
@@ -531,7 +536,7 @@
     <modules>
         <module>common-impl</module>
         <module>client-impl</module>
-        <module>bot-sdk</module>
+        <module>bot-impl</module>
         <module>jackson-support</module>
         <module>jsonb-support</module>
         <module>client-jaxrs</module>
