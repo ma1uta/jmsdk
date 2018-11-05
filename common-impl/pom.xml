@@ -22,13 +22,13 @@
     <parent>
         <groupId>io.github.ma1uta.matrix</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.6.0-beta1</version>
+        <version>0.6.0-beta2</version>
     </parent>
     <artifactId>common-impl</artifactId>
-    <version>0.5.0-beta1</version>
+    <version>0.5.0-beta2</version>
 
     <properties>
-        <common.api.version>0.7.0-beta1</common.api.version>
+        <common.api.version>0.7.0-beta2</common.api.version>
     </properties>
 
     <dependencies>
@@ -37,10 +37,14 @@
             <artifactId>common-api</artifactId>
             <version>${common.api.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
 
         <dependency>
-            <groupId>com.sun.activation</groupId>
-            <artifactId>javax.activation</artifactId>
+            <groupId>javax.activation</groupId>
+            <artifactId>javax.activation-api</artifactId>
         </dependency>
 
         <dependency>
