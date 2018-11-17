@@ -285,7 +285,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         boolean invoked = false;
         if (event instanceof RoomMessage) {
             RoomMessage roomMessage = (RoomMessage) event;
-            RoomMessageContent content = roomMessage.getContent();
+            RoomMessageContent content = (RoomMessageContent) roomMessage.getContent();
             String body = content.getBody().trim();
             boolean permit = permit(event);
             if (LOGGER.isDebugEnabled()) {

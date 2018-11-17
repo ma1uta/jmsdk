@@ -24,8 +24,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.github.ma1uta.matrix.event.Event;
+import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.RoomName;
 import io.github.ma1uta.matrix.event.RoomTopic;
+import io.github.ma1uta.matrix.event.content.EventContent;
 import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.content.RoomNameContent;
@@ -33,9 +35,6 @@ import io.github.ma1uta.matrix.event.content.RoomTopicContent;
 import io.github.ma1uta.matrix.event.message.Notice;
 import io.github.ma1uta.matrix.event.message.RawMessageContent;
 import io.github.ma1uta.matrix.event.message.Text;
-import io.github.ma1uta.matrix.support.jackson.EventDeserializer;
-import io.github.ma1uta.matrix.support.jackson.RoomEncryptedContentDeserializer;
-import io.github.ma1uta.matrix.support.jackson.RoomMessageContentDeserializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -129,6 +128,20 @@ public class RoomMessageContentDeserializerTest {
         assertEquals(content.getClass(), prevContent.getClass());
         assertEquals(newContent, content.getTopic());
         assertEquals(oldContent, prevContent.getTopic());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "{\"type\":\"m.room.message\",\"content\":{\"msgtype\":\"m.text\",\"body\":\"test\"}};test"
+    }, delimiter = ';')
+    public void textEvent(String eventArg, String body) throws IOException {
+        Event event = mapper.readValue(eventArg, Event.class);
+        assertTrue(event instanceof RoomMessage);
+        RoomMessage roomMessage = (RoomMessage) event;
+        EventContent content = roomMessage.getContent();
+        assertTrue(content instanceof Text);
+        Text text = (Text) content;
+        assertEquals(body, text.getBody());
     }
 }
 
