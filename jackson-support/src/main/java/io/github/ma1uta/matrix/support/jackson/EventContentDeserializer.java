@@ -16,42 +16,41 @@
 
 package io.github.ma1uta.matrix.support.jackson;
 
-import static io.github.ma1uta.matrix.event.Event.EventType.CALL_ANSWER;
-import static io.github.ma1uta.matrix.event.Event.EventType.CALL_CANDIDATES;
-import static io.github.ma1uta.matrix.event.Event.EventType.CALL_HANGUP;
-import static io.github.ma1uta.matrix.event.Event.EventType.CALL_INVITE;
-import static io.github.ma1uta.matrix.event.Event.EventType.DIRECT;
-import static io.github.ma1uta.matrix.event.Event.EventType.FORWARDED_ROOM_KEY;
-import static io.github.ma1uta.matrix.event.Event.EventType.FULLY_READ;
-import static io.github.ma1uta.matrix.event.Event.EventType.IGNORED_USER_LIST;
-import static io.github.ma1uta.matrix.event.Event.EventType.PRESENCE;
-import static io.github.ma1uta.matrix.event.Event.EventType.RECEIPT;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_ALIASES;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_AVATAR;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_CANONICAL_ALIAS;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_CREATE;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_ENCRIPTION;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_ENCRYPTED;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_GUEST_ACCESS;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_HISTORY_VISIBILITY;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_JOIN_RULES;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_KEY;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_KEY_REQUEST;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_MEMBER;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_MESSAGE;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_MESSAGE_FEEDBACK;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_NAME;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_PINNED_EVENTS;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_POWER_LEVELS;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_REDACTION;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_SERVER_ACL;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_THIRD_PARTY_INVITE;
-import static io.github.ma1uta.matrix.event.Event.EventType.ROOM_TOPIC;
-import static io.github.ma1uta.matrix.event.Event.EventType.STICKER;
-import static io.github.ma1uta.matrix.event.Event.EventType.TAG;
-import static io.github.ma1uta.matrix.event.Event.EventType.TYPING;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.ma1uta.matrix.event.CallAnswer;
+import io.github.ma1uta.matrix.event.CallCandidates;
+import io.github.ma1uta.matrix.event.CallHangup;
+import io.github.ma1uta.matrix.event.CallInvite;
+import io.github.ma1uta.matrix.event.Direct;
+import io.github.ma1uta.matrix.event.ForwardedRoomKey;
+import io.github.ma1uta.matrix.event.FullyRead;
+import io.github.ma1uta.matrix.event.IgnoredUserList;
+import io.github.ma1uta.matrix.event.Presence;
+import io.github.ma1uta.matrix.event.Receipt;
+import io.github.ma1uta.matrix.event.RoomAliases;
+import io.github.ma1uta.matrix.event.RoomAvatar;
+import io.github.ma1uta.matrix.event.RoomCanonicalAlias;
+import io.github.ma1uta.matrix.event.RoomCreate;
+import io.github.ma1uta.matrix.event.RoomEncrypted;
+import io.github.ma1uta.matrix.event.RoomEncryption;
+import io.github.ma1uta.matrix.event.RoomGuestAccess;
+import io.github.ma1uta.matrix.event.RoomHistoryVisibility;
+import io.github.ma1uta.matrix.event.RoomJoinRules;
+import io.github.ma1uta.matrix.event.RoomKey;
+import io.github.ma1uta.matrix.event.RoomKeyRequest;
+import io.github.ma1uta.matrix.event.RoomMember;
+import io.github.ma1uta.matrix.event.RoomMessage;
+import io.github.ma1uta.matrix.event.RoomMessageFeedback;
+import io.github.ma1uta.matrix.event.RoomName;
+import io.github.ma1uta.matrix.event.RoomPinned;
+import io.github.ma1uta.matrix.event.RoomPowerLevels;
+import io.github.ma1uta.matrix.event.RoomRedaction;
+import io.github.ma1uta.matrix.event.RoomServerAcl;
+import io.github.ma1uta.matrix.event.RoomThirdPartyInvite;
+import io.github.ma1uta.matrix.event.RoomTopic;
+import io.github.ma1uta.matrix.event.Sticker;
+import io.github.ma1uta.matrix.event.Tag;
+import io.github.ma1uta.matrix.event.Typing;
 import io.github.ma1uta.matrix.event.content.CallAnswerContent;
 import io.github.ma1uta.matrix.event.content.CallCandidatesContent;
 import io.github.ma1uta.matrix.event.content.CallHangupContent;
@@ -108,73 +107,73 @@ public class EventContentDeserializer {
      */
     public EventContent deserialize(byte[] content, String type, ObjectMapper mapper) throws IOException {
         switch (type) {
-            case CALL_ANSWER:
+            case CallAnswer.TYPE:
                 return mapper.readValue(content, CallAnswerContent.class);
-            case CALL_CANDIDATES:
+            case CallCandidates.TYPE:
                 return mapper.readValue(content, CallCandidatesContent.class);
-            case CALL_HANGUP:
+            case CallHangup.TYPE:
                 return mapper.readValue(content, CallHangupContent.class);
-            case CALL_INVITE:
+            case CallInvite.TYPE:
                 return mapper.readValue(content, CallInviteContent.class);
-            case DIRECT:
+            case Direct.TYPE:
                 return mapper.readValue(content, DirectContent.class);
-            case FORWARDED_ROOM_KEY:
+            case ForwardedRoomKey.TYPE:
                 return mapper.readValue(content, ForwardedRoomKeyContent.class);
-            case FULLY_READ:
+            case FullyRead.TYPE:
                 return mapper.readValue(content, FullyReadContent.class);
-            case IGNORED_USER_LIST:
+            case IgnoredUserList.TYPE:
                 return mapper.readValue(content, IgnoredUserListContent.class);
-            case PRESENCE:
+            case Presence.TYPE:
                 return mapper.readValue(content, PresenceContent.class);
-            case RECEIPT:
+            case Receipt.TYPE:
                 return mapper.readValue(content, ReceiptContent.class);
-            case ROOM_ALIASES:
+            case RoomAliases.TYPE:
                 return mapper.readValue(content, RoomAliasesContent.class);
-            case ROOM_AVATAR:
+            case RoomAvatar.TYPE:
                 return mapper.readValue(content, RoomAvatarContent.class);
-            case ROOM_CANONICAL_ALIAS:
+            case RoomCanonicalAlias.TYPE:
                 return mapper.readValue(content, RoomCanonicalAliasContent.class);
-            case ROOM_CREATE:
+            case RoomCreate.TYPE:
                 return mapper.readValue(content, RoomCreateContent.class);
-            case ROOM_GUEST_ACCESS:
+            case RoomGuestAccess.TYPE:
                 return mapper.readValue(content, RoomGuestAccessContent.class);
-            case ROOM_ENCRIPTION:
+            case RoomEncryption.TYPE:
                 return mapper.readValue(content, RoomEncryptionContent.class);
-            case ROOM_ENCRYPTED:
+            case RoomEncrypted.TYPE:
                 return mapper.readValue(content, RoomEncryptedContent.class);
-            case ROOM_HISTORY_VISIBILITY:
+            case RoomHistoryVisibility.TYPE:
                 return mapper.readValue(content, RoomHistoryVisibilityContent.class);
-            case ROOM_JOIN_RULES:
+            case RoomJoinRules.TYPE:
                 return mapper.readValue(content, RoomJoinRulesContent.class);
-            case ROOM_KEY:
+            case RoomKey.TYPE:
                 return mapper.readValue(content, RoomKeyContent.class);
-            case ROOM_KEY_REQUEST:
+            case RoomKeyRequest.TYPE:
                 return mapper.readValue(content, RoomKeyRequestContent.class);
-            case ROOM_MEMBER:
+            case RoomMember.TYPE:
                 return mapper.readValue(content, RoomMemberContent.class);
-            case ROOM_MESSAGE:
+            case RoomMessage.TYPE:
                 return mapper.readValue(content, RoomMessageContent.class);
-            case ROOM_MESSAGE_FEEDBACK:
+            case RoomMessageFeedback.TYPE:
                 return mapper.readValue(content, RoomMessageFeedbackContent.class);
-            case ROOM_NAME:
+            case RoomName.TYPE:
                 return mapper.readValue(content, RoomNameContent.class);
-            case ROOM_PINNED_EVENTS:
+            case RoomPinned.TYPE:
                 return mapper.readValue(content, RoomPinnedContent.class);
-            case ROOM_POWER_LEVELS:
+            case RoomPowerLevels.TYPE:
                 return mapper.readValue(content, RoomPowerLevelsContent.class);
-            case ROOM_REDACTION:
+            case RoomRedaction.TYPE:
                 return mapper.readValue(content, RoomRedactionContent.class);
-            case ROOM_THIRD_PARTY_INVITE:
+            case RoomThirdPartyInvite.TYPE:
                 return mapper.readValue(content, RoomThirdPartyInviteContent.class);
-            case ROOM_TOPIC:
+            case RoomTopic.TYPE:
                 return mapper.readValue(content, RoomTopicContent.class);
-            case STICKER:
+            case Sticker.TYPE:
                 return mapper.readValue(content, StickerContent.class);
-            case TAG:
+            case Tag.TYPE:
                 return mapper.readValue(content, TagContent.class);
-            case TYPING:
+            case Typing.TYPE:
                 return mapper.readValue(content, TypingContent.class);
-            case ROOM_SERVER_ACL:
+            case RoomServerAcl.TYPE:
                 return mapper.readValue(content, RoomServerAclContent.class);
             default:
                 return parse(content, mapper);

@@ -28,6 +28,7 @@ import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
 import io.github.ma1uta.matrix.event.RoomMember;
 import io.github.ma1uta.matrix.event.RoomMessage;
+import io.github.ma1uta.matrix.event.content.RoomMemberContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.message.Text;
 import org.slf4j.Logger;
@@ -149,7 +150,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             matrixClient.profile().setDisplayName(config.getDisplayName());
 
             RoomEventFilter roomEventFilter = new RoomEventFilter();
-            roomEventFilter.setTypes(Collections.singletonList(Event.EventType.ROOM_MESSAGE));
+            roomEventFilter.setTypes(Collections.singletonList(RoomMessage.TYPE));
             RoomFilter roomFilter = new RoomFilter();
             roomFilter.setTimeline(roomEventFilter);
             FilterData filter = new FilterData();
@@ -193,7 +194,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
                         RoomMember roomMember = (RoomMember) state;
                         String membership = roomMember.getContent().getMembership();
                         LOGGER.debug("Membership: {}", membership);
-                        return Event.MembershipState.INVITE.equals(membership);
+                        return RoomMemberContent.INVITE.equals(membership);
                     }
                     return false;
                 }).collect(Collectors.toList());

@@ -16,15 +16,6 @@
 
 package io.github.ma1uta.matrix.support.jackson;
 
-import static io.github.ma1uta.matrix.event.Event.MessageType.AUDIO;
-import static io.github.ma1uta.matrix.event.Event.MessageType.EMOTE;
-import static io.github.ma1uta.matrix.event.Event.MessageType.FILE;
-import static io.github.ma1uta.matrix.event.Event.MessageType.IMAGE;
-import static io.github.ma1uta.matrix.event.Event.MessageType.LOCATION;
-import static io.github.ma1uta.matrix.event.Event.MessageType.NOTICE;
-import static io.github.ma1uta.matrix.event.Event.MessageType.TEXT;
-import static io.github.ma1uta.matrix.event.Event.MessageType.VIDEO;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -63,21 +54,21 @@ public class RoomMessageContentDeserializer extends JsonDeserializer<RoomMessage
         }
         String msgtype = typeNode.asText();
         switch (msgtype) {
-            case AUDIO:
+            case Audio.MSGTYPE:
                 return codec.treeToValue(node, Audio.class);
-            case EMOTE:
+            case Emote.MSGTYPE:
                 return codec.treeToValue(node, Emote.class);
-            case FILE:
+            case File.MSGTYPE:
                 return codec.treeToValue(node, File.class);
-            case IMAGE:
+            case Image.MSGTYPE:
                 return codec.treeToValue(node, Image.class);
-            case LOCATION:
+            case Location.MSGTYPE:
                 return codec.treeToValue(node, Location.class);
-            case NOTICE:
+            case Notice.MSGTYPE:
                 return codec.treeToValue(node, Notice.class);
-            case TEXT:
+            case Text.MSGTYPE:
                 return codec.treeToValue(node, Text.class);
-            case VIDEO:
+            case Video.MSGTYPE:
                 return codec.treeToValue(node, Video.class);
             default:
                 return parse(node, ctxt, codec, msgtype);

@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.support.jsonb;
 
-import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
 import io.github.ma1uta.matrix.event.encrypted.MegolmEncryptedContent;
 import io.github.ma1uta.matrix.event.encrypted.OlmEncryptedContent;
@@ -52,9 +51,9 @@ public class RoomEncryptedContentDeserializer implements JsonbDeserializer<RoomE
         String objectSource = object.toString();
 
         switch (algorithm) {
-            case Event.Encryption.OLM:
+            case OlmEncryptedContent.ALGORITHM:
                 return jsonb().fromJson(objectSource, OlmEncryptedContent.class);
-            case Event.Encryption.MEGOLM:
+            case MegolmEncryptedContent.ALGORITHM:
                 return jsonb().fromJson(objectSource, MegolmEncryptedContent.class);
             default:
                 return parse(object, algorithm, ctx);

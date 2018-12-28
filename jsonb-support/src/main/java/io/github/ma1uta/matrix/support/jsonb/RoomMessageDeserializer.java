@@ -16,15 +16,6 @@
 
 package io.github.ma1uta.matrix.support.jsonb;
 
-import static io.github.ma1uta.matrix.event.Event.MessageType.AUDIO;
-import static io.github.ma1uta.matrix.event.Event.MessageType.EMOTE;
-import static io.github.ma1uta.matrix.event.Event.MessageType.FILE;
-import static io.github.ma1uta.matrix.event.Event.MessageType.IMAGE;
-import static io.github.ma1uta.matrix.event.Event.MessageType.LOCATION;
-import static io.github.ma1uta.matrix.event.Event.MessageType.NOTICE;
-import static io.github.ma1uta.matrix.event.Event.MessageType.TEXT;
-import static io.github.ma1uta.matrix.event.Event.MessageType.VIDEO;
-
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.message.Audio;
 import io.github.ma1uta.matrix.event.message.Emote;
@@ -65,21 +56,21 @@ public class RoomMessageDeserializer implements JsonbDeserializer<RoomMessageCon
         String content = object.toString();
 
         switch (msgtype) {
-            case AUDIO:
+            case Audio.MSGTYPE:
                 return jsonb().fromJson(content, Audio.class);
-            case EMOTE:
+            case Emote.MSGTYPE:
                 return jsonb().fromJson(content, Emote.class);
-            case FILE:
+            case File.MSGTYPE:
                 return jsonb().fromJson(content, File.class);
-            case IMAGE:
+            case Image.MSGTYPE:
                 return jsonb().fromJson(content, Image.class);
-            case LOCATION:
+            case Location.MSGTYPE:
                 return jsonb().fromJson(content, Location.class);
-            case NOTICE:
+            case Notice.MSGTYPE:
                 return jsonb().fromJson(content, Notice.class);
-            case TEXT:
+            case Text.MSGTYPE:
                 return jsonb().fromJson(content, Text.class);
-            case VIDEO:
+            case Video.MSGTYPE:
                 return jsonb().fromJson(content, Video.class);
             default:
                 return parse(object, msgtype, ctx);

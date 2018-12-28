@@ -16,9 +16,6 @@
 
 package io.github.ma1uta.matrix.support.jackson;
 
-import static io.github.ma1uta.matrix.event.Event.Encryption.MEGOLM;
-import static io.github.ma1uta.matrix.event.Event.Encryption.OLM;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -48,9 +45,9 @@ public class RoomEncryptedContentDeserializer extends JsonDeserializer<RoomEncry
         String algorithm = algorithmNode.asText();
 
         switch (algorithm) {
-            case MEGOLM:
+            case MegolmEncryptedContent.ALGORITHM:
                 return codec.treeToValue(node, MegolmEncryptedContent.class);
-            case OLM:
+            case OlmEncryptedContent.ALGORITHM:
                 return codec.treeToValue(node, OlmEncryptedContent.class);
             default:
                 return parse(node, ctxt, codec, algorithm);

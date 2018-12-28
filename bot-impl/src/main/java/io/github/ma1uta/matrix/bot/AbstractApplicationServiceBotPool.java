@@ -20,6 +20,7 @@ import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
 import io.github.ma1uta.matrix.event.RoomMember;
+import io.github.ma1uta.matrix.event.content.RoomMemberContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +90,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
                         LOGGER.debug("Event type: {}", event.getType());
                         LOGGER.debug("State key: {}", stateKey);
                     }
-                    return context.getConfig().getUserId().equals(stateKey) && Event.MembershipState.INVITE.equals(membership);
+                    return context.getConfig().getUserId().equals(stateKey) && RoomMemberContent.INVITE.equals(membership);
                 }
                 return false;
             }).map(Map.Entry::getValue).findFirst();
