@@ -25,6 +25,7 @@ import io.github.ma1uta.matrix.client.model.event.MembersResponse;
 import io.github.ma1uta.matrix.client.model.event.RedactRequest;
 import io.github.ma1uta.matrix.client.model.event.SendEventResponse;
 import io.github.ma1uta.matrix.event.Event;
+import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.content.EventContent;
 import io.github.ma1uta.matrix.event.message.FormattedBody;
 import io.github.ma1uta.matrix.event.message.Notice;
@@ -272,13 +273,7 @@ public class EventMethods extends AbstractMethods {
      */
     public CompletableFuture<String> sendFormattedMessage(String roomId, String text, String formattedText) {
         Text payload = new Text();
-        payload.setBody(text);
-        payload.setFormattedBody(formattedText);
-        if (formattedText != null) {
-            payload.setFormat(FormattedBody.Format.ORG_MATRIX_CUSTOM_HTML);
-        }
-
-        return sendEvent(roomId, Event.EventType.ROOM_MESSAGE, payload);
+        return sendFormatted(roomId, text, formattedText, payload);
     }
 
     /**
@@ -291,12 +286,25 @@ public class EventMethods extends AbstractMethods {
      */
     public CompletableFuture<String> sendFormattedNotice(String roomId, String text, String formattedText) {
         Notice payload = new Notice();
+        return sendFormatted(roomId, text, formattedText, payload);
+    }
+
+    /**
+     * Send formatted body object.
+     *
+     * @param roomId        The room id.
+     * @param text          The message.
+     * @param formattedText The formatted message.
+     * @param payload       Formatted object.
+     * @return The ID of the sent event.
+     */
+    protected CompletableFuture<String> sendFormatted(String roomId, String text, String formattedText, FormattedBody payload) {
         payload.setBody(text);
         payload.setFormattedBody(formattedText);
         if (formattedText != null) {
             payload.setFormat(FormattedBody.Format.ORG_MATRIX_CUSTOM_HTML);
         }
 
-        return sendEvent(roomId, Event.EventType.ROOM_MESSAGE, payload);
+        return sendEvent(roomId, RoomMessage.TYPE, payload);
     }
 }
