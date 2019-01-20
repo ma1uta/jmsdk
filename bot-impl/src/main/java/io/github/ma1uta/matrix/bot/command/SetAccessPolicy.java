@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.bot.command;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.bot.AccessPolicy;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
@@ -38,7 +39,7 @@ public class SetAccessPolicy<C extends BotConfig, D extends BotDao<C>, S extends
     }
 
     @Override
-    public boolean ownerInvoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments) {
+    public boolean ownerInvoke(Context<C, D, S, E> context, Id roomId, RoomEvent event, String arguments) {
         if (arguments != null && !arguments.isEmpty()) {
             try {
                 context.getConfig().setPolicy(AccessPolicy.valueOf(arguments.toUpperCase()));

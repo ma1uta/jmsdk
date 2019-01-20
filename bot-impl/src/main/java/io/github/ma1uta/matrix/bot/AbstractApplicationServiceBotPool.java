@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.bot;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
@@ -68,7 +69,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Bot \"{}\"", context.getConfig().getUserId());
                 }
-                List<String> joinedRooms;
+                List<Id> joinedRooms;
                 try {
                     joinedRooms = context.getMatrixClient().room().joinedRooms().join();
                 } catch (Exception e) {

@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.bot.command;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.Command;
@@ -39,7 +40,7 @@ public class Pong<C extends BotConfig, D extends BotDao<C>, S extends Persistent
     }
 
     @Override
-    public boolean invoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments) {
+    public boolean invoke(Context<C, D, S, E> context, Id roomId, RoomEvent event, String arguments) {
         context.getMatrixClient().event().sendNotice(roomId, "pong");
         return true;
     }

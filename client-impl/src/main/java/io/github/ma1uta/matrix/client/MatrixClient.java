@@ -17,6 +17,7 @@
 package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.AdminMethods;
@@ -336,7 +337,7 @@ public class MatrixClient implements Closeable {
      *
      * @return the user MXID.
      */
-    public String getUserId() {
+    public Id getUserId() {
         return getDefaultParams().getUserId();
     }
 

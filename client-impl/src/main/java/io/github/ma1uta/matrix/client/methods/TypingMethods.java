@@ -17,6 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.TypingApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -43,13 +44,15 @@ public class TypingMethods extends AbstractMethods {
      * @param timeout The length of time in milliseconds to mark this user as typing.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> typing(String roomId, Boolean typing, Long timeout) {
-        String userId = defaults().getUserId();
+    public CompletableFuture<EmptyResponse> typing(Id roomId, Boolean typing, Long timeout) {
+        Id userId = defaults().getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(typing, "Typing cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId).path("roomId", roomId);
+        RequestParams params = defaults().clone()
+            .path("userId", userId.toString())
+            .path("roomId", roomId.toString());
         TypingRequest request = new TypingRequest();
         request.setTyping(typing);
         request.setTimeout(timeout);

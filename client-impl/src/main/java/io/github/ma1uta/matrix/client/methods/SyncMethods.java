@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.Page;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.SyncApi;
@@ -65,10 +66,10 @@ public class SyncMethods extends AbstractMethods {
      * @param roomId  The room ID for which events should be returned.
      * @return The events received, which may be none.
      */
-    public CompletableFuture<Page<Event>> events(String from, Long timeout, String roomId) {
+    public CompletableFuture<Page<Event>> events(String from, Long timeout, Id roomId) {
         RequestParams params = defaults().clone()
             .query("from", from)
-            .query("roomId", roomId)
+            .query("roomId", roomId.toString())
             .query("timeout", timeout);
         return factory().get(SyncApi.class, "events", params, new GenericType<Page<Event>>() {
         });

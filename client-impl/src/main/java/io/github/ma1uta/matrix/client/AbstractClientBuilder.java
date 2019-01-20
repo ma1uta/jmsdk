@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.client;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 
 import java.util.Objects;
@@ -47,7 +48,7 @@ public abstract class AbstractClientBuilder<C> {
      * @param userId The user ID.
      * @return This builder.
      */
-    public AbstractClientBuilder<C> userId(String userId) {
+    public AbstractClientBuilder<C> userId(Id userId) {
         this.defaultParams.userId(userId);
         return this;
     }

@@ -23,6 +23,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
 import io.github.ma1uta.matrix.client.model.admin.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.admin.DeviceInfo;
@@ -68,9 +69,9 @@ class AdminMethodsTest extends MockServer {
         );
 
         getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
-        AdminResponse res = getMatrixClient().admin().whois("@peter:rabbit.rocks").get(1000, TimeUnit.MILLISECONDS);
+        AdminResponse res = getMatrixClient().admin().whois(Id.valueOf("@peter:rabbit.rocks")).get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(res);
-        assertEquals("@peter:rabbit.rocks", res.getUserId());
+        assertEquals("@peter:rabbit.rocks", res.getUserId().toString());
         Map<String, DeviceInfo> devices = res.getDevices();
         assertNotNull(devices);
         assertEquals(1, devices.keySet().size());

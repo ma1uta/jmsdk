@@ -17,6 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.ClientConfigApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -45,7 +46,9 @@ public class ClientConfigMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> addConfig(String type, Map<String, String> accountData) {
         Objects.requireNonNull(type, "Type cannot be empty.");
         Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
-        RequestParams params = defaults().clone().path("userId", defaults().getUserId()).path("type", type);
+        RequestParams params = defaults().clone()
+            .path("userId", defaults().getUserId().toString())
+            .path("type", type);
 
         return factory().put(ClientConfigApi.class, "addConfig", params, accountData, EmptyResponse.class);
     }
@@ -59,12 +62,14 @@ public class ClientConfigMethods extends AbstractMethods {
      * @param accountData The account data.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> addRoomConfig(String roomId, String type, Map<String, String> accountData) {
+    public CompletableFuture<EmptyResponse> addRoomConfig(Id roomId, String type, Map<String, String> accountData) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(type, "Type cannot be empty");
         Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty");
 
-        RequestParams params = defaults().clone().path("userId", defaults().getUserId()).path("roomId", roomId)
+        RequestParams params = defaults().clone()
+            .path("userId", defaults().getUserId().toString())
+            .path("roomId", roomId.toString())
             .path("type", type);
         return factory().put(ClientConfigApi.class, "addRoomConfig", params, accountData, EmptyResponse.class);
     }

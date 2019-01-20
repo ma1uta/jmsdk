@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.bot.command;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.Command;
@@ -45,7 +46,7 @@ public class Join<C extends BotConfig, D extends BotDao<C>, S extends Persistent
     }
 
     @Override
-    public boolean invoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments) {
+    public boolean invoke(Context<C, D, S, E> context, Id roomId, RoomEvent event, String arguments) {
         C config = context.getConfig();
         MatrixClient matrixClient = context.getMatrixClient();
         if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
@@ -55,7 +56,7 @@ public class Join<C extends BotConfig, D extends BotDao<C>, S extends Persistent
             matrixClient.event().sendNotice(roomId, "Usage: " + usage());
         } else {
             try {
-                RoomId result = matrixClient.room().joinByIdOrAlias(arguments).join();
+                RoomId result = matrixClient.room().joinByIdOrAlias(Id.valueOf(arguments)).join();
                 context.getBot().getSkipTimelineRooms().add(result.getRoomId());
             } catch (Exception e) {
                 String msg = String.format("Cannot join: %s", e.getMessage());

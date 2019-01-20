@@ -31,6 +31,6 @@ public class IdDeserializer extends JsonDeserializer<Id> {
 
     @Override
     public Id deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-        return Id.of(p.getText());
+        return Id.valueOf(p.getText());
     }
 }

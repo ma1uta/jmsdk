@@ -30,6 +30,6 @@ public class IdDeserializer implements JsonbDeserializer<Id> {
 
     @Override
     public Id deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        return Id.of(parser.getObject().toString());
+        return Id.valueOf(parser.getObject().toString());
     }
 }

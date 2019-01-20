@@ -65,7 +65,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
     private final boolean exitOnEmptyRooms;
 
-    private final Set<String> skipTimelineRooms = new HashSet<>();
+    private final Set<Id> skipTimelineRooms = new HashSet<>();
 
     public Bot(RequestFactory factory, String asToken, boolean exitOnEmptyRooms, C config, S service,
                List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
@@ -83,7 +83,8 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     }
 
     protected Context<C, D, S, E> init(RequestFactory factory, String asToken, C config, S service) {
-        MatrixClient matrixClient = new MatrixClient(factory, new RequestParams().userId(config.getUserId()).accessToken(asToken));
+        MatrixClient matrixClient = new MatrixClient(factory,
+            new RequestParams().userId(Id.valueOf(config.getUserId())).accessToken(asToken));
         Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
         context.setConfig(config);
         return context;
@@ -124,7 +125,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         this.initAction = initAction;
     }
 
-    public Set<String> getSkipTimelineRooms() {
+    public Set<Id> getSkipTimelineRooms() {
         return skipTimelineRooms;
     }
 
@@ -141,7 +142,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             BotConfig config = context.getConfig();
 
             RegisterRequest registerRequest = new RegisterRequest();
-            registerRequest.setUsername(Id.of(config.getUserId()).getLocalpart());
+            registerRequest.setUsername(Id.valueOf(config.getUserId()).getLocalpart());
             registerRequest.setInitialDeviceDisplayName(config.getDisplayName());
             registerRequest.setDeviceId(config.getDeviceId());
 
@@ -166,7 +167,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         return LoopState.NEXT_STATE;
     }
 
-    protected LoopState registeredState(Map<String, List<Event>> eventMap) {
+    protected LoopState registeredState(Map<Id, List<Event>> eventMap) {
         LOGGER.debug("Wait for invite");
         if (!eventMap.isEmpty()) {
             return joinRoom(eventMap) ? LoopState.NEXT_STATE : LoopState.RUN;
@@ -181,11 +182,11 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @param eventMap invited eventMap. Map &lt;roomId&gt; - &lt;[event]&gt; room_id to invite_state.
      * @return true if bot joined else false.
      */
-    public boolean joinRoom(Map<String, List<Event>> eventMap) {
+    public boolean joinRoom(Map<Id, List<Event>> eventMap) {
         return getContext().runInTransaction((context, dao) -> {
             LOGGER.debug("Start joining.");
             boolean joined = false;
-            for (Map.Entry<String, List<Event>> eventEntry : eventMap.entrySet()) {
+            for (Map.Entry<Id, List<Event>> eventEntry : eventMap.entrySet()) {
                 List<Event> inviteEvents = eventEntry.getValue().stream().peek(state -> {
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Event type: {}", state.getType());
@@ -202,13 +203,13 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
                 for (Event state : inviteEvents) {
                     if (state instanceof RoomEvent) {
-                        String roomId = eventEntry.getKey();
+                        Id roomId = eventEntry.getKey();
                         LOGGER.debug("Join to room {}", roomId);
                         context.getMatrixClient().room().joinByIdOrAlias(roomId);
 
                         C config = context.getConfig();
                         config.setState(BotState.JOINED);
-                        config.setOwner(((RoomEvent) state).getSender());
+                        config.setOwner(((RoomEvent) state).getSender().toString());
                         LOGGER.debug("Finish joining");
                         joined = true;
                     }
@@ -239,8 +240,8 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @param events events.
      * @return next loop state.
      */
-    public LoopState processJoinedRoom(String roomId, List<Event> events) {
-        String lastEvent = null;
+    public LoopState processJoinedRoom(Id roomId, List<Event> events) {
+        Id lastEvent = null;
         long lastOriginTs = 0;
         MatrixClient matrixClient = getContext().getMatrixClient();
         boolean invoked = false;
@@ -281,7 +282,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @param event  event.
      * @return {@code true} if any command was invoked, else {@code false}.
      */
-    protected boolean processEvent(String roomId, Event event) {
+    protected boolean processEvent(Id roomId, Event event) {
         MatrixClient matrixClient = getContext().getMatrixClient();
         C config = getContext().getConfig();
         boolean invoked = false;
@@ -322,7 +323,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         C config = getContext().getConfig();
         return config.getPolicy() == null
             || AccessPolicy.ALL.equals(config.getPolicy())
-            || (event instanceof RoomEvent && config.getOwner().equals(((RoomEvent) event).getSender()));
+            || (event instanceof RoomEvent && config.getOwner().equals(((RoomEvent) event).getSender().toString()));
     }
 
     /**
@@ -344,7 +345,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
      * @param content command.
      * @return {@code true} if invoked command, else {@code false}.
      */
-    protected boolean processAction(String roomId, RoomEvent event, String content) {
+    protected boolean processAction(Id roomId, RoomEvent event, String content) {
         String contentWithoutPrefix = content.substring(getPrefix().length());
         String[] arguments = contentWithoutPrefix.trim().split("\\s");
         String commandName = arguments[0];

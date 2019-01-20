@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.bot.command;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.Command;
@@ -35,7 +36,7 @@ public abstract class OwnerCommand<C extends BotConfig, D extends BotDao<C>, S e
     Command<C, D, S, E> {
 
     @Override
-    public boolean invoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments) {
+    public boolean invoke(Context<C, D, S, E> context, Id roomId, RoomEvent event, String arguments) {
         C config = context.getConfig();
         if (config.getOwner() != null && !config.getOwner().equals(event.getSender())) {
             return false;
@@ -44,5 +45,5 @@ public abstract class OwnerCommand<C extends BotConfig, D extends BotDao<C>, S e
         return ownerInvoke(context, roomId, event, arguments);
     }
 
-    protected abstract boolean ownerInvoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments);
+    protected abstract boolean ownerInvoke(Context<C, D, S, E> context, Id roomId, RoomEvent event, String arguments);
 }

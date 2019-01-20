@@ -43,7 +43,7 @@ public class FilterMethods extends AbstractMethods {
     public CompletableFuture<FilterResponse> uploadFilter(FilterData filter) {
         Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", defaults().getUserId());
+        RequestParams params = defaults().clone().path("userId", defaults().getUserId().toString());
         return factory().post(FilterApi.class, "uploadFilter", params, filter, FilterResponse.class);
     }
 
@@ -57,7 +57,9 @@ public class FilterMethods extends AbstractMethods {
         Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
         Objects.requireNonNull(filterId, "FilterId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", defaults().getUserId()).path("filterId", filterId);
+        RequestParams params = defaults().clone()
+            .path("userId", defaults().getUserId().toString())
+            .path("filterId", filterId);
         return factory().get(FilterApi.class, "getFilter", params, FilterData.class);
     }
 }

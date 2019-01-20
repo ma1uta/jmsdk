@@ -17,6 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.PresenceApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -48,11 +49,11 @@ public class PresenceMethods extends AbstractMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setPresenceStatus(PresenceStatus status) {
-        String userId = defaults().getUserId();
+        Id userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(status.getPresence(), "Presence cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId);
+        RequestParams params = defaults().clone().path("userId", userId.toString());
         return factory().put(PresenceApi.class, "setPresenceStatus", params, status, EmptyResponse.class);
     }
 
@@ -62,10 +63,10 @@ public class PresenceMethods extends AbstractMethods {
      * @param userId The user whose presence state to get.
      * @return The presence state for this user.
      */
-    public CompletableFuture<PresenceStatus> getPresenceStatus(String userId) {
+    public CompletableFuture<PresenceStatus> getPresenceStatus(Id userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId);
+        RequestParams params = defaults().clone().path("userId", userId.toString());
         return factory().get(PresenceApi.class, "getPresenceStatus", params, PresenceStatus.class);
     }
 
@@ -76,10 +77,10 @@ public class PresenceMethods extends AbstractMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setPresenceList(PresenceList presenceList) {
-        String userId = defaults().getUserId();
+        Id userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId);
+        RequestParams params = defaults().clone().path("userId", userId.toString());
         return factory().post(PresenceApi.class, "setPresenceList", params, presenceList, EmptyResponse.class);
     }
 
@@ -89,10 +90,10 @@ public class PresenceMethods extends AbstractMethods {
      * @param userId The user whose presence list should be retrieved.
      * @return A list of presence events for this list.
      */
-    public CompletableFuture<List<Event>> getPresenceList(String userId) {
+    public CompletableFuture<List<Event>> getPresenceList(Id userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId);
+        RequestParams params = defaults().clone().path("userId", userId.toString());
         return factory().get(PresenceApi.class, "getPresenceList", params, new GenericType<List<Event>>() {
         });
     }
