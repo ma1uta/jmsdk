@@ -40,7 +40,7 @@ public class IdTest {
         "+group:server.tld;group;server.tld",
     }, delimiter = ';')
     public void id(String idValue, String localpart, String domain) {
-        Id id = Id.of(idValue);
+        Id id = Id.valueOf(idValue);
         assertTrue(id.isValid());
         assertEquals(localpart, id.getLocalpart());
         assertEquals(domain, id.getHostname());
@@ -51,7 +51,7 @@ public class IdTest {
         "@correct_user=/id.12:server.tld"
     })
     public void user(String id) {
-        assertTrue(Id.of(id) instanceof UserId);
+        assertTrue(Id.valueOf(id) instanceof UserId);
     }
 
     @ParameterizedTest
@@ -60,7 +60,7 @@ public class IdTest {
         "#/ali12/=@#test:server.tld"
     })
     public void alias(String id) {
-        assertTrue(Id.of(id) instanceof AliasId);
+        assertTrue(Id.valueOf(id) instanceof AliasId);
     }
 
     @ParameterizedTest
@@ -70,6 +70,6 @@ public class IdTest {
         "@a:b:server.tld"
     })
     public void wrongUserId(String id) {
-        assertFalse(Id.of(id) instanceof UserId);
+        assertFalse(Id.valueOf(id) instanceof UserId);
     }
 }
