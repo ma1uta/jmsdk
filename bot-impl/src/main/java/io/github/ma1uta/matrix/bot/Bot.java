@@ -34,6 +34,7 @@ import io.github.ma1uta.matrix.event.message.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,9 +74,9 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         this.commands = new HashMap<>(commandsClasses.size());
         commandsClasses.forEach(cl -> {
             try {
-                Command<C, D, S, E> command = cl.newInstance();
+                Command<C, D, S, E> command = cl.getDeclaredConstructor().newInstance();
                 this.commands.put(command.name(), command);
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 LOGGER.error("Cannot create new instance of the command: " + cl.getCanonicalName(), e);
             }
         });
@@ -140,7 +141,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             BotConfig config = context.getConfig();
 
             RegisterRequest registerRequest = new RegisterRequest();
-            registerRequest.setUsername(Id.getInstance().localpart(config.getUserId()));
+            registerRequest.setUsername(Id.of(config.getUserId()).getLocalpart());
             registerRequest.setInitialDeviceDisplayName(config.getDisplayName());
             registerRequest.setDeviceId(config.getDeviceId());
 

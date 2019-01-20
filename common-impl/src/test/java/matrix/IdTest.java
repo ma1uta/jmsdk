@@ -20,7 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.ma1uta.matrix.AliasId;
 import io.github.ma1uta.matrix.Id;
+import io.github.ma1uta.matrix.UserId;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -38,10 +40,10 @@ public class IdTest {
         "+group:server.tld;group;server.tld",
     }, delimiter = ';')
     public void id(String idValue, String localpart, String domain) {
-        Id id = Id.getInstance();
-        assertTrue(id.isId(idValue));
-        assertEquals(localpart, id.localpart(idValue));
-        assertEquals(domain, id.domain(idValue));
+        Id id = Id.of(idValue);
+        assertTrue(id.isValid());
+        assertEquals(localpart, id.getLocalpart());
+        assertEquals(domain, id.getHostname());
     }
 
     @ParameterizedTest
@@ -49,7 +51,7 @@ public class IdTest {
         "@correct_user=/id.12:server.tld"
     })
     public void user(String id) {
-        assertTrue(Id.getInstance().isUserId(id));
+        assertTrue(Id.of(id) instanceof UserId);
     }
 
     @ParameterizedTest
@@ -58,16 +60,16 @@ public class IdTest {
         "#/ali12/=@#test:server.tld"
     })
     public void alias(String id) {
-        assertTrue(Id.getInstance().isAliasId(id));
+        assertTrue(Id.of(id) instanceof AliasId);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "!asd:server.tld",
+        "@asd:server.tld::",
         "@A:server.tld",
         "@a:b:server.tld"
     })
     public void wrongUserId(String id) {
-        assertFalse(Id.getInstance().isUserId(id));
+        assertFalse(Id.of(id) instanceof UserId);
     }
 }
