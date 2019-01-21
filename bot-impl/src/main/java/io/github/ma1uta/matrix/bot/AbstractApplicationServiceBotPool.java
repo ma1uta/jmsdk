@@ -61,7 +61,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
      * @param event  event.
      * @return {@code true} if event was processed, else {@code false}.
      */
-    public boolean send(String roomId, Event event) {
+    public boolean send(Id roomId, Event event) {
         LOGGER.debug("Receive event in the room: {0}", roomId);
         Optional<ApplicationServiceBot<C, D, S, E>> bot = getBotMap().entrySet().stream()
             .filter(entry -> {
