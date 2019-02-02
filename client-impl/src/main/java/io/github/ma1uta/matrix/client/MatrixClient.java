@@ -22,6 +22,7 @@ import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.AdminMethods;
 import io.github.ma1uta.matrix.client.methods.AuthMethods;
+import io.github.ma1uta.matrix.client.methods.CapabilityMethods;
 import io.github.ma1uta.matrix.client.methods.ClientConfigMethods;
 import io.github.ma1uta.matrix.client.methods.ContentMethods;
 import io.github.ma1uta.matrix.client.methods.DeviceMethods;
@@ -330,6 +331,15 @@ public class MatrixClient implements Closeable {
      */
     public ProtocolMethods protocol() {
         return new ProtocolMethods(getRequestFactory(), getDefaultParams());
+    }
+
+    /**
+     * The capabilities methods.
+     *
+     * @return the capabilities methods.
+     */
+    public CapabilityMethods capabilities() {
+        return new CapabilityMethods(getRequestFactory(), getDefaultParams());
     }
 
     /**
