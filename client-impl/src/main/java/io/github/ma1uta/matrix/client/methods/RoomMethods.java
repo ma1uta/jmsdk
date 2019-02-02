@@ -26,8 +26,10 @@ import io.github.ma1uta.matrix.client.model.room.InviteRequest;
 import io.github.ma1uta.matrix.client.model.room.JoinRequest;
 import io.github.ma1uta.matrix.client.model.room.JoinedRoomsResponse;
 import io.github.ma1uta.matrix.client.model.room.KickRequest;
+import io.github.ma1uta.matrix.client.model.room.NewVersion;
 import io.github.ma1uta.matrix.client.model.room.PublicRoomsRequest;
 import io.github.ma1uta.matrix.client.model.room.PublicRoomsResponse;
+import io.github.ma1uta.matrix.client.model.room.ReplacementRoom;
 import io.github.ma1uta.matrix.client.model.room.RoomId;
 import io.github.ma1uta.matrix.client.model.room.RoomVisibility;
 import io.github.ma1uta.matrix.client.model.room.UnbanRequest;
@@ -287,5 +289,22 @@ public class RoomMethods extends AbstractMethods {
     public CompletableFuture<PublicRoomsResponse> searchPublicRooms(String server, PublicRoomsRequest request) {
         RequestParams params = defaults().clone().query("server", server);
         return factory().post(RoomApi.class, "searchPublicRooms", params, request, PublicRoomsResponse.class);
+    }
+
+    /**
+     * Upgrades the given room to a particular room version, migrating as much data as possible over to the new room.
+     *
+     * @param roomId     The ID of the room to upgrade.
+     * @param newVersion The new version for the room.
+     * @return The ID of the new room.
+     */
+    public CompletableFuture<ReplacementRoom> upgrade(Id roomId, String newVersion) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(newVersion, "New version cannot be empty.");
+
+        RequestParams params = defaults().clone().path("roomId", roomId.toString());
+        NewVersion request = new NewVersion();
+        request.setNewVersion(newVersion);
+        return factory().post(RoomApi.class, "upgrade", params, request, ReplacementRoom.class);
     }
 }
