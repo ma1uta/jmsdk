@@ -54,6 +54,22 @@ public class ClientConfigMethods extends AbstractMethods {
     }
 
     /**
+     * Get some account_data for the client. This config is only visible to the user that get the account_data.
+     *
+     * @param type The event type of the account_data to set. Custom types should be namespaced to avoid clashes.
+     * @return The account_data.
+     */
+    public CompletableFuture<Map> getConfig(String type) {
+        Objects.requireNonNull(type, "Type cannot be empty.");
+        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
+        RequestParams params = defaults().clone()
+            .path("userId", defaults().getUserId().toString())
+            .path("type", type);
+
+        return factory().get(ClientConfigApi.class, "getConfig", params, Map.class);
+    }
+
+    /**
      * Set some account_data for the client. This config is only visible to the user that set the account_data. The config will be
      * synced to clients in the top-level account_data.
      *
@@ -72,5 +88,24 @@ public class ClientConfigMethods extends AbstractMethods {
             .path("roomId", roomId.toString())
             .path("type", type);
         return factory().put(ClientConfigApi.class, "addRoomConfig", params, accountData, EmptyResponse.class);
+    }
+
+    /**
+     * Get some account_data for the client. This config is only visible to the user that get the account_data.
+     *
+     * @param roomId The id of the room to set account_data on.
+     * @param type   The event type of the account_data to set. Custom types should be namespaced to avoid clashes.
+     * @return The account_data.
+     */
+    public CompletableFuture<Map> getRoomConfig(Id roomId, String type) {
+        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
+        Objects.requireNonNull(type, "Type cannot be empty");
+        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty");
+
+        RequestParams params = defaults().clone()
+            .path("userId", defaults().getUserId().toString())
+            .path("roomId", roomId.toString())
+            .path("type", type);
+        return factory().get(ClientConfigApi.class, "getRoomConfig", params, Map.class);
     }
 }
