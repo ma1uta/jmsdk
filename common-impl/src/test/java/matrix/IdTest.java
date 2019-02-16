@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.ma1uta.matrix.AliasId;
+import io.github.ma1uta.matrix.HostnamefullId;
 import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.UserId;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +32,6 @@ public class IdTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "$event:server.tld;event;server.tld",
         "@user:server.tld;user;server.tld",
         "@us1:127.0.0.1;us1;127.0.0.1",
         "@use2:0.0.0.0:200;use2;0.0.0.0:200",
@@ -42,8 +42,10 @@ public class IdTest {
     public void id(String idValue, String localpart, String domain) {
         Id id = Id.valueOf(idValue);
         assertTrue(id.isValid());
-        assertEquals(localpart, id.getLocalpart());
-        assertEquals(domain, id.getHostname());
+        assertTrue(id instanceof HostnamefullId);
+        HostnamefullId hostnamefullId = (HostnamefullId) id;
+        assertEquals(localpart, hostnamefullId.getLocalpart());
+        assertEquals(domain, hostnamefullId.getHostname());
     }
 
     @ParameterizedTest
