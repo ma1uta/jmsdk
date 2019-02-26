@@ -26,6 +26,7 @@ import io.github.ma1uta.matrix.event.ForwardedRoomKey;
 import io.github.ma1uta.matrix.event.FullyRead;
 import io.github.ma1uta.matrix.event.IgnoredUserList;
 import io.github.ma1uta.matrix.event.Presence;
+import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.Receipt;
 import io.github.ma1uta.matrix.event.RoomAliases;
 import io.github.ma1uta.matrix.event.RoomAvatar;
@@ -61,6 +62,7 @@ import io.github.ma1uta.matrix.event.content.ForwardedRoomKeyContent;
 import io.github.ma1uta.matrix.event.content.FullyReadContent;
 import io.github.ma1uta.matrix.event.content.IgnoredUserListContent;
 import io.github.ma1uta.matrix.event.content.PresenceContent;
+import io.github.ma1uta.matrix.event.content.PushRulesContent;
 import io.github.ma1uta.matrix.event.content.RawEventContent;
 import io.github.ma1uta.matrix.event.content.ReceiptContent;
 import io.github.ma1uta.matrix.event.content.RoomAliasesContent;
@@ -175,6 +177,8 @@ public class EventContentDeserializer {
                 return mapper.readValue(content, TypingContent.class);
             case RoomServerAcl.TYPE:
                 return mapper.readValue(content, RoomServerAclContent.class);
+            case PushRules.TYPE:
+                return mapper.readValue(content, PushRulesContent.class);
             default:
                 return parse(content, mapper);
         }

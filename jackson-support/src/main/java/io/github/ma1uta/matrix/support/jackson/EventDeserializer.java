@@ -32,6 +32,7 @@ import io.github.ma1uta.matrix.event.ForwardedRoomKey;
 import io.github.ma1uta.matrix.event.FullyRead;
 import io.github.ma1uta.matrix.event.IgnoredUserList;
 import io.github.ma1uta.matrix.event.Presence;
+import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.RawEvent;
 import io.github.ma1uta.matrix.event.Receipt;
 import io.github.ma1uta.matrix.event.RoomAliases;
@@ -146,6 +147,8 @@ public class EventDeserializer extends JsonDeserializer<Event> {
                 return codec.treeToValue(node, Typing.class);
             case RoomServerAcl.TYPE:
                 return codec.treeToValue(node, RoomServerAcl.class);
+            case PushRules.TYPE:
+                return codec.treeToValue(node, PushRules.class);
             default:
                 return parse(node, codec, ctxt, type.asText());
         }

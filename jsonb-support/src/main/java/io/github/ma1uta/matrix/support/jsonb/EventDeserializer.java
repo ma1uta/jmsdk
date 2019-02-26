@@ -26,6 +26,7 @@ import io.github.ma1uta.matrix.event.ForwardedRoomKey;
 import io.github.ma1uta.matrix.event.FullyRead;
 import io.github.ma1uta.matrix.event.IgnoredUserList;
 import io.github.ma1uta.matrix.event.Presence;
+import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.RawEvent;
 import io.github.ma1uta.matrix.event.Receipt;
 import io.github.ma1uta.matrix.event.RoomAliases;
@@ -151,6 +152,8 @@ public class EventDeserializer implements JsonbDeserializer<Event> {
                 return jsonb().fromJson(event, Typing.class);
             case RoomServerAcl.TYPE:
                 return jsonb().fromJson(event, RoomServerAcl.class);
+            case PushRules.TYPE:
+                return jsonb().fromJson(event, PushRules.class);
             default:
                 return parse(event, ctx, type);
         }

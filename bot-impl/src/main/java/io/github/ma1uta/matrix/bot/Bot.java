@@ -17,6 +17,7 @@
 package io.github.ma1uta.matrix.bot;
 
 import io.github.ma1uta.matrix.Id;
+import io.github.ma1uta.matrix.UserId;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -142,7 +143,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             BotConfig config = context.getConfig();
 
             RegisterRequest registerRequest = new RegisterRequest();
-            registerRequest.setUsername(Id.valueOf(config.getUserId()).getLocalpart());
+            registerRequest.setUsername(((UserId) Id.valueOf(config.getUserId())).getLocalpart());
             registerRequest.setInitialDeviceDisplayName(config.getDisplayName());
             registerRequest.setDeviceId(config.getDeviceId());
 

@@ -21,14 +21,10 @@ import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.PresenceApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
-import io.github.ma1uta.matrix.client.model.presence.PresenceList;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
-import io.github.ma1uta.matrix.event.Event;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.GenericType;
 
 /**
  * Presence methods.
@@ -68,33 +64,5 @@ public class PresenceMethods extends AbstractMethods {
 
         RequestParams params = defaults().clone().path("userId", userId.toString());
         return factory().get(PresenceApi.class, "getPresenceStatus", params, PresenceStatus.class);
-    }
-
-    /**
-     * Adds or removes users from this presence list.
-     *
-     * @param presenceList The presence list.
-     * @return The empty response.
-     */
-    public CompletableFuture<EmptyResponse> setPresenceList(PresenceList presenceList) {
-        Id userId = defaults().getUserId();
-        Objects.requireNonNull(userId, "UserId cannot be empty.");
-
-        RequestParams params = defaults().clone().path("userId", userId.toString());
-        return factory().post(PresenceApi.class, "setPresenceList", params, presenceList, EmptyResponse.class);
-    }
-
-    /**
-     * Retrieve a list of presence events for every user on this list.
-     *
-     * @param userId The user whose presence list should be retrieved.
-     * @return A list of presence events for this list.
-     */
-    public CompletableFuture<List<Event>> getPresenceList(Id userId) {
-        Objects.requireNonNull(userId, "UserId cannot be empty.");
-
-        RequestParams params = defaults().clone().path("userId", userId.toString());
-        return factory().get(PresenceApi.class, "getPresenceList", params, new GenericType<List<Event>>() {
-        });
     }
 }

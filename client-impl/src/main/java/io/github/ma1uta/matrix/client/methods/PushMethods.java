@@ -23,13 +23,13 @@ import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.push.NotificationResponse;
 import io.github.ma1uta.matrix.client.model.push.PushActions;
 import io.github.ma1uta.matrix.client.model.push.PushEnable;
-import io.github.ma1uta.matrix.client.model.push.PushRule;
 import io.github.ma1uta.matrix.client.model.push.PushRulesResponse;
 import io.github.ma1uta.matrix.client.model.push.PushUpdateRequest;
 import io.github.ma1uta.matrix.client.model.push.Pusher;
 import io.github.ma1uta.matrix.client.model.push.PushersRequest;
 import io.github.ma1uta.matrix.client.model.push.PushersResponse;
-import io.github.ma1uta.matrix.client.model.push.Ruleset;
+import io.github.ma1uta.matrix.event.nested.PushRule;
+import io.github.ma1uta.matrix.event.nested.Ruleset;
 
 import java.util.List;
 import java.util.Objects;
