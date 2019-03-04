@@ -34,7 +34,7 @@
         <undertow.version>2.0.14.Final</undertow.version>
         <jackson.annotations.version>2.9.8</jackson.annotations.version>
         <jackson.core.version>2.9.8</jackson.core.version>
-        <wiremock.version>2.21.0</w2iremock.version>
+        <wiremock.version>2.21.0</wiremock.version>
     </properties>
 
     <dependencies>
