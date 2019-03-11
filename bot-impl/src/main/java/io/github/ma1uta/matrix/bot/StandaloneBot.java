@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.sync.InvitedRoom;
@@ -135,9 +134,9 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
      */
     protected LoopState registeredState() {
         return loop(sync -> {
-            Map<Id, InvitedRoom> invite = sync.getRooms().getInvite();
-            Map<Id, List<Event>> eventMap = new HashMap<>();
-            for (Map.Entry<Id, InvitedRoom> entry : invite.entrySet()) {
+            Map<String, InvitedRoom> invite = sync.getRooms().getInvite();
+            Map<String, List<Event>> eventMap = new HashMap<>();
+            for (Map.Entry<String, InvitedRoom> entry : invite.entrySet()) {
                 eventMap.put(entry.getKey(), entry.getValue().getInviteState().getEvents());
             }
             return registeredState(eventMap);
@@ -154,16 +153,16 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
             Rooms rooms = sync.getRooms();
 
             MatrixClient matrixClient = getContext().getMatrixClient();
-            List<Id> joinedRooms = matrixClient.room().joinedRooms().join();
-            for (Map.Entry<Id, LeftRoom> roomEntry : rooms.getLeave().entrySet()) {
-                Id leftRoom = roomEntry.getKey();
+            List<String> joinedRooms = matrixClient.room().joinedRooms().join();
+            for (Map.Entry<String, LeftRoom> roomEntry : rooms.getLeave().entrySet()) {
+                String leftRoom = roomEntry.getKey();
                 if (joinedRooms.contains(leftRoom)) {
                     matrixClient.room().leave(leftRoom);
                 }
             }
 
             LoopState nextState = LoopState.RUN;
-            for (Map.Entry<Id, JoinedRoom> joinedRoomEntry : rooms.getJoin().entrySet()) {
+            for (Map.Entry<String, JoinedRoom> joinedRoomEntry : rooms.getJoin().entrySet()) {
                 LoopState state = processJoinedRoom(joinedRoomEntry.getKey(), joinedRoomEntry.getValue().getTimeline().getEvents());
                 switch (state) {
                     case EXIT:

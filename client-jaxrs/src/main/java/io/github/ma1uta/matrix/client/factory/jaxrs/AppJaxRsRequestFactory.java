@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client.factory.jaxrs;
 
-import io.github.ma1uta.matrix.UserId;
 import io.github.ma1uta.matrix.client.RequestParams;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -46,9 +45,6 @@ public class AppJaxRsRequestFactory extends JaxRsRequestFactory {
 
     @Override
     protected WebTarget applyQueryParams(RequestParams params, WebTarget path) {
-        if (!(params.getUserId() instanceof UserId)) {
-            throw new IllegalArgumentException("The `user_id` should be specified.");
-        }
         return super.applyQueryParams(params, path).queryParam("user_id", encode(params.getUserId().toString()));
     }
 }

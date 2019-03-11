@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.ThirdPartyProtocolApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -105,10 +104,10 @@ public class ProtocolMethods extends AbstractMethods {
      * @param alias Required. The Matrix room alias to look up.
      * @return Founded location.
      */
-    public CompletableFuture<List<ProtocolLocation>> location(Id alias) {
+    public CompletableFuture<List<ProtocolLocation>> location(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
 
-        RequestParams params = defaults().clone().query("alias", alias.toString());
+        RequestParams params = defaults().clone().query("alias", alias);
         return factory().get(ThirdPartyProtocolApi.class, "location", params, new GenericType<List<ProtocolLocation>>() {
         });
     }
@@ -119,10 +118,10 @@ public class ProtocolMethods extends AbstractMethods {
      * @param userId Required. The Matrix User ID to look up.
      * @return Founded users.
      */
-    public CompletableFuture<List<ProtocolLocation>> user(Id userId) {
+    public CompletableFuture<List<ProtocolLocation>> user(String userId) {
         Objects.requireNonNull(userId, "userId cannot be empty.");
 
-        RequestParams params = defaults().clone().query("userid", userId.toString());
+        RequestParams params = defaults().clone().query("userid", userId);
         return factory().get(ThirdPartyProtocolApi.class, "user", params, new GenericType<List<ProtocolLocation>>() {
         });
     }

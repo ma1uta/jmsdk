@@ -17,7 +17,6 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.ReportApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -44,15 +43,15 @@ public class ReportMethods extends AbstractMethods {
      * @param score   The score to rate this content as where -100 is most offensive and 0 is inoffensive.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> report(Id roomId, Id eventId, String reason, Integer score) {
+    public CompletableFuture<EmptyResponse> report(String roomId, String eventId, String reason, Integer score) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
         Objects.requireNonNull(reason, "Reason cannot be empty.");
         Objects.requireNonNull(score, "Score cannot be empty.");
 
         RequestParams params = defaults().clone()
-            .path("roomId", roomId.toString())
-            .path("eventId", eventId.toString());
+            .path("roomId", roomId)
+            .path("eventId", eventId);
         ReportRequest request = new ReportRequest();
         request.setReason(reason);
         request.setScore(score);

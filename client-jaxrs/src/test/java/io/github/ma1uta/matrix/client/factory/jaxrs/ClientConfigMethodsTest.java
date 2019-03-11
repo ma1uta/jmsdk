@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.Id;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -55,7 +54,7 @@ class ClientConfigMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().getDefaultParams().userId(Id.valueOf("@alice:example.com"));
+            getMatrixClient().getDefaultParams().userId("@alice:example.com");
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
         }
         Map<String, String> config = new HashMap<>();
@@ -86,13 +85,13 @@ class ClientConfigMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().getDefaultParams().userId(Id.valueOf("@alice:example.com"));
+            getMatrixClient().getDefaultParams().userId("@alice:example.com");
             getMatrixClient().getDefaultParams().accessToken(ACCESS_TOKEN);
         }
         Map<String, String> config = new HashMap<>();
         config.put("custom_account_data_key", "custom_config_value");
         EmptyResponse emptyResponse = getMatrixClient().clientConfig()
-            .addRoomConfig(Id.valueOf("!726s6s6q:example.com"), "org.example.custom.room.config", config).get(100000, TimeUnit.MILLISECONDS);
+            .addRoomConfig("!726s6s6q:example.com", "org.example.custom.room.config", config).get(100000, TimeUnit.MILLISECONDS);
         assertNotNull(emptyResponse);
     }
 }

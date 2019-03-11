@@ -17,7 +17,6 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.ProfileApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -44,10 +43,10 @@ public class ProfileMethods extends AbstractMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setDisplayName(String displayName) {
-        Id userId = defaults().getUserId();
+        String userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId.toString());
+        RequestParams params = defaults().clone().path("userId", userId);
         DisplayName request = new DisplayName();
         request.setDisplayName(displayName);
         return factory().put(ProfileApi.class, "setDisplayName", params, request, EmptyResponse.class);
@@ -60,10 +59,10 @@ public class ProfileMethods extends AbstractMethods {
      * @param userId The user whose display name to get.
      * @return The display name for this user.
      */
-    public CompletableFuture<String> showDisplayName(Id userId) {
+    public CompletableFuture<String> showDisplayName(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId.toString());
+        RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(ProfileApi.class, "showDisplayName", params, DisplayName.class).thenApply(DisplayName::getDisplayName);
     }
 
@@ -75,10 +74,10 @@ public class ProfileMethods extends AbstractMethods {
      * @return empty response.
      */
     public CompletableFuture<EmptyResponse> setAvaterUrl(String avatarUrl) {
-        Id userId = defaults().getUserId();
+        String userId = defaults().getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId.toString());
+        RequestParams params = defaults().clone().path("userId", userId);
         AvatarUrl request = new AvatarUrl();
         request.setAvatarUrl(avatarUrl);
         return factory().put(ProfileApi.class, "setAvatarUrl", params, request, EmptyResponse.class);
@@ -91,10 +90,10 @@ public class ProfileMethods extends AbstractMethods {
      * @param userId The user whose avatar URL to get.
      * @return The avatar URL for this user.
      */
-    public CompletableFuture<String> showAvatarUrl(Id userId) {
+    public CompletableFuture<String> showAvatarUrl(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId.toString());
+        RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(ProfileApi.class, "showAvatarUrl", params, AvatarUrl.class).thenApply(AvatarUrl::getAvatarUrl);
     }
 
@@ -105,10 +104,10 @@ public class ProfileMethods extends AbstractMethods {
      * @param userId The user whose profile information to get.
      * @return The profile info for this user.
      */
-    public CompletableFuture<Profile> profile(Id userId) {
+    public CompletableFuture<Profile> profile(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId.toString());
+        RequestParams params = defaults().clone().path("userId", userId);
         return factory().get(ProfileApi.class, "profile", params, Profile.class);
     }
 }

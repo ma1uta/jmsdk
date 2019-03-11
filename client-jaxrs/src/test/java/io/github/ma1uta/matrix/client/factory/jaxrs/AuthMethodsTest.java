@@ -89,7 +89,7 @@ class AuthMethodsTest extends MockServer {
         LoginResponse loginResponse = getMatrixClient().auth().login(loginRequest).get(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(loginResponse);
-        assertEquals("@cheeky_monkey:matrix.org", loginResponse.getUserId().toString());
+        assertEquals("@cheeky_monkey:matrix.org", loginResponse.getUserId());
         assertEquals("abc123", loginResponse.getAccessToken());
         assertEquals("GHTYAJCE", loginResponse.getDeviceId());
     }

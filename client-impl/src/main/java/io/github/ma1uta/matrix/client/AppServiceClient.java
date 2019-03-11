@@ -17,8 +17,6 @@
 package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.Id;
-import io.github.ma1uta.matrix.UserId;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 
@@ -29,9 +27,6 @@ public class AppServiceClient extends MatrixClient {
 
     public AppServiceClient(RequestFactory factory, RequestParams defaultParams) {
         super(factory, defaultParams);
-        if (!(defaultParams.getUserId() instanceof UserId)) {
-            throw new NullPointerException("The `user_id` should be specified.");
-        }
     }
 
     /**
@@ -40,7 +35,7 @@ public class AppServiceClient extends MatrixClient {
      * @param userId The user MXID.
      * @return The new AppService client.
      */
-    public AppServiceClient userId(Id userId) {
+    public AppServiceClient userId(String userId) {
         return new AppServiceClient(getRequestFactory(), getDefaultParams().clone().userId(userId));
     }
 

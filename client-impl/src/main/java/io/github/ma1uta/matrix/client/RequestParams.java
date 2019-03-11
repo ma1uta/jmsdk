@@ -16,8 +16,6 @@
 
 package io.github.ma1uta.matrix.client;
 
-import io.github.ma1uta.matrix.Id;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +28,7 @@ public class RequestParams implements Cloneable {
     private Map<String, String> queryParams = new HashMap<>();
     private Map<String, String> headerParams = new HashMap<>();
 
-    private Id userId;
+    private String userId;
     private String accessToken;
     private String deviceId;
 
@@ -130,7 +128,7 @@ public class RequestParams implements Cloneable {
         return headerParams;
     }
 
-    public Id getUserId() {
+    public String getUserId() {
         return userId;
     }
 
@@ -140,7 +138,7 @@ public class RequestParams implements Cloneable {
      * @param userId The user Matrix ID.
      * @return This request params.
      */
-    public RequestParams userId(Id userId) {
+    public RequestParams userId(String userId) {
         this.userId = userId;
         return this;
     }

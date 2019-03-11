@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
@@ -61,7 +60,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
      * @param event  event.
      * @return {@code true} if event was processed, else {@code false}.
      */
-    public boolean send(Id roomId, Event event) {
+    public boolean send(String roomId, Event event) {
         LOGGER.debug("Receive event in the room: {0}", roomId);
         Optional<ApplicationServiceBot<C, D, S, E>> bot = getBotMap().entrySet().stream()
             .filter(entry -> {
@@ -69,7 +68,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Bot \"{}\"", context.getConfig().getUserId());
                 }
-                List<Id> joinedRooms;
+                List<String> joinedRooms;
                 try {
                     joinedRooms = context.getMatrixClient().room().joinedRooms().join();
                 } catch (Exception e) {

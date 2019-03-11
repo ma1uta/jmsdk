@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.AppServiceClient;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -51,7 +50,7 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
     @Override
     protected Context<C, D, S, E> init(RequestFactory factory, String asToken, C config, S service) {
         AppServiceClient matrixClient = new AppServiceClient(factory,
-            new RequestParams().userId(Id.valueOf(config.getUserId())).accessToken(asToken));
+            new RequestParams().userId(String.valueOf(config.getUserId())).accessToken(asToken));
         Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
         context.setConfig(config);
         return context;
@@ -79,7 +78,7 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
                 state = newState();
                 break;
             case REGISTERED:
-                Map<Id, List<Event>> eventMap = new HashMap<>();
+                Map<String, List<Event>> eventMap = new HashMap<>();
                 eventMap.put(event.getRoomId(), Collections.singletonList(event));
                 state = registeredState(eventMap);
                 break;

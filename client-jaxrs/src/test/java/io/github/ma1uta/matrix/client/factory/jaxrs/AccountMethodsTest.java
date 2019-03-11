@@ -58,7 +58,7 @@ public class AccountMethodsTest extends MockServer {
         LoginResponse loginResponse = register(false, true);
 
         assertEquals("abc123", getMatrixClient().getDefaultParams().getAccessToken());
-        assertEquals("@cheeky_monkey:matrix.org", getMatrixClient().getDefaultParams().getUserId().toString());
+        assertEquals("@cheeky_monkey:matrix.org", getMatrixClient().getDefaultParams().getUserId());
         assertEquals("abc123", loginResponse.getAccessToken());
         assertEquals("GHTYAJCE", loginResponse.getDeviceId());
     }
@@ -68,7 +68,7 @@ public class AccountMethodsTest extends MockServer {
         LoginResponse loginResponse = register(true, true);
 
         assertNull(getMatrixClient().getDefaultParams().getAccessToken());
-        assertEquals("@cheeky_monkey:matrix.org", getMatrixClient().getDefaultParams().getUserId().toString());
+        assertEquals("@cheeky_monkey:matrix.org", getMatrixClient().getDefaultParams().getUserId());
         assertNull(loginResponse.getDeviceId());
         assertNull(loginResponse.getAccessToken());
     }
@@ -129,7 +129,7 @@ public class AccountMethodsTest extends MockServer {
         LoginResponse loginResponse = getMatrixClient().account().register(request).get(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(loginResponse);
-        assertEquals("@cheeky_monkey:matrix.org", loginResponse.getUserId().toString());
+        assertEquals("@cheeky_monkey:matrix.org", loginResponse.getUserId());
 
         return loginResponse;
     }
@@ -573,6 +573,6 @@ public class AccountMethodsTest extends MockServer {
         }
         WhoamiResponse whoamiResponse = getMatrixClient().account().whoami().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(whoamiResponse);
-        assertEquals("@joe:example.org", whoamiResponse.getUserId().toString());
+        assertEquals("@joe:example.org", whoamiResponse.getUserId());
     }
 }

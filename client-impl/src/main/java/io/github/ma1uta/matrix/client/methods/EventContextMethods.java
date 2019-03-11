@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.EventContextApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -43,13 +42,13 @@ public class EventContextMethods extends AbstractMethods {
      * @param limit   The maximum number of events to return. Default: 10.
      * @return The events and state surrounding the requested event.
      */
-    public CompletableFuture<EventContextResponse> context(Id roomId, Id eventId, Integer limit) {
+    public CompletableFuture<EventContextResponse> context(String roomId, String eventId, Integer limit) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
 
         RequestParams params = defaults().clone()
-            .path("roomId", roomId.toString())
-            .path("eventId", eventId.toString())
+            .path("roomId", roomId)
+            .path("eventId", eventId)
             .query("limit", limit);
         return factory().get(EventContextApi.class, "context", params, EventContextResponse.class);
     }

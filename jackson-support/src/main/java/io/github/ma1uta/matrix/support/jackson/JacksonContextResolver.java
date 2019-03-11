@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
@@ -56,8 +55,6 @@ public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
                     eventModule.addDeserializer(Event.class, new EventDeserializer());
                     eventModule.addDeserializer(RoomEncryptedContent.class, new RoomEncryptedContentDeserializer());
                     eventModule.addDeserializer(RoomMessageContent.class, new RoomMessageContentDeserializer());
-                    eventModule.addDeserializer(Id.class, new IdDeserializer());
-                    eventModule.addSerializer(Id.class, new IdSerializer());
 
                     mapper.registerModule(eventModule);
                 }

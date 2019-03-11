@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.RequestParams;
 import io.github.ma1uta.matrix.client.api.AdminApi;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
@@ -41,7 +40,7 @@ public class AdminMethods extends AbstractMethods {
      * @param userId The user mxid
      * @return The user information.
      */
-    public CompletableFuture<AdminResponse> whois(Id userId) {
+    public CompletableFuture<AdminResponse> whois(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
         RequestParams params = defaults().clone().path("userId", userId.toString());

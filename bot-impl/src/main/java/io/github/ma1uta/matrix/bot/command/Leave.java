@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.bot.command;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.bot.BotConfig;
 import io.github.ma1uta.matrix.bot.BotDao;
 import io.github.ma1uta.matrix.bot.Context;
@@ -38,7 +37,7 @@ public class Leave<C extends BotConfig, D extends BotDao<C>, S extends Persisten
     }
 
     @Override
-    public boolean ownerInvoke(Context<C, D, S, E> context, Id roomId, RoomEvent event, String arguments) {
+    public boolean ownerInvoke(Context<C, D, S, E> context, String roomId, RoomEvent event, String arguments) {
         context.getMatrixClient().room().leave(roomId);
         return true;
     }
