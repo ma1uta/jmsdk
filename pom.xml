@@ -67,40 +67,40 @@
         <java.version>1.8</java.version>
 
         <!-- plugins versions -->
-        <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
-        <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
-        <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
-        <nexus.staging.maven.plugin.version>1.6.8</nexus.staging.maven.plugin.version>
-        <jacoco.maven.plugin.version>0.8.2</jacoco.maven.plugin.version>
-        <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>2.22.0</maven.failsafe.plugin.version>
-        <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
-        <maven.javadoc.plugin.version>3.0.1</maven.javadoc.plugin.version>
-        <maven.site.plugin.version>3.7.1</maven.site.plugin.version>
-        <maven.project.info.plugin.version>3.0.0</maven.project.info.plugin.version>
-        <maven.jar.plugin.version>3.1.0</maven.jar.plugin.version>
-        <maven.bundle.plugin.version>4.1.0</maven.bundle.plugin.version>
-        <buildnumber.maven.plugin.version>1.4</buildnumber.maven.plugin.version>
-        <maven.enforcer.plugin.version>3.0.0-M2</maven.enforcer.plugin.version>
+        <version.plugin.maven-compiler-plugin>3.8.0</version.plugin.maven-compiler-plugin>
+        <version.plugin.maven-checkstyle-plugin>3.0.0</version.plugin.maven-checkstyle-plugin>
+        <version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
+        <version.plugin.nexus-staging-maven-plugin>1.6.8</version.plugin.nexus-staging-maven-plugin>
+        <version.plugin.jacoco-maven-plugin>0.8.2</version.plugin.jacoco-maven-plugin>
+        <version.plugin.maven-surefire-plugin>2.22.0</version.plugin.maven-surefire-plugin>
+        <version.plugin.maven-failsafe-plugin>2.22.0</version.plugin.maven-failsafe-plugin>
+        <version.plugin.maven-source-plugin>3.0.1</version.plugin.maven-source-plugin>
+        <version.plugin.maven-javadoc-plugin>3.0.1</version.plugin.maven-javadoc-plugin>
+        <version.plugin.maven-site-plugin>3.7.1</version.plugin.maven-site-plugin>
+        <version.plugin.maven-project-info-plugin>3.0.0</version.plugin.maven-project-info-plugin>
+        <version.plugin.maven-jar-plugin>3.1.0</version.plugin.maven-jar-plugin>
+        <version.plugin.maven-bundle-plugin>4.1.0</version.plugin.maven-bundle-plugin>
+        <version.plugin.buildnumber-maven-plugin>1.4</version.plugin.buildnumber-maven-plugin>
+        <version.plugin.maven-enforcer-plugin>3.0.0-M2</version.plugin.maven-enforcer-plugin>
 
         <!-- plugin dependencies -->
-        <checkstyle.version>8.18</checkstyle.version>
-        <asm.version>7.1</asm.version>
+        <version.lib.checkstyle>8.21</version.lib.checkstyle>
+        <version.lib.asm>7.1</version.lib.asm>
 
         <!-- dependencies -->
-        <slf4j.api.version>1.8.0-beta4</slf4j.api.version>
-        <jackson.databind.version>2.9.8</jackson.databind.version>
-        <hibernate.jpa.api.version>1.0.2.Final</hibernate.jpa.api.version>
-        <junit5.bom.version>5.4.0</junit5.bom.version>
-        <jersey.client.version>2.28</jersey.client.version>
-        <jersey.hk2.version>2.28</jersey.hk2.version>
-        <jersey.media.json.jackson.version>2.28</jersey.media.json.jackson.version>
-        <jackson.jaxrs.json.provider.version>2.9.8</jackson.jaxrs.json.provider.version>
-        <javax.json.bind.api.version>1.0</javax.json.bind.api.version>
-        <javax.json.api.version>1.1.4</javax.json.api.version>
+        <version.lib.slf4j-api>1.8.0-beta4</version.lib.slf4j-api>
+        <version.lib.jackson-databind>2.9.9</version.lib.jackson-databind>
+        <version.lib.hibernate.jpa-api>1.0.2.Final</version.lib.hibernate.jpa-api>
+        <version.lib.junit-bom>5.4.0</version.lib.junit-bom>
+        <version.lib.jersey-client>2.28</version.lib.jersey-client>
+        <version.lib.jersey.hk2>2.28</version.lib.jersey.hk2>
+        <version.lib.jersey-media-json-jackson>2.28</version.lib.jersey-media-json-jackson>
+        <version.lib.jackson-jaxrs-json-provider>2.9.9</version.lib.jackson-jaxrs-json-provider>
+        <version.lib.jakarta.json.bind-api>1.0.1</version.lib.jakarta.json.bind-api>
+        <version.lib.jakarta.json-api>1.1.5</version.lib.jakarta.json-api>
 
         <!-- compatibility -->
-        <javax.activation.version>1.2.0</javax.activation.version>
+        <version.lib.jakarta.activation-api>1.2.1</version.lib.jakarta.activation-api>
     </properties>
 
     <build>
@@ -109,12 +109,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven.compiler.plugin.version}</version>
+                    <version>${version.plugin.maven-compiler-plugin}</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.ow2.asm</groupId>
                             <artifactId>asm</artifactId>
-                            <version>${asm.version}</version>
+                            <version>${version.lib.asm}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -122,7 +122,7 @@
                     <!-- This plugin generates the buildNumber property used in maven-bundle-plugin -->
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>buildnumber-maven-plugin</artifactId>
-                    <version>${buildnumber.maven.plugin.version}</version>
+                    <version>${version.plugin.buildnumber-maven-plugin}</version>
                     <configuration>
                         <format>{0,date,MM/dd/yyyy hh:mm aa}</format>
                         <items>
@@ -141,7 +141,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>${maven.bundle.plugin.version}</version>
+                    <version>${version.plugin.maven-bundle-plugin}</version>
                     <extensions>true</extensions>
                     <configuration>
                         <instructions>
@@ -168,7 +168,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven.enforcer.plugin.version}</version>
+                    <version>${version.plugin.maven-enforcer-plugin}</version>
                     <executions>
                         <execution>
                             <id>enforce-maven</id>
@@ -189,7 +189,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven.source.plugin.version}</version>
+                    <version>${version.plugin.maven-source-plugin}</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -202,7 +202,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven.jar.plugin.version}</version>
+                    <version>${version.plugin.maven-jar-plugin}</version>
                     <configuration>
                         <archive>
                             <manifest>
@@ -214,7 +214,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${maven.checkstyle.plugin.version}</version>
+                    <version>${version.plugin.maven-checkstyle-plugin}</version>
                     <configuration>
                         <configLocation>config/checkstyle/checkstyle.xml</configLocation>
                         <excludes>**/module-info.java</excludes>
@@ -235,14 +235,14 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>${checkstyle.version}</version>
+                            <version>${version.lib.checkstyle}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.maven.plugin.version}</version>
+                    <version>${version.plugin.jacoco-maven-plugin}</version>
                     <executions>
                         <execution>
                             <id>prepare-agent</id>
@@ -255,19 +255,19 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven.surefire.plugin.version}</version>
+                    <version>${version.plugin.maven-surefire-plugin}</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.ow2.asm</groupId>
                             <artifactId>asm</artifactId>
-                            <version>${asm.version}</version>
+                            <version>${version.lib.asm}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${maven.javadoc.plugin.version}</version>
+                    <version>${version.plugin.maven-javadoc-plugin}</version>
                     <executions>
                         <execution>
                             <id>aggregate</id>
@@ -287,14 +287,14 @@
                         <dependency>
                             <groupId>org.ow2.asm</groupId>
                             <artifactId>asm</artifactId>
-                            <version>${asm.version}</version>
+                            <version>${version.lib.asm}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${maven.failsafe.plugin.version}</version>
+                    <version>${version.plugin.maven-failsafe-plugin}</version>
                     <executions>
                         <execution>
                             <goals>
@@ -313,12 +313,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>${maven.site.plugin.version}</version>
+                    <version>${version.plugin.maven-site-plugin}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>${maven.project.info.plugin.version}</version>
+                    <version>${version.plugin.maven-project-info-plugin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -371,51 +371,51 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.api.version}</version>
+                <version>${version.lib.slf4j-api}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>${jackson.jaxrs.json.provider.version}</version>
+                <version>${version.lib.jackson-jaxrs-json-provider}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson.databind.version}</version>
+                <version>${version.lib.jackson-databind}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
                 <artifactId>jersey-client</artifactId>
-                <version>${jersey.client.version}</version>
+                <version>${version.lib.jersey-client}</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.media</groupId>
                 <artifactId>jersey-media-json-jackson</artifactId>
-                <version>${jersey.media.json.jackson.version}</version>
+                <version>${version.lib.jersey-media-json-jackson}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>${junit5.bom.version}</version>
+                <version>${version.lib.junit-bom}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>javax.json.bind</groupId>
-                <artifactId>javax.json.bind-api</artifactId>
-                <version>${javax.json.bind.api.version}</version>
+                <groupId>jakarta.json.bind</groupId>
+                <artifactId>jakarta.json.bind-api</artifactId>
+                <version>${version.lib.jakarta.json.bind-api}</version>
             </dependency>
             <dependency>
-                <groupId>javax.json</groupId>
-                <artifactId>javax.json-api</artifactId>
-                <version>${javax.json.api.version}</version>
+                <groupId>jakarta.json</groupId>
+                <artifactId>jakarta.json-api</artifactId>
+                <version>${version.lib.jakarta.json-api}</version>
             </dependency>
             <dependency>
-                <groupId>javax.activation</groupId>
-                <artifactId>javax.activation-api</artifactId>
-                <version>${javax.activation.version}</version>
+                <groupId>jakarta.activation</groupId>
+                <artifactId>jakarta.activation-api</artifactId>
+                <version>${version.lib.jakarta.activation-api}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -431,7 +431,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>${maven.gpg.plugin.version}</version>
+                        <version>${version.plugin.maven-gpg-plugin}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -445,7 +445,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${nexus.staging.maven.plugin.version}</version>
+                        <version>${version.plugin.nexus-staging-maven-plugin}</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
@@ -472,7 +472,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-compiler-plugin</artifactId>
-                            <version>${maven.compiler.plugin.version}</version>
+                            <version>${version.plugin.maven-compiler-plugin}</version>
                             <executions>
                                 <execution>
                                     <id>default-compile</id>
@@ -528,7 +528,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-compiler-plugin</artifactId>
-                            <version>${maven.compiler.plugin.version}</version>
+                            <version>${version.plugin.maven-compiler-plugin}</version>
                             <configuration>
                                 <source>${java.version}</source>
                                 <target>${java.version}</target>

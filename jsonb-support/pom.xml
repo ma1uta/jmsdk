@@ -29,7 +29,7 @@
 
     <properties>
         <common.api.version>0.8.0-SNAPSHOT</common.api.version>
-        <javax.json.version>1.1.4</javax.json.version>
+        <jakarta.json.version>1.1.5</jakarta.json.version>
         <yasson.version>1.0.3</yasson.version>
     </properties>
 
@@ -40,18 +40,18 @@
             <version>${common.api.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.json.bind</groupId>
-            <artifactId>javax.json.bind-api</artifactId>
+            <groupId>jakarta.json.bind</groupId>
+            <artifactId>jakarta.json.bind-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.json</groupId>
-            <artifactId>javax.json-api</artifactId>
+            <groupId>jakarta.json</groupId>
+            <artifactId>jakarta.json-api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>${javax.json.version}</version>
+            <artifactId>jakarta.json</artifactId>
+            <version>${jakarta.json.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse</groupId>

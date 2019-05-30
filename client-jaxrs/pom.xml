@@ -32,8 +32,8 @@
         <client.impl.version>0.6.0-SNAPSHOT</client.impl.version>
         <jackson.support.version>0.2.0-SNAPSHOT</jackson.support.version>
         <undertow.version>2.0.14.Final</undertow.version>
-        <jackson.annotations.version>2.9.8</jackson.annotations.version>
-        <jackson.core.version>2.9.8</jackson.core.version>
+        <jackson.annotations.version>2.9.9</jackson.annotations.version>
+        <jackson.core.version>2.9.9</jackson.core.version>
         <wiremock.version>2.21.0</wiremock.version>
     </properties>
 
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
-            <version>${jersey.hk2.version}</version>
+            <version>${version.lib.jersey.hk2}</version>
             <scope>test</scope>
         </dependency>
 
