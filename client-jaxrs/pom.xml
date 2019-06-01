@@ -29,34 +29,33 @@
     <version>0.2.0-SNAPSHOT</version>
 
     <properties>
-        <client.impl.version>0.6.0-SNAPSHOT</client.impl.version>
-        <jackson.support.version>0.2.0-SNAPSHOT</jackson.support.version>
-        <undertow.version>2.0.14.Final</undertow.version>
-        <jackson.annotations.version>2.9.9</jackson.annotations.version>
-        <jackson.core.version>2.9.9</jackson.core.version>
-        <wiremock.version>2.21.0</wiremock.version>
+        <version.lib.client-impl>0.6.0-SNAPSHOT</version.lib.client-impl>
+        <version.lib.jackson-support>0.2.0-SNAPSHOT</version.lib.jackson-support>
+        <version.lib.jackson-annotations>2.9.9</version.lib.jackson-annotations>
+        <version.lib.jackson-core>2.9.9</version.lib.jackson-core>
+        <version.lib.wiremock>2.23.2</version.lib.wiremock>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>client-impl</artifactId>
-            <version>${client.impl.version}</version>
+            <version>${version.lib.client-impl}</version>
         </dependency>
         <dependency>
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>jackson-support</artifactId>
-            <version>${jackson.support.version}</version>
+            <version>${version.lib.jackson-support}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.annotations.version}</version>
+            <version>${version.lib.jackson-annotations}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson.core.version}</version>
+            <version>${version.lib.jackson-core}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -82,7 +81,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
-            <version>${wiremock.version}</version>
+            <version>${version.lib.wiremock}</version>
             <scope>test</scope>
         </dependency>
 

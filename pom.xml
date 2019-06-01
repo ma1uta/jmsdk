@@ -90,7 +90,7 @@
         <!-- dependencies -->
         <version.lib.slf4j-api>1.8.0-beta4</version.lib.slf4j-api>
         <version.lib.jackson-databind>2.9.9</version.lib.jackson-databind>
-        <version.lib.hibernate.jpa-api>1.0.2.Final</version.lib.hibernate.jpa-api>
+        <version.lib.jakarta.persistence-api>2.2.2</version.lib.jakarta.persistence-api>
         <version.lib.junit-bom>5.4.0</version.lib.junit-bom>
         <version.lib.jersey-client>2.28</version.lib.jersey-client>
         <version.lib.jersey.hk2>2.28</version.lib.jersey.hk2>
