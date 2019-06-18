@@ -262,10 +262,10 @@
                             <version>${version.lib.asm}</version>
                         </dependency>
                     </dependencies>
-                    <configuration>
+                    <!--configuration>
                         <forkCount>0</forkCount>
-                        <argLine>--add-modules java.xml.bind --illegal-access=permit</argLine>
-                    </configuration>
+                        <argLine--><!--add-modules java.xml.bind --><!--illegal-access=permit</argLine>
+                    </configuration-->
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
