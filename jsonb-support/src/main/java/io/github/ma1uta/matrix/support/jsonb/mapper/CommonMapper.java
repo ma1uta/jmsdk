@@ -29,9 +29,12 @@ import javax.json.JsonValue;
 @SuppressWarnings( {"javadocType", "javadocMethod", "javadocVariable"})
 public interface CommonMapper {
 
+    default boolean isNull(JsonValue jsonValue) {
+        return jsonValue == null || jsonValue.getValueType() == JsonValue.ValueType.NULL;
+    }
+
     default boolean isNull(JsonObject jsonObject, String property) {
-        return jsonObject == null
-            || jsonObject.getValueType() == JsonValue.ValueType.NULL
+        return isNull(jsonObject)
             || jsonObject.get(property) == null
             || jsonObject.isNull(property);
     }
@@ -45,7 +48,7 @@ public interface CommonMapper {
     }
 
     default String toString(JsonValue jsonValue) {
-        if (jsonValue == null || jsonValue.getValueType() == JsonValue.ValueType.NULL) {
+        if (isNull(jsonValue)) {
             return null;
         }
         return ((JsonString) jsonValue).getString();
@@ -68,7 +71,7 @@ public interface CommonMapper {
     }
 
     default JsonObject toObject(JsonValue jsonValue) {
-        if (jsonValue == null || jsonValue.getValueType() == JsonValue.ValueType.NULL) {
+        if (isNull(jsonValue)) {
             return null;
         }
         return jsonValue.asJsonObject();
@@ -82,10 +85,24 @@ public interface CommonMapper {
     }
 
     default List<String> toStringArray(JsonArray jsonArray) {
-        if (jsonArray == null || jsonArray.getValueType() == JsonValue.ValueType.NULL) {
+        if (isNull(jsonArray)) {
             return null;
         }
         return jsonArray.stream().filter(Objects::nonNull).map(this::toString).collect(Collectors.toList());
+    }
+
+    default Map<String, String> toStringMap(JsonObject jsonObject) {
+        if (isNull(jsonObject)) {
+            return null;
+        }
+
+        Map<String, String> map = new HashMap<>();
+
+        for (Map.Entry<String, JsonValue> entry : jsonObject.entrySet()) {
+            map.put(entry.getKey(), toString(entry.getValue()));
+        }
+
+        return map;
     }
 
     default Map<String, String> toStringMap(JsonObject jsonObject, String property) {
@@ -93,12 +110,6 @@ public interface CommonMapper {
             return null;
         }
 
-        Map<String, String> map = new HashMap<>();
-
-        for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject(property).entrySet()) {
-            map.put(entry.getKey(), toString(entry.getValue()));
-        }
-
-        return map;
+        return toStringMap(jsonObject.getJsonObject(property));
     }
 }

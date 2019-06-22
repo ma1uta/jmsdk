@@ -29,14 +29,27 @@ import io.github.ma1uta.matrix.event.content.KeyVerificationMacContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationRequestContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationStartContent;
 import io.github.ma1uta.matrix.event.content.PresenceContent;
+import io.github.ma1uta.matrix.event.content.PushRulesContent;
+import io.github.ma1uta.matrix.event.content.ReceiptContent;
 import io.github.ma1uta.matrix.event.content.RoomKeyContent;
+import io.github.ma1uta.matrix.event.content.RoomKeyRequestContent;
+import io.github.ma1uta.matrix.event.content.TagContent;
+import io.github.ma1uta.matrix.event.content.TypingContent;
 import io.github.ma1uta.matrix.event.nested.Answer;
 import io.github.ma1uta.matrix.event.nested.Candidate;
+import io.github.ma1uta.matrix.event.nested.PushCondition;
+import io.github.ma1uta.matrix.event.nested.PushRule;
+import io.github.ma1uta.matrix.event.nested.ReceiptInfo;
+import io.github.ma1uta.matrix.event.nested.ReceiptTs;
+import io.github.ma1uta.matrix.event.nested.RequestedKeyInfo;
+import io.github.ma1uta.matrix.event.nested.Ruleset;
+import io.github.ma1uta.matrix.event.nested.TagInfo;
 import org.mapstruct.Mapping;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -139,11 +152,123 @@ public interface EventContentMapper extends CommonMapper {
     @Mapping(expression = "java(toString(jsonObject, \"status_msg\"))", target = "statusMsg")
     PresenceContent presenceContent(JsonObject jsonObject);
 
+    @Mapping(expression = "java(ruleset(jsonObject.getJsonObject(\"global\")))", target = "global")
+    PushRulesContent pushRulesContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(pushRules(jsonObject.getJsonArray(\"content\")))", target = "content")
+    @Mapping(expression = "java(pushRules(jsonObject.getJsonArray(\"override\")))", target = "override")
+    @Mapping(expression = "java(pushRules(jsonObject.getJsonArray(\"room\")))", target = "room")
+    @Mapping(expression = "java(pushRules(jsonObject.getJsonArray(\"sender\")))", target = "sender")
+    @Mapping(expression = "java(pushRules(jsonObject.getJsonArray(\"underride\")))", target = "underride")
+    Ruleset ruleset(JsonObject jsonObject);
+
+    List<PushRule> pushRules(JsonArray jsonArray);
+
+    @Mapping(expression = "java(actions(jsonObject))", target = "actions")
+    @Mapping(expression = "java(toBoolean(jsonObject, \"default\"))", target = "defaultRule")
+    @Mapping(expression = "java(toBoolean(jsonObject, \"enabled\"))", target = "enabled")
+    @Mapping(expression = "java(toString(jsonObject, \"rule_id\"))", target = "ruleId")
+    @Mapping(expression = "java(conditions(jsonObject.getJsonArray(\"conditions\")))", target = "conditions")
+    @Mapping(expression = "java(toString(jsonObject, \"pattern\"))", target = "pattern")
+    PushRule pushRule(JsonObject jsonObject);
+
+    default List<Object> actions(JsonObject jsonObject) {
+        if (isNull(jsonObject, "actions")) {
+            return null;
+        }
+
+        return jsonObject.getJsonArray("actions").stream().map(action -> {
+            switch (action.getValueType()) {
+                case STRING:
+                    return toString(action);
+                case OBJECT:
+                    return toStringMap(action.asJsonObject());
+                default:
+                    return action.toString();
+            }
+        }).collect(Collectors.toList());
+    }
+
+    List<PushCondition> conditions(JsonArray jsonArray);
+
+    @Mapping(expression = "java(toString(jsonObject, \"kind\"))", target = "kind")
+    @Mapping(expression = "java(toString(jsonObject, \"key\"))", target = "key")
+    @Mapping(expression = "java(toString(jsonObject, \"pattern\"))", target = "pattern")
+    @Mapping(expression = "java(toString(jsonObject, \"is\"))", target = "is")
+    PushCondition pushCondition(JsonObject jsonObject);
+
+    default ReceiptContent receiptContent(JsonObject jsonObject) {
+        if (isNull(jsonObject)) {
+            return null;
+        }
+
+        ReceiptContent receiptContent = new ReceiptContent();
+
+        for (Map.Entry<String, JsonValue> entry : jsonObject.entrySet()) {
+            receiptContent.put(entry.getKey(), receiptInfo(entry.getValue().asJsonObject()));
+        }
+
+        return receiptContent;
+    }
+
+    default ReceiptInfo receiptInfo(JsonObject jsonObject) {
+        if (isNull(jsonObject, "read")) {
+            return null;
+        }
+
+        ReceiptInfo receiptInfo = new ReceiptInfo();
+
+        Map<String, ReceiptTs> read = new HashMap<>();
+        for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("read").entrySet()) {
+            read.put(entry.getKey(), receiptTs(entry.getValue().asJsonObject()));
+        }
+        receiptInfo.setRead(read);
+
+        return receiptInfo;
+    }
+
+    @Mapping(expression = "java(toLong(jsonObject, \"ts\"))", target = "ts")
+    ReceiptTs receiptTs(JsonObject jsonObject);
+
     @Mapping(expression = "java(toString(jsonObject, \"algorithm\"))", target = "algorithm")
     @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
     @Mapping(expression = "java(toString(jsonObject, \"session_id\"))", target = "sessionId")
     @Mapping(expression = "java(toString(jsonObject, \"session_key\"))", target = "sessionKey")
     RoomKeyContent roomKeyContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(requestKeyInfo(jsonObject.getJsonObject(\"body\")))", target = "body")
+    @Mapping(expression = "java(toString(jsonObject, \"action\"))", target = "action")
+    @Mapping(expression = "java(toString(jsonObject, \"requesting_device_id\"))", target = "requestingDeviceId")
+    @Mapping(expression = "java(toString(jsonObject, \"request_id\"))", target = "requestId")
+    RoomKeyRequestContent roomKeyRequestContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"algorithm\"))", target = "algorithm")
+    @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
+    @Mapping(expression = "java(toString(jsonObject, \"sender_key\"))", target = "senderKey")
+    @Mapping(expression = "java(toString(jsonObject, \"session_id\"))", target = "sessionId")
+    RequestedKeyInfo requestKeyInfo(JsonObject jsonObject);
+
+    default TagContent tagContent(JsonObject jsonObject) {
+        if (isNull(jsonObject, "tags")) {
+            return null;
+        }
+
+        TagContent tagContent = new TagContent();
+
+        Map<String, TagInfo> tags = new HashMap<>();
+        for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("tags").entrySet()) {
+            tags.put(entry.getKey(), tagInfo(entry.getValue().asJsonObject()));
+        }
+        tagContent.setTags(tags);
+
+        return tagContent;
+    }
+
+    @Mapping(expression = "java(toLong(jsonObject, \"order\"))", target = "order")
+    TagInfo tagInfo(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toStringArray(jsonObject, \"user_ids\"))", target = "userIds")
+    TypingContent typingContent(JsonObject jsonObject);
 
     @Mapping(expression = "java(toString(jsonObject, \"call_id\"))", target = "callId")
     @Mapping(expression = "java(answer(jsonObject.getJsonObject(\"answer\")))", target = "answer")
@@ -159,7 +284,7 @@ public interface EventContentMapper extends CommonMapper {
     @Mapping(expression = "java(toLong(jsonObject, \"version\"))", target = "version")
     CallCandidatesContent callCandidatesContent(JsonObject jsonObject);
 
-    List<Candidate> candidates(JsonArray jsonObject);
+    List<Candidate> candidates(JsonArray jsonArray);
 
     @Mapping(expression = "java(toString(jsonObject, \"sdpMid\"))", target = "sdpMid")
     @Mapping(expression = "java(toLong(jsonObject, \"sdpMLineIndex\"))", target = "sdpMLineIndex")

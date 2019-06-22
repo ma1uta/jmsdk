@@ -30,9 +30,14 @@ import io.github.ma1uta.matrix.event.KeyVerificationMac;
 import io.github.ma1uta.matrix.event.KeyVerificationRequest;
 import io.github.ma1uta.matrix.event.KeyVerificationStart;
 import io.github.ma1uta.matrix.event.Presence;
+import io.github.ma1uta.matrix.event.PushRules;
+import io.github.ma1uta.matrix.event.Receipt;
 import io.github.ma1uta.matrix.event.RoomEvent;
 import io.github.ma1uta.matrix.event.RoomKey;
+import io.github.ma1uta.matrix.event.RoomKeyRequest;
 import io.github.ma1uta.matrix.event.StateEvent;
+import io.github.ma1uta.matrix.event.Tag;
+import io.github.ma1uta.matrix.event.Typing;
 import io.github.ma1uta.matrix.event.content.DummyContent;
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
@@ -104,14 +109,25 @@ public interface EventMapper extends EventContentMapper {
     @Mapping(expression = "java(presenceContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     Presence presence(JsonObject jsonObject);
 
-    // PushRules
+    @Mapping(expression = "java(pushRulesContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    PushRules pushRules(JsonObject jsonObject);
 
-    // Receipt
-
-    // RoomEvent
+    @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
+    @Mapping(expression = "java(receiptContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    Receipt receipt(JsonObject jsonObject);
 
     @Mapping(expression = "java(roomKeyContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     RoomKey roomKey(JsonObject jsonObject);
+
+    @Mapping(expression = "java(roomKeyRequestContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    RoomKeyRequest roomKeyRequest(JsonObject jsonObject);
+
+    @Mapping(expression = "java(tagContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    Tag tag(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
+    @Mapping(expression = "java(typingContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    Typing typing(JsonObject jsonObject);
 
     @InheritConfiguration
     @Mapping(expression = "java(callAnswerContent(jsonObject.getJsonObject(\"content\")))", target = "content")

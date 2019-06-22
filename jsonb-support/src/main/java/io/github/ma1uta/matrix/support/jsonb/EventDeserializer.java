@@ -32,8 +32,13 @@ import io.github.ma1uta.matrix.event.KeyVerificationMac;
 import io.github.ma1uta.matrix.event.KeyVerificationRequest;
 import io.github.ma1uta.matrix.event.KeyVerificationStart;
 import io.github.ma1uta.matrix.event.Presence;
+import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.RawEvent;
+import io.github.ma1uta.matrix.event.Receipt;
 import io.github.ma1uta.matrix.event.RoomKey;
+import io.github.ma1uta.matrix.event.RoomKeyRequest;
+import io.github.ma1uta.matrix.event.Tag;
+import io.github.ma1uta.matrix.event.Typing;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -87,9 +92,18 @@ public class EventDeserializer implements JsonbDeserializer<Event> {
                 return INSTANCE.keyVerificationStart(jsonObject);
             case Presence.TYPE:
                 return INSTANCE.presence(jsonObject);
-
+            case PushRules.TYPE:
+                return INSTANCE.pushRules(jsonObject);
+            case Receipt.TYPE:
+                return INSTANCE.receipt(jsonObject);
             case RoomKey.TYPE:
                 return INSTANCE.roomKey(jsonObject);
+            case RoomKeyRequest.TYPE:
+                return INSTANCE.roomKeyRequest(jsonObject);
+            case Tag.TYPE:
+                return INSTANCE.tag(jsonObject);
+            case Typing.TYPE:
+                return INSTANCE.typing(jsonObject);
             case CallCandidates.TYPE:
                 return INSTANCE.callCandidates(jsonObject);
             default:
