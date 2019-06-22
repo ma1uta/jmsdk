@@ -16,8 +16,6 @@
 
 package io.github.ma1uta.matrix.support.jsonb.mapper;
 
-import io.github.ma1uta.matrix.event.content.CallAnswerContent;
-import io.github.ma1uta.matrix.event.content.CallCandidatesContent;
 import io.github.ma1uta.matrix.event.content.DirectContent;
 import io.github.ma1uta.matrix.event.content.ForwardedRoomKeyContent;
 import io.github.ma1uta.matrix.event.content.FullyReadContent;
@@ -35,8 +33,6 @@ import io.github.ma1uta.matrix.event.content.RoomKeyContent;
 import io.github.ma1uta.matrix.event.content.RoomKeyRequestContent;
 import io.github.ma1uta.matrix.event.content.TagContent;
 import io.github.ma1uta.matrix.event.content.TypingContent;
-import io.github.ma1uta.matrix.event.nested.Answer;
-import io.github.ma1uta.matrix.event.nested.Candidate;
 import io.github.ma1uta.matrix.event.nested.PushCondition;
 import io.github.ma1uta.matrix.event.nested.PushRule;
 import io.github.ma1uta.matrix.event.nested.ReceiptInfo;
@@ -55,19 +51,17 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 
 @SuppressWarnings( {"javadocType", "javadocMethod", "javadocVariable", "LineLength"})
-public interface EventContentMapper extends CommonMapper {
-
-    Object EMPTY = new Object();
+public interface SimpleEventContentMapper extends CommonMapper {
 
     default DirectContent directContent(JsonObject jsonObject) {
-        if (jsonObject == null) {
+        if (isNull(jsonObject)) {
             return null;
         }
 
         DirectContent directContent = new DirectContent();
 
         for (Map.Entry<String, JsonValue> entry : jsonObject.entrySet()) {
-            if (entry.getValue() == null || entry.getValue().getValueType() == JsonValue.ValueType.NULL) {
+            if (isNull(entry.getValue())) {
                 continue;
             }
 
@@ -90,17 +84,19 @@ public interface EventContentMapper extends CommonMapper {
     FullyReadContent fullyReadContent(JsonObject jsonObject);
 
     default IgnoredUserListContent ignoredUserListContent(JsonObject jsonObject) {
-        if (jsonObject == null || jsonObject.getValueType() == JsonValue.ValueType.NULL) {
+        if (isNull(jsonObject)) {
             return null;
         }
 
         IgnoredUserListContent ignoredUserListContent = new IgnoredUserListContent();
 
-        Map<String, Object> ignoredUsers = new HashMap<>();
-        for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("ignored_users").entrySet()) {
-            ignoredUsers.put(entry.getKey(), EMPTY);
+        if (!isNull(jsonObject, "ignored_users")) {
+            Map<String, Object> ignoredUsers = new HashMap<>();
+            for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("ignored_users").entrySet()) {
+                ignoredUsers.put(entry.getKey(), EMPTY);
+            }
+            ignoredUserListContent.setIgnoredUsers(ignoredUsers);
         }
-        ignoredUserListContent.setIgnoredUsers(ignoredUsers);
 
         return ignoredUserListContent;
     }
@@ -212,17 +208,19 @@ public interface EventContentMapper extends CommonMapper {
     }
 
     default ReceiptInfo receiptInfo(JsonObject jsonObject) {
-        if (isNull(jsonObject, "read")) {
+        if (isNull(jsonObject)) {
             return null;
         }
 
         ReceiptInfo receiptInfo = new ReceiptInfo();
 
-        Map<String, ReceiptTs> read = new HashMap<>();
-        for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("read").entrySet()) {
-            read.put(entry.getKey(), receiptTs(entry.getValue().asJsonObject()));
+        if (!isNull(jsonObject, "read")) {
+            Map<String, ReceiptTs> read = new HashMap<>();
+            for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("read").entrySet()) {
+                read.put(entry.getKey(), receiptTs(entry.getValue().asJsonObject()));
+            }
+            receiptInfo.setRead(read);
         }
-        receiptInfo.setRead(read);
 
         return receiptInfo;
     }
@@ -249,17 +247,19 @@ public interface EventContentMapper extends CommonMapper {
     RequestedKeyInfo requestKeyInfo(JsonObject jsonObject);
 
     default TagContent tagContent(JsonObject jsonObject) {
-        if (isNull(jsonObject, "tags")) {
+        if (isNull(jsonObject)) {
             return null;
         }
 
         TagContent tagContent = new TagContent();
 
-        Map<String, TagInfo> tags = new HashMap<>();
-        for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("tags").entrySet()) {
-            tags.put(entry.getKey(), tagInfo(entry.getValue().asJsonObject()));
+        if (!isNull(jsonObject, "tags")) {
+            Map<String, TagInfo> tags = new HashMap<>();
+            for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("tags").entrySet()) {
+                tags.put(entry.getKey(), tagInfo(entry.getValue().asJsonObject()));
+            }
+            tagContent.setTags(tags);
         }
-        tagContent.setTags(tags);
 
         return tagContent;
     }
@@ -269,25 +269,4 @@ public interface EventContentMapper extends CommonMapper {
 
     @Mapping(expression = "java(toStringArray(jsonObject, \"user_ids\"))", target = "userIds")
     TypingContent typingContent(JsonObject jsonObject);
-
-    @Mapping(expression = "java(toString(jsonObject, \"call_id\"))", target = "callId")
-    @Mapping(expression = "java(answer(jsonObject.getJsonObject(\"answer\")))", target = "answer")
-    @Mapping(expression = "java(toLong(jsonObject, \"version\"))", target = "version")
-    CallAnswerContent callAnswerContent(JsonObject jsonObject);
-
-    @Mapping(expression = "java(toString(jsonObject, \"type\"))", target = "type")
-    @Mapping(expression = "java(toString(jsonObject, \"sdp\"))", target = "sdp")
-    Answer answer(JsonObject jsonObject);
-
-    @Mapping(expression = "java(toString(jsonObject, \"call_id\"))", target = "callId")
-    @Mapping(expression = "java(candidates(jsonObject.getJsonArray(\"candidates\")))", target = "candidates")
-    @Mapping(expression = "java(toLong(jsonObject, \"version\"))", target = "version")
-    CallCandidatesContent callCandidatesContent(JsonObject jsonObject);
-
-    List<Candidate> candidates(JsonArray jsonArray);
-
-    @Mapping(expression = "java(toString(jsonObject, \"sdpMid\"))", target = "sdpMid")
-    @Mapping(expression = "java(toLong(jsonObject, \"sdpMLineIndex\"))", target = "sdpMLineIndex")
-    @Mapping(expression = "java(toString(jsonObject, \"candidate\"))", target = "candidate")
-    Candidate candidate(JsonObject jsonObject);
 }

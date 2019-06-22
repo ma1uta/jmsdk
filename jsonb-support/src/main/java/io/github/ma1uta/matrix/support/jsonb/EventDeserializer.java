@@ -18,7 +18,10 @@ package io.github.ma1uta.matrix.support.jsonb;
 
 import static io.github.ma1uta.matrix.support.jsonb.mapper.EventMapper.INSTANCE;
 
+import io.github.ma1uta.matrix.event.CallAnswer;
 import io.github.ma1uta.matrix.event.CallCandidates;
+import io.github.ma1uta.matrix.event.CallHangup;
+import io.github.ma1uta.matrix.event.CallInvite;
 import io.github.ma1uta.matrix.event.Direct;
 import io.github.ma1uta.matrix.event.Dummy;
 import io.github.ma1uta.matrix.event.Event;
@@ -35,8 +38,12 @@ import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.RawEvent;
 import io.github.ma1uta.matrix.event.Receipt;
+import io.github.ma1uta.matrix.event.RoomEncrypted;
 import io.github.ma1uta.matrix.event.RoomKey;
 import io.github.ma1uta.matrix.event.RoomKeyRequest;
+import io.github.ma1uta.matrix.event.RoomMessageFeedback;
+import io.github.ma1uta.matrix.event.RoomRedaction;
+import io.github.ma1uta.matrix.event.Sticker;
 import io.github.ma1uta.matrix.event.Tag;
 import io.github.ma1uta.matrix.event.Typing;
 
@@ -104,8 +111,23 @@ public class EventDeserializer implements JsonbDeserializer<Event> {
                 return INSTANCE.tag(jsonObject);
             case Typing.TYPE:
                 return INSTANCE.typing(jsonObject);
+
+            case CallAnswer.TYPE:
+                return INSTANCE.callAnswer(jsonObject);
             case CallCandidates.TYPE:
                 return INSTANCE.callCandidates(jsonObject);
+            case CallHangup.TYPE:
+                return INSTANCE.callHangup(jsonObject);
+            case CallInvite.TYPE:
+                return INSTANCE.callInvite(jsonObject);
+            case RoomEncrypted.TYPE:
+                return INSTANCE.roomEncrypted(jsonObject);
+            case RoomMessageFeedback.TYPE:
+                return INSTANCE.roomMessageFeedback(jsonObject);
+            case RoomRedaction.TYPE:
+                return INSTANCE.roomRedaction(jsonObject);
+            case Sticker.TYPE:
+                return INSTANCE.sticker(jsonObject);
             default:
                 return parse(jsonObject);
         }

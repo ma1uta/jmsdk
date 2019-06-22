@@ -22,12 +22,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
 @SuppressWarnings( {"javadocType", "javadocMethod", "javadocVariable"})
 public interface CommonMapper {
+
+    Object EMPTY = new Object();
 
     default boolean isNull(JsonValue jsonValue) {
         return jsonValue == null || jsonValue.getValueType() == JsonValue.ValueType.NULL;
@@ -60,6 +63,14 @@ public interface CommonMapper {
         }
 
         return jsonObject.getJsonNumber(property).longValue();
+    }
+
+    default Long toLong(JsonValue jsonValue) {
+        if (isNull(jsonValue)) {
+            return null;
+        }
+
+        return ((JsonNumber) jsonValue).longValue();
     }
 
     default Boolean toBoolean(JsonObject jsonObject, String property) {
