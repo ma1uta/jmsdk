@@ -27,7 +27,11 @@ import io.github.ma1uta.matrix.event.KeyVerificationAccept;
 import io.github.ma1uta.matrix.event.KeyVerificationCancel;
 import io.github.ma1uta.matrix.event.KeyVerificationKey;
 import io.github.ma1uta.matrix.event.KeyVerificationMac;
+import io.github.ma1uta.matrix.event.KeyVerificationRequest;
+import io.github.ma1uta.matrix.event.KeyVerificationStart;
+import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.RoomEvent;
+import io.github.ma1uta.matrix.event.RoomKey;
 import io.github.ma1uta.matrix.event.StateEvent;
 import io.github.ma1uta.matrix.event.content.DummyContent;
 import org.mapstruct.InheritConfiguration;
@@ -46,14 +50,14 @@ public interface EventMapper extends EventContentMapper {
 
     EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"event_id\")))", target = "eventId")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"room_id\")))", target = "roomId")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"sender\")))", target = "sender")
-    @Mapping(expression = "java(toLong(jsonObject.getJsonNumber(\"origin_server_ts\")))", target = "originServerTs")
+    @Mapping(expression = "java(toString(jsonObject, \"event_id\"))", target = "eventId")
+    @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
+    @Mapping(expression = "java(toString(jsonObject, \"sender\"))", target = "sender")
+    @Mapping(expression = "java(toLong(jsonObject, \"origin_server_ts\"))", target = "originServerTs")
     void roomEvent(JsonObject jsonObject, @MappingTarget RoomEvent roomEvent);
 
     @InheritConfiguration
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"state_key\")))", target = "stateKey")
+    @Mapping(expression = "java(toString(jsonObject, \"state_key\"))", target = "stateKey")
     void stateEvent(JsonObject jsonObject, @MappingTarget StateEvent stateEvent);
 
     @Mapping(expression = "java(directContent(jsonObject.getJsonObject(\"content\")))", target = "content")
@@ -71,7 +75,7 @@ public interface EventMapper extends EventContentMapper {
     @Mapping(expression = "java(forwardedRoomKeyContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     ForwardedRoomKey forwardedRoomKey(JsonObject jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"room_id\")))", target = "roomId")
+    @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
     @Mapping(expression = "java(fullyReadContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     FullyRead fullyRead(JsonObject jsonObject);
 
@@ -89,6 +93,25 @@ public interface EventMapper extends EventContentMapper {
 
     @Mapping(expression = "java(keyVerificationMacContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     KeyVerificationMac keyVerificationMac(JsonObject jsonObject);
+
+    @Mapping(expression = "java(keyVerificationRequestContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    KeyVerificationRequest keyVerificationRequest(JsonObject jsonObject);
+
+    @Mapping(expression = "java(keyVerificationStartContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    KeyVerificationStart keyVerificationStart(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"sender\"))", target = "sender")
+    @Mapping(expression = "java(presenceContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    Presence presence(JsonObject jsonObject);
+
+    // PushRules
+
+    // Receipt
+
+    // RoomEvent
+
+    @Mapping(expression = "java(roomKeyContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    RoomKey roomKey(JsonObject jsonObject);
 
     @InheritConfiguration
     @Mapping(expression = "java(callAnswerContent(jsonObject.getJsonObject(\"content\")))", target = "content")

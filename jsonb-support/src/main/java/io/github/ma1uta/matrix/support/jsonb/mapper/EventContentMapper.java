@@ -26,6 +26,10 @@ import io.github.ma1uta.matrix.event.content.KeyVerificationAcceptContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationCancelContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationKeyContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationMacContent;
+import io.github.ma1uta.matrix.event.content.KeyVerificationRequestContent;
+import io.github.ma1uta.matrix.event.content.KeyVerificationStartContent;
+import io.github.ma1uta.matrix.event.content.PresenceContent;
+import io.github.ma1uta.matrix.event.content.RoomKeyContent;
 import io.github.ma1uta.matrix.event.nested.Answer;
 import io.github.ma1uta.matrix.event.nested.Candidate;
 import org.mapstruct.Mapping;
@@ -60,16 +64,16 @@ public interface EventContentMapper extends CommonMapper {
         return directContent;
     }
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"algorithm\")))", target = "algorithm")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"room_id\")))", target = "roomId")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"sender_key\")))", target = "senderKey")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"session_id\")))", target = "sessionId")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"session_key\")))", target = "sessionKey")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"sender_claimed_ed25519_key\")))", target = "senderClaimedEd25519Key")
-    @Mapping(expression = "java(toStringArray(jsonObject.getJsonArray(\"forwarding_curve25519_key_chain\")))", target = "forwardingCurve25519KeyChain")
+    @Mapping(expression = "java(toString(jsonObject, \"algorithm\"))", target = "algorithm")
+    @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
+    @Mapping(expression = "java(toString(jsonObject, \"sender_key\"))", target = "senderKey")
+    @Mapping(expression = "java(toString(jsonObject, \"session_id\"))", target = "sessionId")
+    @Mapping(expression = "java(toString(jsonObject, \"session_key\"))", target = "sessionKey")
+    @Mapping(expression = "java(toString(jsonObject, \"sender_claimed_ed25519_key\"))", target = "senderClaimedEd25519Key")
+    @Mapping(expression = "java(toStringArray(jsonObject, \"forwarding_curve25519_key_chain\"))", target = "forwardingCurve25519KeyChain")
     ForwardedRoomKeyContent forwardedRoomKeyContent(JsonObject jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"event_id\")))", target = "eventId")
+    @Mapping(expression = "java(toString(jsonObject, \"event_id\"))", target = "eventId")
     FullyReadContent fullyReadContent(JsonObject jsonObject);
 
     default IgnoredUserListContent ignoredUserListContent(JsonObject jsonObject) {
@@ -88,47 +92,77 @@ public interface EventContentMapper extends CommonMapper {
         return ignoredUserListContent;
     }
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"transaction_id\")))", target = "transactionId")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"method\")))", target = "method")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"key_agreement_protocol\")))", target = "keyAgreementProtocol")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"hash\")))", target = "hash")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"message_authentication_code\")))", target = "messageAuthenticationCode")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"short_authentication_string\")))", target = "shortAuthenticationString")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"commitment\")))", target = "commitment")
+    @Mapping(expression = "java(toString(jsonObject, \"transaction_id\"))", target = "transactionId")
+    @Mapping(expression = "java(toString(jsonObject, \"method\"))", target = "method")
+    @Mapping(expression = "java(toString(jsonObject, \"key_agreement_protocol\"))", target = "keyAgreementProtocol")
+    @Mapping(expression = "java(toString(jsonObject, \"hash\"))", target = "hash")
+    @Mapping(expression = "java(toString(jsonObject, \"message_authentication_code\"))", target = "messageAuthenticationCode")
+    @Mapping(expression = "java(toString(jsonObject, \"short_authentication_string\"))", target = "shortAuthenticationString")
+    @Mapping(expression = "java(toString(jsonObject, \"commitment\"))", target = "commitment")
     KeyVerificationAcceptContent keyVerificationAcceptContent(JsonObject jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"transaction_id\")))", target = "transactionId")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"reason\")))", target = "reason")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"code\")))", target = "code")
+    @Mapping(expression = "java(toString(jsonObject, \"transaction_id\"))", target = "transactionId")
+    @Mapping(expression = "java(toString(jsonObject, \"reason\"))", target = "reason")
+    @Mapping(expression = "java(toString(jsonObject, \"code\"))", target = "code")
     KeyVerificationCancelContent keyVerificationCancelContent(JsonObject jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"transaction_id\")))", target = "transactionId")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"key\")))", target = "key")
+    @Mapping(expression = "java(toString(jsonObject, \"transaction_id\"))", target = "transactionId")
+    @Mapping(expression = "java(toString(jsonObject, \"key\"))", target = "key")
     KeyVerificationKeyContent keyVerificationKeyContent(JsonObject jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"transaction_id\")))", target = "transactionId")
-    @Mapping(expression = "java(toStringMap(jsonObject.getJsonObject(\"mac\")))", target = "mac")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"keys\")))", target = "keys")
+    @Mapping(expression = "java(toString(jsonObject, \"transaction_id\"))", target = "transactionId")
+    @Mapping(expression = "java(toStringMap(jsonObject, \"mac\"))", target = "mac")
+    @Mapping(expression = "java(toString(jsonObject, \"keys\"))", target = "keys")
     KeyVerificationMacContent keyVerificationMacContent(JsonObject jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"call_id\")))", target = "callId")
+    @Mapping(expression = "java(toString(jsonObject, \"from_device\"))", target = "fromDevice")
+    @Mapping(expression = "java(toString(jsonObject, \"transaction_id\"))", target = "transactionId")
+    @Mapping(expression = "java(toStringArray(jsonObject, \"methods\"))", target = "methods")
+    @Mapping(expression = "java(toLong(jsonObject, \"timestamp\"))", target = "timestamp")
+    KeyVerificationRequestContent keyVerificationRequestContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"from_device\"))", target = "fromDevice")
+    @Mapping(expression = "java(toString(jsonObject, \"transaction_id\"))", target = "transactionId")
+    @Mapping(expression = "java(toString(jsonObject, \"method\"))", target = "method")
+    @Mapping(expression = "java(toString(jsonObject, \"next_method\"))", target = "nextMethod")
+    @Mapping(expression = "java(toStringArray(jsonObject, \"key_agreement_protocol\"))", target = "keyAgreementProtocol")
+    @Mapping(expression = "java(toStringArray(jsonObject, \"hashes\"))", target = "hashes")
+    @Mapping(expression = "java(toStringArray(jsonObject, \"message_authentication_codes\"))", target = "messageAuthenticationCodes")
+    @Mapping(expression = "java(toStringArray(jsonObject, \"short_authentication_string\"))", target = "shortAuthenticationString")
+    KeyVerificationStartContent keyVerificationStartContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"avatar_url\"))", target = "avatarUrl")
+    @Mapping(expression = "java(toString(jsonObject, \"displayname\"))", target = "displayName")
+    @Mapping(expression = "java(toLong(jsonObject, \"last_active_ago\"))", target = "lastActiveAgo")
+    @Mapping(expression = "java(toString(jsonObject, \"presence\"))", target = "presence")
+    @Mapping(expression = "java(toBoolean(jsonObject, \"currently_active\"))", target = "currentlyActive")
+    @Mapping(expression = "java(toString(jsonObject, \"status_msg\"))", target = "statusMsg")
+    PresenceContent presenceContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"algorithm\"))", target = "algorithm")
+    @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
+    @Mapping(expression = "java(toString(jsonObject, \"session_id\"))", target = "sessionId")
+    @Mapping(expression = "java(toString(jsonObject, \"session_key\"))", target = "sessionKey")
+    RoomKeyContent roomKeyContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"call_id\"))", target = "callId")
     @Mapping(expression = "java(answer(jsonObject.getJsonObject(\"answer\")))", target = "answer")
-    @Mapping(expression = "java(toLong(jsonObject.getJsonNumber(\"version\")))", target = "version")
+    @Mapping(expression = "java(toLong(jsonObject, \"version\"))", target = "version")
     CallAnswerContent callAnswerContent(JsonObject jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"type\")))", target = "type")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"sdp\")))", target = "sdp")
+    @Mapping(expression = "java(toString(jsonObject, \"type\"))", target = "type")
+    @Mapping(expression = "java(toString(jsonObject, \"sdp\"))", target = "sdp")
     Answer answer(JsonObject jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"call_id\")))", target = "callId")
+    @Mapping(expression = "java(toString(jsonObject, \"call_id\"))", target = "callId")
     @Mapping(expression = "java(candidates(jsonObject.getJsonArray(\"candidates\")))", target = "candidates")
-    @Mapping(expression = "java(toLong(jsonObject.getJsonNumber(\"version\")))", target = "version")
+    @Mapping(expression = "java(toLong(jsonObject, \"version\"))", target = "version")
     CallCandidatesContent callCandidatesContent(JsonObject jsonObject);
 
     List<Candidate> candidates(JsonArray jsonObject);
 
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"sdpMid\")))", target = "sdpMid")
-    @Mapping(expression = "java(toLong(jsonObject.getJsonNumber(\"sdpMLineIndex\")))", target = "sdpMLineIndex")
-    @Mapping(expression = "java(toString(jsonObject.getJsonString(\"candidate\")))", target = "candidate")
+    @Mapping(expression = "java(toString(jsonObject, \"sdpMid\"))", target = "sdpMid")
+    @Mapping(expression = "java(toLong(jsonObject, \"sdpMLineIndex\"))", target = "sdpMLineIndex")
+    @Mapping(expression = "java(toString(jsonObject, \"candidate\"))", target = "candidate")
     Candidate candidate(JsonObject jsonObject);
 }

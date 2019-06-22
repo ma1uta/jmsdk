@@ -26,7 +26,14 @@ import io.github.ma1uta.matrix.event.ForwardedRoomKey;
 import io.github.ma1uta.matrix.event.FullyRead;
 import io.github.ma1uta.matrix.event.IgnoredUserList;
 import io.github.ma1uta.matrix.event.KeyVerificationAccept;
+import io.github.ma1uta.matrix.event.KeyVerificationCancel;
+import io.github.ma1uta.matrix.event.KeyVerificationKey;
+import io.github.ma1uta.matrix.event.KeyVerificationMac;
+import io.github.ma1uta.matrix.event.KeyVerificationRequest;
+import io.github.ma1uta.matrix.event.KeyVerificationStart;
+import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.RawEvent;
+import io.github.ma1uta.matrix.event.RoomKey;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -68,6 +75,21 @@ public class EventDeserializer implements JsonbDeserializer<Event> {
                 return INSTANCE.ignoredUserList(jsonObject);
             case KeyVerificationAccept.TYPE:
                 return INSTANCE.keyVerificationAccept(jsonObject);
+            case KeyVerificationCancel.TYPE:
+                return INSTANCE.keyVerificationCancel(jsonObject);
+            case KeyVerificationKey.TYPE:
+                return INSTANCE.keyVerificationKey(jsonObject);
+            case KeyVerificationMac.TYPE:
+                return INSTANCE.keyVerificationMac(jsonObject);
+            case KeyVerificationRequest.TYPE:
+                return INSTANCE.keyVerificationRequest(jsonObject);
+            case KeyVerificationStart.TYPE:
+                return INSTANCE.keyVerificationStart(jsonObject);
+            case Presence.TYPE:
+                return INSTANCE.presence(jsonObject);
+
+            case RoomKey.TYPE:
+                return INSTANCE.roomKey(jsonObject);
             case CallCandidates.TYPE:
                 return INSTANCE.callCandidates(jsonObject);
             default:

@@ -22,13 +22,27 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
-import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
 @SuppressWarnings( {"javadocType", "javadocMethod", "javadocVariable"})
 public interface CommonMapper {
+
+    default boolean isNull(JsonObject jsonObject, String property) {
+        return jsonObject == null
+            || jsonObject.getValueType() == JsonValue.ValueType.NULL
+            || jsonObject.get(property) == null
+            || jsonObject.isNull(property);
+    }
+
+    default String toString(JsonObject jsonObject, String property) {
+        if (isNull(jsonObject, property)) {
+            return null;
+        }
+
+        return jsonObject.getString(property);
+    }
 
     default String toString(JsonValue jsonValue) {
         if (jsonValue == null || jsonValue.getValueType() == JsonValue.ValueType.NULL) {
@@ -37,11 +51,20 @@ public interface CommonMapper {
         return ((JsonString) jsonValue).getString();
     }
 
-    default Long toLong(JsonValue jsonValue) {
-        if (jsonValue == null || jsonValue.getValueType() == JsonValue.ValueType.NULL) {
+    default Long toLong(JsonObject jsonObject, String property) {
+        if (isNull(jsonObject, property)) {
             return null;
         }
-        return ((JsonNumber) jsonValue).numberValue().longValue();
+
+        return jsonObject.getJsonNumber(property).longValue();
+    }
+
+    default Boolean toBoolean(JsonObject jsonObject, String property) {
+        if (isNull(jsonObject, property)) {
+            return null;
+        }
+
+        return jsonObject.getBoolean(property) ? Boolean.TRUE : Boolean.FALSE;
     }
 
     default JsonObject toObject(JsonValue jsonValue) {
@@ -51,6 +74,13 @@ public interface CommonMapper {
         return jsonValue.asJsonObject();
     }
 
+    default List<String> toStringArray(JsonObject jsonObject, String property) {
+        if (isNull(jsonObject, property)) {
+            return null;
+        }
+        return jsonObject.getJsonArray(property).stream().filter(Objects::nonNull).map(this::toString).collect(Collectors.toList());
+    }
+
     default List<String> toStringArray(JsonArray jsonArray) {
         if (jsonArray == null || jsonArray.getValueType() == JsonValue.ValueType.NULL) {
             return null;
@@ -58,14 +88,14 @@ public interface CommonMapper {
         return jsonArray.stream().filter(Objects::nonNull).map(this::toString).collect(Collectors.toList());
     }
 
-    default Map<String, String> toStringMap(JsonObject jsonObject) {
-        if (jsonObject == null || jsonObject.getValueType() == JsonValue.ValueType.NULL) {
+    default Map<String, String> toStringMap(JsonObject jsonObject, String property) {
+        if (isNull(jsonObject, property)) {
             return null;
         }
 
         Map<String, String> map = new HashMap<>();
 
-        for (Map.Entry<String, JsonValue> entry : jsonObject.entrySet()) {
+        for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject(property).entrySet()) {
             map.put(entry.getKey(), toString(entry.getValue()));
         }
 
