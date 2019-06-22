@@ -262,10 +262,9 @@
                             <version>${version.lib.asm}</version>
                         </dependency>
                     </dependencies>
-                    <!--configuration>
-                        <forkCount>0</forkCount>
-                        <argLine--><!--add-modules java.xml.bind --><!--illegal-access=permit</argLine>
-                    </configuration-->
+                    <configuration>
+                        <argLine>--illegal-access=permit</argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -349,10 +348,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <!-- https://bugs.openjdk.java.net/browse/JDK-8212233 -->
-                    <failOnError>false</failOnError>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -455,8 +450,7 @@
             </build>
         </profile>
 
-        <!-- java 9+ was disabled due to https://bugs.openjdk.java.net/browse/JDK-8210483 -->
-        <!--profile>
+        <profile>
             <id>jdk9+</id>
             <activation>
                 <jdk>[9,)</jdk>
@@ -474,18 +468,18 @@
                             <executions>
                                 <execution>
                                     <id>default-compile</id>
-                                    <configuration-->
+                                    <configuration>
                                         <!-- compile everything to ensure module-info contains right entries -->
-                                        <!--release>9</release>
+                                        <release>9</release>
                                     </configuration>
                                 </execution>
                                 <execution>
                                     <id>base-compile</id>
                                     <goals>
                                         <goal>compile</goal>
-                                    </goals-->
+                                    </goals>
                                     <!-- recompile everything for target VM except the module-info.java -->
-                                    <!--configuration>
+                                    <configuration>
                                         <excludes>
                                             <exclude>module-info.java</exclude>
                                         </excludes>
@@ -500,23 +494,22 @@
                             </configuration>
                         </plugin>
                         <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-surefire-plugin</artifactId>
                             <configuration>
-                                <forkCount>0</forkCount>
-                                <argLine--><!--add-modules java.xml.bind --><!--illegal-access=permit</argLine>
+                                <argLine>--illegal-access=permit</argLine>
                             </configuration>
                         </plugin>
                     </plugins>
                 </pluginManagement>
             </build>
 
-        </profile-->
+        </profile>
 
         <profile>
             <id>jdk8-</id>
             <activation>
-                <!--jdk>(,9)</jdk-->
-                <activeByDefault>true</activeByDefault>
+                <jdk>(,9)</jdk>
             </activation>
             <properties>
                 <packaging.type>bundle</packaging.type>

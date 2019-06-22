@@ -28,7 +28,7 @@
     <version>0.9.0-SNAPSHOT</version>
 
     <properties>
-        <version.lib.common-api>0.9.0-SNAPSHOT</version.lib.common-api>
+        <version.lib.common-api>0.9.0</version.lib.common-api>
     </properties>
 
     <dependencies>

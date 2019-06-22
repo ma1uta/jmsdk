@@ -29,7 +29,7 @@
     <version>0.9.0-SNAPSHOT</version>
 
     <properties>
-        <version.lib.client-api>0.9.0-SNAPSHOT</version.lib.client-api>
+        <version.lib.client-api>0.9.0</version.lib.client-api>
         <version.lib.common-impl>0.9.0-SNAPSHOT</version.lib.common-impl>
     </properties>
 
