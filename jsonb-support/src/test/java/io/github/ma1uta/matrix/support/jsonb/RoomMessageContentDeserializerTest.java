@@ -16,25 +16,30 @@
 
 package io.github.ma1uta.matrix.support.jsonb;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.ma1uta.matrix.event.CallCandidates;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomName;
 import io.github.ma1uta.matrix.event.RoomTopic;
+import io.github.ma1uta.matrix.event.content.CallCandidatesContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.content.RoomNameContent;
 import io.github.ma1uta.matrix.event.content.RoomTopicContent;
 import io.github.ma1uta.matrix.event.message.Notice;
 import io.github.ma1uta.matrix.event.message.RawMessageContent;
 import io.github.ma1uta.matrix.event.message.Text;
+import io.github.ma1uta.matrix.event.nested.Candidate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.Arrays;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
@@ -125,5 +130,32 @@ public class RoomMessageContentDeserializerTest {
         assertEquals(content.getClass(), prevContent.getClass());
         assertEquals(newContent, content.getTopic());
         assertEquals(oldContent, prevContent.getTopic());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "{\"sender\":\"name\",\"type\":\"m.call.candidates\",\"content\":{\"candidates\":[{\"candidate\":\"candidate_1\",\"sdpMid\":\"sdpMin_1\",\"sdpMLineIndex\":1},{\"candidate\":\"candidate_2\",\"sdpMid\":\"sdpMin-2\",\"sdpMLineIndex\":2}]}}",
+    }, delimiter = ';')
+    public void callCandidates(String eventArg) throws Exception {
+        Event event = mapper.fromJson(eventArg, Event.class);
+
+        assertEquals(CallCandidates.class, event.getClass());
+        CallCandidates callCandidates = (CallCandidates) event;
+
+        assertEquals("name", callCandidates.getSender());
+        CallCandidatesContent content = callCandidates.getContent();
+        assertNotNull(content);
+
+        assertEquals(2, content.getCandidates().size());
+
+        Candidate candidate = content.getCandidates().get(0);
+        assertEquals("candidate_1", candidate.getCandidate());
+        assertEquals("sdpMin_1", candidate.getSdpMid());
+        assertEquals(1L, candidate.getSdpMLineIndex());
+
+        candidate = content.getCandidates().get(1);
+        assertEquals("candidate_2", candidate.getCandidate());
+        assertEquals("sdpMin-2", candidate.getSdpMid());
+        assertEquals(2L, candidate.getSdpMLineIndex());
     }
 }
