@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.support.jsonb.mapper;
 
+import io.github.ma1uta.matrix.Signed;
 import io.github.ma1uta.matrix.event.CallAnswer;
 import io.github.ma1uta.matrix.event.CallCandidates;
 import io.github.ma1uta.matrix.event.CallHangup;
@@ -48,9 +49,17 @@ import io.github.ma1uta.matrix.event.RoomHistoryVisibility;
 import io.github.ma1uta.matrix.event.RoomJoinRules;
 import io.github.ma1uta.matrix.event.RoomKey;
 import io.github.ma1uta.matrix.event.RoomKeyRequest;
+import io.github.ma1uta.matrix.event.RoomMember;
 import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.RoomMessageFeedback;
+import io.github.ma1uta.matrix.event.RoomName;
+import io.github.ma1uta.matrix.event.RoomPinned;
+import io.github.ma1uta.matrix.event.RoomPowerLevels;
 import io.github.ma1uta.matrix.event.RoomRedaction;
+import io.github.ma1uta.matrix.event.RoomServerAcl;
+import io.github.ma1uta.matrix.event.RoomThirdPartyInvite;
+import io.github.ma1uta.matrix.event.RoomTombstone;
+import io.github.ma1uta.matrix.event.RoomTopic;
 import io.github.ma1uta.matrix.event.StateEvent;
 import io.github.ma1uta.matrix.event.Sticker;
 import io.github.ma1uta.matrix.event.Tag;
@@ -62,6 +71,7 @@ import io.github.ma1uta.matrix.event.content.CallHangupContent;
 import io.github.ma1uta.matrix.event.content.CallInviteContent;
 import io.github.ma1uta.matrix.event.content.DirectContent;
 import io.github.ma1uta.matrix.event.content.DummyContent;
+import io.github.ma1uta.matrix.event.content.EventContent;
 import io.github.ma1uta.matrix.event.content.ForwardedRoomKeyContent;
 import io.github.ma1uta.matrix.event.content.FullyReadContent;
 import io.github.ma1uta.matrix.event.content.IgnoredUserListContent;
@@ -73,6 +83,7 @@ import io.github.ma1uta.matrix.event.content.KeyVerificationRequestContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationStartContent;
 import io.github.ma1uta.matrix.event.content.PresenceContent;
 import io.github.ma1uta.matrix.event.content.PushRulesContent;
+import io.github.ma1uta.matrix.event.content.RawEventContent;
 import io.github.ma1uta.matrix.event.content.ReceiptContent;
 import io.github.ma1uta.matrix.event.content.RoomAliasesContent;
 import io.github.ma1uta.matrix.event.content.RoomAvatarContent;
@@ -88,9 +99,16 @@ import io.github.ma1uta.matrix.event.content.RoomKeyRequestContent;
 import io.github.ma1uta.matrix.event.content.RoomMemberContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageFeedbackContent;
+import io.github.ma1uta.matrix.event.content.RoomNameContent;
+import io.github.ma1uta.matrix.event.content.RoomPinnedContent;
+import io.github.ma1uta.matrix.event.content.RoomPowerLevelsContent;
 import io.github.ma1uta.matrix.event.content.RoomRedactionContent;
+import io.github.ma1uta.matrix.event.content.RoomServerAclContent;
+import io.github.ma1uta.matrix.event.content.RoomThirdPartyInviteContent;
+import io.github.ma1uta.matrix.event.content.RoomTopicContent;
 import io.github.ma1uta.matrix.event.content.StickerContent;
 import io.github.ma1uta.matrix.event.content.TagContent;
+import io.github.ma1uta.matrix.event.content.TombstoneContent;
 import io.github.ma1uta.matrix.event.content.TypingContent;
 import io.github.ma1uta.matrix.event.encrypted.MegolmEncryptedContent;
 import io.github.ma1uta.matrix.event.encrypted.OlmEncryptedContent;
@@ -113,10 +131,13 @@ import io.github.ma1uta.matrix.event.nested.CiphertextInfo;
 import io.github.ma1uta.matrix.event.nested.EncryptedFile;
 import io.github.ma1uta.matrix.event.nested.FileInfo;
 import io.github.ma1uta.matrix.event.nested.ImageInfo;
+import io.github.ma1uta.matrix.event.nested.Invite;
 import io.github.ma1uta.matrix.event.nested.JWK;
 import io.github.ma1uta.matrix.event.nested.LocationInfo;
+import io.github.ma1uta.matrix.event.nested.NotificationPowerLevel;
 import io.github.ma1uta.matrix.event.nested.Offer;
 import io.github.ma1uta.matrix.event.nested.PreviousRoom;
+import io.github.ma1uta.matrix.event.nested.PublicKeys;
 import io.github.ma1uta.matrix.event.nested.PushCondition;
 import io.github.ma1uta.matrix.event.nested.PushRule;
 import io.github.ma1uta.matrix.event.nested.ReceiptInfo;
@@ -155,6 +176,10 @@ public interface EventMapper {
     Util UTIL = new Util();
 
     default Event deserialize(JsonObject jsonObject) {
+        if (isNull(jsonObject)) {
+            return null;
+        }
+
         if (jsonObject.get("type") == null || jsonObject.isNull("type")) {
             return UTIL.parse(jsonObject);
         }
@@ -234,11 +259,123 @@ public interface EventMapper {
                 return roomHistoryVisibility(jsonObject);
             case RoomJoinRules.TYPE:
                 return roomJoinRules(jsonObject);
+            case RoomMember.TYPE:
+                return roomMember(jsonObject);
+            case RoomName.TYPE:
+                return roomName(jsonObject);
+            case RoomPinned.TYPE:
+                return roomPinned(jsonObject);
+            case RoomPowerLevels.TYPE:
+                return roomPowerLevels(jsonObject);
+            case RoomServerAcl.TYPE:
+                return roomServerAcl(jsonObject);
+            case RoomThirdPartyInvite.TYPE:
+                return roomThirdPartyInvite(jsonObject);
+            case RoomTombstone.TYPE:
+                return roomTombstone(jsonObject);
+            case RoomTopic.TYPE:
+                return roomTopic(jsonObject);
 
             default:
                 return UTIL.parse(jsonObject);
         }
+    }
 
+    @SuppressWarnings("unchecked")
+    default <T extends EventContent> T deserializeEventContent(JsonObject jsonObject, String type) {
+        switch (type) {
+            case Direct.TYPE:
+                return (T) directContent(jsonObject);
+            case Dummy.TYPE:
+                return (T) new DummyContent();
+            case ForwardedRoomKey.TYPE:
+                return (T) forwardedRoomKeyContent(jsonObject);
+            case FullyRead.TYPE:
+                return (T) fullyReadContent(jsonObject);
+            case IgnoredUserList.TYPE:
+                return (T) ignoredUserListContent(jsonObject);
+            case KeyVerificationAccept.TYPE:
+                return (T) keyVerificationAcceptContent(jsonObject);
+            case KeyVerificationCancel.TYPE:
+                return (T) keyVerificationCancelContent(jsonObject);
+            case KeyVerificationKey.TYPE:
+                return (T) keyVerificationKeyContent(jsonObject);
+            case KeyVerificationMac.TYPE:
+                return (T) keyVerificationMacContent(jsonObject);
+            case KeyVerificationRequest.TYPE:
+                return (T) keyVerificationRequestContent(jsonObject);
+            case KeyVerificationStart.TYPE:
+                return (T) keyVerificationStartContent(jsonObject);
+            case Presence.TYPE:
+                return (T) presenceContent(jsonObject);
+            case PushRules.TYPE:
+                return (T) pushRulesContent(jsonObject);
+            case Receipt.TYPE:
+                return (T) receiptContent(jsonObject);
+            case RoomKey.TYPE:
+                return (T) roomKeyContent(jsonObject);
+            case RoomKeyRequest.TYPE:
+                return (T) roomKeyRequestContent(jsonObject);
+            case Tag.TYPE:
+                return (T) tagContent(jsonObject);
+            case Typing.TYPE:
+                return (T) typingContent(jsonObject);
+
+            case CallAnswer.TYPE:
+                return (T) callAnswerContent(jsonObject);
+            case CallCandidates.TYPE:
+                return (T) callCandidatesContent(jsonObject);
+            case CallHangup.TYPE:
+                return (T) callHangupContent(jsonObject);
+            case CallInvite.TYPE:
+                return (T) callInviteContent(jsonObject);
+            case RoomEncrypted.TYPE:
+                return (T) roomEncryptedContent(jsonObject);
+            case RoomMessage.TYPE:
+                return (T) roomMessageContent(jsonObject);
+            case RoomMessageFeedback.TYPE:
+                return (T) roomMessageFeedbackContent(jsonObject);
+            case RoomRedaction.TYPE:
+                return (T) roomRedactionContent(jsonObject);
+            case Sticker.TYPE:
+                return (T) stickerContent(jsonObject);
+
+            case RoomAliases.TYPE:
+                return (T) roomAliasesContent(jsonObject);
+            case RoomAvatar.TYPE:
+                return (T) roomAvatarContent(jsonObject);
+            case RoomCanonicalAlias.TYPE:
+                return (T) roomCanonicalAliasContent(jsonObject);
+            case RoomCreate.TYPE:
+                return (T) roomCreateContent(jsonObject);
+            case RoomEncryption.TYPE:
+                return (T) roomEncryptionContent(jsonObject);
+            case RoomGuestAccess.TYPE:
+                return (T) roomGuestAccessContent(jsonObject);
+            case RoomHistoryVisibility.TYPE:
+                return (T) roomHistoryVisibilityContent(jsonObject);
+            case RoomJoinRules.TYPE:
+                return (T) roomJoinRulesContent(jsonObject);
+            case RoomMember.TYPE:
+                return (T) roomMemberContent(jsonObject);
+            case RoomName.TYPE:
+                return (T) roomNameContent(jsonObject);
+            case RoomPinned.TYPE:
+                return (T) roomPinnedContent(jsonObject);
+            case RoomPowerLevels.TYPE:
+                return (T) roomPowerLevelsContent(jsonObject);
+            case RoomServerAcl.TYPE:
+                return (T) roomServerAclContent(jsonObject);
+            case RoomThirdPartyInvite.TYPE:
+                return (T) roomThirdPartyInviteContent(jsonObject);
+            case RoomTombstone.TYPE:
+                return (T) tombstoneContent(jsonObject);
+            case RoomTopic.TYPE:
+                return (T) roomTopicContent(jsonObject);
+
+            default:
+                return (T) new RawEventContent(toRawMap(jsonObject));
+        }
     }
 
     class Util {
@@ -304,6 +441,7 @@ public interface EventMapper {
         if (isNull(jsonValue)) {
             return null;
         }
+
         return ((JsonString) jsonValue).getString();
     }
 
@@ -312,7 +450,7 @@ public interface EventMapper {
             return null;
         }
 
-        return jsonObject.getJsonNumber(property).longValue();
+        return toLong(jsonObject.getJsonNumber(property));
     }
 
     default Long toLong(JsonValue jsonValue) {
@@ -321,6 +459,22 @@ public interface EventMapper {
         }
 
         return ((JsonNumber) jsonValue).longValue();
+    }
+
+    default Byte toByte(JsonObject jsonObject, String property) {
+        if (isNull(jsonObject, property)) {
+            return null;
+        }
+
+        return toByte(jsonObject.getJsonNumber(property));
+    }
+
+    default Byte toByte(JsonValue jsonValue) {
+        if (isNull(jsonValue)) {
+            return null;
+        }
+
+        return (byte) ((JsonNumber) jsonValue).intValue();
     }
 
     default Boolean toBoolean(JsonObject jsonObject, String property) {
@@ -342,6 +496,7 @@ public interface EventMapper {
         if (isNull(jsonObject, property)) {
             return null;
         }
+
         return toStringArray(jsonObject.getJsonArray(property));
     }
 
@@ -349,6 +504,7 @@ public interface EventMapper {
         if (isNull(jsonArray)) {
             return null;
         }
+
         return jsonArray.stream().filter(Objects::nonNull).map(this::toString).collect(Collectors.toList());
     }
 
@@ -372,6 +528,18 @@ public interface EventMapper {
         }
 
         return toStringMap(jsonObject.getJsonObject(property));
+    }
+
+    default Map<String, Byte> toStringByteMap(JsonObject jsonObject, String property) {
+        if (isNull(jsonObject, property)) {
+            return null;
+        }
+
+        Map<String, Byte> map = new HashMap<>();
+        for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject(property).entrySet()) {
+            map.put(entry.getKey(), toByte(entry.getValue()));
+        }
+        return map;
     }
 
     default Map<String, Object> toRawMap(JsonObject jsonObject) {
@@ -457,9 +625,37 @@ public interface EventMapper {
     @Mapping(expression = "java(toString(jsonObject, \"room_id\"))", target = "roomId")
     @Mapping(expression = "java(toString(jsonObject, \"sender\"))", target = "sender")
     @Mapping(expression = "java(toLong(jsonObject, \"origin_server_ts\"))", target = "originServerTs")
+    @Mapping(expression = "java(unsigned(jsonObject))", target = "unsigned")
     void roomEvent(JsonObject jsonObject, @MappingTarget RoomEvent roomEvent);
 
-    Unsigned unsigned(JsonObject jsonObject);
+    default Unsigned unsigned(JsonObject jsonObject) {
+        if (isNull(jsonObject, "unsigned")) {
+            return null;
+        }
+
+        return unsigned(jsonObject.getJsonObject("unsigned"), jsonObject.getString("type"));
+    }
+
+    default Unsigned unsigned(JsonObject jsonObject, String type) {
+        Unsigned<EventContent> unsigned = new Unsigned<>();
+
+        unsigned.setAge(toLong(jsonObject, "age"));
+        unsigned.setRedactedBecause(deserialize(jsonObject.getJsonObject("redacted_because")));
+        unsigned.setTransactionId(toString(jsonObject, "transaction_id"));
+        unsigned.setPrevContent(deserializeEventContent(jsonObject.getJsonObject("prev_content"), type));
+
+        if (!isNull(jsonObject, "invite_room_state")) {
+            unsigned.setInviteRoomState(
+                jsonObject.getJsonArray("invite_room_state").stream()
+                    .map(JsonValue::asJsonObject)
+                    .map(this::deserialize)
+                    .collect(Collectors.toList())
+            );
+        }
+
+        return unsigned;
+
+    }
 
     @InheritConfiguration
     @Mapping(expression = "java(callAnswerContent(jsonObject.getJsonObject(\"content\")))", target = "content")
@@ -543,6 +739,45 @@ public interface EventMapper {
     @Mapping(expression = "java(roomJoinRulesContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
     RoomJoinRules roomJoinRules(JsonObject jsonObject);
 
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(roomMemberContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    @Mapping(expression = "java(roomMemberContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
+    RoomMember roomMember(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(roomNameContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    @Mapping(expression = "java(roomNameContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
+    RoomName roomName(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(roomPinnedContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    @Mapping(expression = "java(roomPinnedContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
+    RoomPinned roomPinned(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(roomPowerLevelsContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    @Mapping(expression = "java(roomPowerLevelsContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
+    RoomPowerLevels roomPowerLevels(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(roomServerAclContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    @Mapping(expression = "java(roomServerAclContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
+    RoomServerAcl roomServerAcl(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(roomThirdPartyInviteContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    @Mapping(expression = "java(roomThirdPartyInviteContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
+    RoomThirdPartyInvite roomThirdPartyInvite(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(tombstoneContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    @Mapping(expression = "java(tombstoneContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
+    RoomTombstone roomTombstone(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(roomTopicContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    @Mapping(expression = "java(roomTopicContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
+    RoomTopic roomTopic(JsonObject jsonObject);
 
     // Event contents.
 
@@ -762,6 +997,7 @@ public interface EventMapper {
 
     @Mapping(expression = "java(toStringArray(jsonObject, \"user_ids\"))", target = "userIds")
     TypingContent typingContent(JsonObject jsonObject);
+
 
     // Room event contents.
 
@@ -1051,6 +1287,78 @@ public interface EventMapper {
     @Mapping(expression = "java(toString(jsonObject, \"join_rule\"))", target = "joinRule")
     RoomJoinRulesContent roomJoinRulesContent(JsonObject jsonObject);
 
+    @Mapping(expression = "java(toString(jsonObject, \"avatar_url\"))", target = "avatarUrl")
+    @Mapping(expression = "java(toString(jsonObject, \"displayname\"))", target = "displayName")
+    @Mapping(expression = "java(toString(jsonObject, \"membership\"))", target = "membership")
+    @Mapping(expression = "java(toBoolean(jsonObject, \"is_direct\"))", target = "direct")
+    @Mapping(expression = "java(invite(jsonObject.getJsonObject(\"third_party_invite\")))", target = "thirdPartyInvite")
+    @Mapping(expression = "java(unsigned(jsonObject.getJsonObject(\"third_party_invite\"), \"m.room.member\"))", target = "unsigned")
     RoomMemberContent roomMemberContent(JsonObject jsonObject);
 
+    @Mapping(expression = "java(toString(jsonObject, \"display_name\"))", target = "displayName")
+    @Mapping(expression = "java(signed(jsonObject.getJsonObject(\"signed\")))", target = "signed")
+    Invite invite(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"mxid\"))", target = "mxid")
+    @Mapping(expression = "java(toString(jsonObject, \"token\"))", target = "token")
+    @Mapping(expression = "java(signatures(jsonObject.getJsonObject(\"signatures\")))", target = "signatures")
+    Signed signed(JsonObject jsonObject);
+
+    default Map<String, Map<String, String>> signatures(JsonObject jsonObject) {
+        if (isNull(jsonObject)) {
+            return null;
+        }
+
+        Map<String, Map<String, String>> signatures = new HashMap<>();
+        for (Map.Entry<String, JsonValue> entry : jsonObject.entrySet()) {
+            signatures.put(entry.getKey(), toStringMap(entry.getValue().asJsonObject()));
+        }
+
+        return signatures;
+    }
+
+    @Mapping(expression = "java(toString(jsonObject, \"name\"))", target = "name")
+    RoomNameContent roomNameContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toStringArray(jsonObject, \"pinned\"))", target = "pinned")
+    RoomPinnedContent roomPinnedContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toByte(jsonObject, \"ban\"))", target = "ban")
+    @Mapping(expression = "java(toStringByteMap(jsonObject, \"events\"))", target = "events")
+    @Mapping(expression = "java(toByte(jsonObject, \"events_default\"))", target = "eventsDefault")
+    @Mapping(expression = "java(toByte(jsonObject, \"invite\"))", target = "invite")
+    @Mapping(expression = "java(toByte(jsonObject, \"kick\"))", target = "kick")
+    @Mapping(expression = "java(toByte(jsonObject, \"redact\"))", target = "redact")
+    @Mapping(expression = "java(toByte(jsonObject, \"state_default\"))", target = "stateDefault")
+    @Mapping(expression = "java(toStringByteMap(jsonObject, \"users\"))", target = "users")
+    @Mapping(expression = "java(toByte(jsonObject, \"users_default\"))", target = "usersDefault")
+    @Mapping(expression = "java(notificationPowerLevel(jsonObject.getJsonObject(\"notifications\")))", target = "notifications")
+    RoomPowerLevelsContent roomPowerLevelsContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toByte(jsonObject, \"room\"))", target = "room")
+    NotificationPowerLevel notificationPowerLevel(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toBoolean(jsonObject, \"allow_ip_literals\"))", target = "allowIpLiterals")
+    @Mapping(expression = "java(toStringArray(jsonObject, \"allow\"))", target = "allow")
+    @Mapping(expression = "java(toStringArray(jsonObject, \"deny\"))", target = "deny")
+    RoomServerAclContent roomServerAclContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"display_name\"))", target = "displayName")
+    @Mapping(expression = "java(toString(jsonObject, \"key_validity_url\"))", target = "keyValidityUrl")
+    @Mapping(expression = "java(toString(jsonObject, \"public_key\"))", target = "publicKey")
+    @Mapping(expression = "java(publicKeysArray(jsonObject.getJsonArray(\"public_keys\")))", target = "publicKeys")
+    RoomThirdPartyInviteContent roomThirdPartyInviteContent(JsonObject jsonObject);
+
+    List<PublicKeys> publicKeysArray(JsonArray jsonArray);
+
+    @Mapping(expression = "java(toString(jsonObject, \"key_validity_url\"))", target = "keyValidityUrl")
+    @Mapping(expression = "java(toString(jsonObject, \"public_key\"))", target = "publicKey")
+    PublicKeys publicKeys(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"body\"))", target = "body")
+    @Mapping(expression = "java(toString(jsonObject, \"replacement_room\"))", target = "replacementRoom")
+    TombstoneContent tombstoneContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"topic\"))", target = "topic")
+    RoomTopicContent roomTopicContent(JsonObject jsonObject);
 }

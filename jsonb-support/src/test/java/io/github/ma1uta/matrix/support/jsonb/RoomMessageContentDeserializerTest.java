@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.support.jsonb;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Arrays;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
@@ -53,7 +51,8 @@ public class RoomMessageContentDeserializerTest {
     public void before() {
         mapper = JsonbBuilder.create(
             new JsonbConfig().withDeserializers(
-                new EventDeserializer()
+                new EventDeserializer(),
+                new RoomMessageContentDeserializer()
             ).withPropertyOrderStrategy(PropertyOrderStrategy.LEXICOGRAPHICAL)
         );
     }
