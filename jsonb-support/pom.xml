@@ -107,6 +107,14 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <configLocation>config/checkstyle/checkstyle.xml</configLocation>
+                    <excludes>**/module-info.java,**/EventMapperImpl.java</excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
