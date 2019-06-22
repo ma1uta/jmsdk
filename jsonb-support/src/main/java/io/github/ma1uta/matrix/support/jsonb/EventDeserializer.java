@@ -38,7 +38,15 @@ import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.RawEvent;
 import io.github.ma1uta.matrix.event.Receipt;
+import io.github.ma1uta.matrix.event.RoomAliases;
+import io.github.ma1uta.matrix.event.RoomAvatar;
+import io.github.ma1uta.matrix.event.RoomCanonicalAlias;
+import io.github.ma1uta.matrix.event.RoomCreate;
 import io.github.ma1uta.matrix.event.RoomEncrypted;
+import io.github.ma1uta.matrix.event.RoomEncryption;
+import io.github.ma1uta.matrix.event.RoomGuestAccess;
+import io.github.ma1uta.matrix.event.RoomHistoryVisibility;
+import io.github.ma1uta.matrix.event.RoomJoinRules;
 import io.github.ma1uta.matrix.event.RoomKey;
 import io.github.ma1uta.matrix.event.RoomKeyRequest;
 import io.github.ma1uta.matrix.event.RoomMessage;
@@ -131,6 +139,24 @@ public class EventDeserializer implements JsonbDeserializer<Event> {
                 return INSTANCE.roomRedaction(jsonObject);
             case Sticker.TYPE:
                 return INSTANCE.sticker(jsonObject);
+
+            case RoomAliases.TYPE:
+                return INSTANCE.roomAliases(jsonObject);
+            case RoomAvatar.TYPE:
+                return INSTANCE.roomAvatar(jsonObject);
+            case RoomCanonicalAlias.TYPE:
+                return INSTANCE.roomCanonicalAlias(jsonObject);
+            case RoomCreate.TYPE:
+                return INSTANCE.roomCreate(jsonObject);
+            case RoomEncryption.TYPE:
+                return INSTANCE.roomEncryption(jsonObject);
+            case RoomGuestAccess.TYPE:
+                return INSTANCE.roomGuestAccess(jsonObject);
+            case RoomHistoryVisibility.TYPE:
+                return INSTANCE.roomHistoryVisibility(jsonObject);
+            case RoomJoinRules.TYPE:
+                return INSTANCE.roomJoinRules(jsonObject);
+
             default:
                 return parse(jsonObject);
         }

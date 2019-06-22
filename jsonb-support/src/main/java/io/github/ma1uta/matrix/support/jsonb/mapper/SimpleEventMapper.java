@@ -32,22 +32,15 @@ import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.Receipt;
 import io.github.ma1uta.matrix.event.RoomKey;
 import io.github.ma1uta.matrix.event.RoomKeyRequest;
-import io.github.ma1uta.matrix.event.StateEvent;
 import io.github.ma1uta.matrix.event.Tag;
 import io.github.ma1uta.matrix.event.Typing;
 import io.github.ma1uta.matrix.event.content.DummyContent;
-import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 import javax.json.JsonObject;
 
 @SuppressWarnings( {"javadocType", "javadocMethod", "javadocVariable"})
-public interface SimpleEventMapper extends RoomEventContentMapper {
-
-    @InheritConfiguration
-    @Mapping(expression = "java(toString(jsonObject, \"state_key\"))", target = "stateKey")
-    void stateEvent(JsonObject jsonObject, @MappingTarget StateEvent stateEvent);
+public interface SimpleEventMapper extends StateEventContentMapper {
 
     @Mapping(expression = "java(directContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     Direct direct(JsonObject jsonObject);

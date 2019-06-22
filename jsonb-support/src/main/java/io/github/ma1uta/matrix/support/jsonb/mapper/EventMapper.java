@@ -24,7 +24,7 @@ import javax.json.JsonValue;
 
 @SuppressWarnings( {"javadocType", "javadocMethod", "javadocVariable", "InterfaceIsType"})
 @Mapper(unmappedSourcePolicy = ReportingPolicy.IGNORE, imports = JsonValue.class)
-public interface EventMapper extends RoomEventMapper {
+public interface EventMapper extends StateEventMapper {
 
     EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
 
