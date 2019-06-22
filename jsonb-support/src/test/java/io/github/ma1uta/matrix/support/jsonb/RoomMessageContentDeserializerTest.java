@@ -53,9 +53,7 @@ public class RoomMessageContentDeserializerTest {
     public void before() {
         mapper = JsonbBuilder.create(
             new JsonbConfig().withDeserializers(
-                new RoomEncryptedContentDeserializer(),
-                new EventDeserializer(),
-                new RoomMessageDeserializer()
+                new EventDeserializer()
             ).withPropertyOrderStrategy(PropertyOrderStrategy.LEXICOGRAPHICAL)
         );
     }

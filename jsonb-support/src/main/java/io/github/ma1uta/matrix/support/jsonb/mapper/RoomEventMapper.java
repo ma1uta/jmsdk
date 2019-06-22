@@ -22,6 +22,7 @@ import io.github.ma1uta.matrix.event.CallHangup;
 import io.github.ma1uta.matrix.event.CallInvite;
 import io.github.ma1uta.matrix.event.RoomEncrypted;
 import io.github.ma1uta.matrix.event.RoomEvent;
+import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.RoomMessageFeedback;
 import io.github.ma1uta.matrix.event.RoomRedaction;
 import io.github.ma1uta.matrix.event.Sticker;
@@ -59,6 +60,10 @@ public interface RoomEventMapper extends SimpleEventMapper {
     @InheritConfiguration
     @Mapping(expression = "java(roomEncryptedContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     RoomEncrypted roomEncrypted(JsonObject jsonObject);
+
+    @InheritConfiguration
+    @Mapping(expression = "java(roomMessageContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    RoomMessage roomMessage(JsonObject jsonObject);
 
     @Mapping(expression = "java(roomMessageFeedbackContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     RoomMessageFeedback roomMessageFeedback(JsonObject jsonObject);

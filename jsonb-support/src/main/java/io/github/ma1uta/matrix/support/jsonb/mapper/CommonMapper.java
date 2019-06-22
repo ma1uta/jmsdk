@@ -123,4 +123,33 @@ public interface CommonMapper {
 
         return toStringMap(jsonObject.getJsonObject(property));
     }
+
+    default Map<String, Object> toRawMap(JsonObject jsonObject) {
+        Map<String, Object> map = new HashMap<>();
+        for (Map.Entry<String, JsonValue> entry : jsonObject.entrySet()) {
+            JsonValue value = entry.getValue();
+            Object param = null;
+            if (value != null) {
+                switch (value.getValueType()) {
+                    case STRING:
+                        param = toString(value);
+                        break;
+                    case NUMBER:
+                        param = toLong(value);
+                        break;
+                    case TRUE:
+                        param = Boolean.TRUE;
+                        break;
+                    case FALSE:
+                        param = Boolean.FALSE;
+                        break;
+                    default:
+                        param = value.toString();
+                }
+            }
+            map.put(entry.getKey(), param);
+        }
+        return map;
+    }
+
 }

@@ -21,23 +21,41 @@ import io.github.ma1uta.matrix.event.content.CallCandidatesContent;
 import io.github.ma1uta.matrix.event.content.CallHangupContent;
 import io.github.ma1uta.matrix.event.content.CallInviteContent;
 import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
+import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageFeedbackContent;
 import io.github.ma1uta.matrix.event.content.RoomRedactionContent;
 import io.github.ma1uta.matrix.event.content.StickerContent;
 import io.github.ma1uta.matrix.event.encrypted.MegolmEncryptedContent;
 import io.github.ma1uta.matrix.event.encrypted.OlmEncryptedContent;
 import io.github.ma1uta.matrix.event.encrypted.RawEncryptedContent;
+import io.github.ma1uta.matrix.event.message.Audio;
+import io.github.ma1uta.matrix.event.message.Emote;
+import io.github.ma1uta.matrix.event.message.File;
+import io.github.ma1uta.matrix.event.message.FormattedBody;
+import io.github.ma1uta.matrix.event.message.Image;
+import io.github.ma1uta.matrix.event.message.Location;
+import io.github.ma1uta.matrix.event.message.Notice;
+import io.github.ma1uta.matrix.event.message.RawMessageContent;
+import io.github.ma1uta.matrix.event.message.ServerNotice;
+import io.github.ma1uta.matrix.event.message.Text;
+import io.github.ma1uta.matrix.event.message.Video;
 import io.github.ma1uta.matrix.event.nested.Answer;
+import io.github.ma1uta.matrix.event.nested.AudioInfo;
 import io.github.ma1uta.matrix.event.nested.Candidate;
 import io.github.ma1uta.matrix.event.nested.CiphertextInfo;
 import io.github.ma1uta.matrix.event.nested.EncryptedFile;
 import io.github.ma1uta.matrix.event.nested.FileInfo;
 import io.github.ma1uta.matrix.event.nested.ImageInfo;
 import io.github.ma1uta.matrix.event.nested.JWK;
+import io.github.ma1uta.matrix.event.nested.LocationInfo;
 import io.github.ma1uta.matrix.event.nested.Offer;
+import io.github.ma1uta.matrix.event.nested.Relates;
+import io.github.ma1uta.matrix.event.nested.Reply;
 import io.github.ma1uta.matrix.event.nested.ThumbnailInfo;
+import io.github.ma1uta.matrix.event.nested.VideoInfo;
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.HashMap;
 import java.util.List;
@@ -128,36 +146,131 @@ public interface RoomEventContentMapper extends SimpleEventContentMapper {
     MegolmEncryptedContent megolmEncryptedContent(JsonObject jsonObject);
 
     default RawEncryptedContent rawEncryptedContent(JsonObject jsonObject, String algorithhm) {
-        Map<String, Object> content = new HashMap<>();
-        for (Map.Entry<String, JsonValue> entry : jsonObject.entrySet()) {
-            JsonValue value = entry.getValue();
-            Object param = null;
-            if (value != null) {
-                switch (value.getValueType()) {
-                    case STRING:
-                        param = toString(value);
-                        break;
-                    case NUMBER:
-                        param = toLong(value);
-                        break;
-                    case TRUE:
-                        param = Boolean.TRUE;
-                        break;
-                    case FALSE:
-                        param = Boolean.FALSE;
-                        break;
-                    default:
-                        param = value.toString();
-                }
-            }
-            content.put(entry.getKey(), param);
-        }
-        return new RawEncryptedContent(content, algorithhm);
+        return new RawEncryptedContent(toRawMap(jsonObject), algorithhm);
     }
 
     @Mapping(expression = "java(toString(jsonObject, \"body\"))", target = "body")
     @Mapping(expression = "java(toLong(jsonObject, \"type\"))", target = "type")
     CiphertextInfo ciphertextInfo(JsonObject jsonObject);
+
+    default RoomMessageContent roomMessageContent(JsonObject jsonObject) {
+        if (isNull(jsonObject)) {
+            return null;
+        }
+
+        RoomMessageContent roomMessageContent;
+
+        if (isNull(jsonObject, "msgtype")) {
+            return rawMessageContent(jsonObject, null);
+        }
+
+        String msgtype = jsonObject.getString("msgtype");
+        switch (msgtype) {
+            case Audio.MSGTYPE:
+                roomMessageContent = audio(jsonObject);
+                break;
+            case Emote.MSGTYPE:
+                roomMessageContent = emote(jsonObject);
+                break;
+            case File.MSGTYPE:
+                roomMessageContent = file(jsonObject);
+                break;
+            case Image.MSGTYPE:
+                roomMessageContent = image(jsonObject);
+                break;
+            case Location.MSGTYPE:
+                roomMessageContent = location(jsonObject);
+                break;
+            case Notice.MSGTYPE:
+                roomMessageContent = notice(jsonObject);
+                break;
+            case ServerNotice.MSGTYPE:
+                roomMessageContent = serverNotice(jsonObject);
+                break;
+            case Text.MSGTYPE:
+                roomMessageContent = text(jsonObject);
+                break;
+            case Video.MSGTYPE:
+                roomMessageContent = video(jsonObject);
+                break;
+            default:
+                roomMessageContent = rawMessageContent(jsonObject, msgtype);
+        }
+
+        roomMessageContent.setBody(toString(jsonObject, "body"));
+        roomMessageContent.setRelatesTo(relates(jsonObject));
+
+        return roomMessageContent;
+    }
+
+    default RawMessageContent rawMessageContent(JsonObject jsonObject, String msgtype) {
+        return new RawMessageContent(toRawMap(jsonObject), msgtype);
+    }
+
+    @Mapping(expression = "java(toString(jsonObject, \"format\"))", target = "format")
+    @Mapping(expression = "java(toString(jsonObject, \"formatted_body\"))", target = "formattedBody")
+    void formattedBody(JsonObject jsonObject, @MappingTarget FormattedBody formattedBody);
+
+    @Mapping(expression = "java(audioInfo(jsonObject.getJsonObject(\"duration\")))", target = "info")
+    @Mapping(expression = "java(toString(jsonObject, \"url\"))", target = "url")
+    @Mapping(expression = "java(encryptedFile(jsonObject.getJsonObject(\"file\")))", target = "file")
+    Audio audio(JsonObject jsonObject);
+
+    @InheritConfiguration
+    Emote emote(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"filename\"))", target = "filename")
+    @Mapping(expression = "java(fileInfo(jsonObject.getJsonObject(\"info\")))", target = "info")
+    @Mapping(expression = "java(toString(jsonObject, \"url\"))", target = "url")
+    @Mapping(expression = "java(encryptedFile(jsonObject.getJsonObject(\"file\")))", target = "file")
+    File file(JsonObject jsonObject);
+
+    @Mapping(expression = "java(imageInfo(jsonObject.getJsonObject(\"info\")))", target = "info")
+    @Mapping(expression = "java(toString(jsonObject, \"url\"))", target = "url")
+    @Mapping(expression = "java(encryptedFile(jsonObject.getJsonObject(\"file\")))", target = "file")
+    Image image(JsonObject jsonObject);
+
+    @Mapping(expression = "java(locationInfo(jsonObject.getJsonObject(\"info\")))", target = "info")
+    @Mapping(expression = "java(toString(jsonObject, \"geo_uri\"))", target = "geoUri")
+    Location location(JsonObject jsonObject);
+
+    @InheritConfiguration
+    Notice notice(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"server_notice_type\"))", target = "serverNoticeType")
+    @Mapping(expression = "java(toString(jsonObject, \"admin_contact\"))", target = "adminContact")
+    @Mapping(expression = "java(toString(jsonObject, \"limit_type\"))", target = "limitType")
+    ServerNotice serverNotice(JsonObject jsonObject);
+
+    @InheritConfiguration
+    Text text(JsonObject jsonObject);
+
+    @Mapping(expression = "java(videoInfo(jsonObject.getJsonObject(\"info\")))", target = "info")
+    @Mapping(expression = "java(toString(jsonObject, \"url\"))", target = "url")
+    @Mapping(expression = "java(encryptedFile(jsonObject.getJsonObject(\"file\")))", target = "file")
+    Video video(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toLong(jsonObject, \"duration\"))", target = "duration")
+    @Mapping(expression = "java(toString(jsonObject, \"mimetype\"))", target = "mimetype")
+    @Mapping(expression = "java(toLong(jsonObject, \"size\"))", target = "size")
+    AudioInfo audioInfo(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"thumbnail_url\"))", target = "thumbnailUrl")
+    @Mapping(expression = "java(encryptedFile(jsonObject.getJsonObject(\"thumbnail_file\")))", target = "thumbnailFile")
+    @Mapping(expression = "java(thumbnailInfo(jsonObject.getJsonObject(\"thumbnail_info\")))", target = "thumbnailInfo")
+    LocationInfo locationInfo(JsonObject jsonObject);
+
+    @InheritConfiguration
+    @Mapping(expression = "java(toLong(jsonObject, \"h\"))", target = "height")
+    @Mapping(expression = "java(toLong(jsonObject, \"w\"))", target = "width")
+    @Mapping(expression = "java(toLong(jsonObject, \"duration\"))", target = "duration")
+    VideoInfo videoInfo(JsonObject jsonObject);
+
+    @Mapping(expression = "java(reply(jsonObject.getJsonObject(\"m.in_reply_to\")))", target = "inReplyTo")
+    Relates relates(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"event_id\"))", target = "eventId")
+    Reply reply(JsonObject jsonObject);
 
     @Mapping(expression = "java(toString(jsonObject, \"target_event_id\"))", target = "targetEventId")
     @Mapping(expression = "java(toString(jsonObject, \"type\"))", target = "type")

@@ -41,6 +41,7 @@ import io.github.ma1uta.matrix.event.Receipt;
 import io.github.ma1uta.matrix.event.RoomEncrypted;
 import io.github.ma1uta.matrix.event.RoomKey;
 import io.github.ma1uta.matrix.event.RoomKeyRequest;
+import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.RoomMessageFeedback;
 import io.github.ma1uta.matrix.event.RoomRedaction;
 import io.github.ma1uta.matrix.event.Sticker;
@@ -122,6 +123,8 @@ public class EventDeserializer implements JsonbDeserializer<Event> {
                 return INSTANCE.callInvite(jsonObject);
             case RoomEncrypted.TYPE:
                 return INSTANCE.roomEncrypted(jsonObject);
+            case RoomMessage.TYPE:
+                return INSTANCE.roomMessage(jsonObject);
             case RoomMessageFeedback.TYPE:
                 return INSTANCE.roomMessageFeedback(jsonObject);
             case RoomRedaction.TYPE:
