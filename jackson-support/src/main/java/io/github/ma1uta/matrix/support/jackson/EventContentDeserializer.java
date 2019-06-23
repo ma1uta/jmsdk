@@ -22,9 +22,16 @@ import io.github.ma1uta.matrix.event.CallCandidates;
 import io.github.ma1uta.matrix.event.CallHangup;
 import io.github.ma1uta.matrix.event.CallInvite;
 import io.github.ma1uta.matrix.event.Direct;
+import io.github.ma1uta.matrix.event.Dummy;
 import io.github.ma1uta.matrix.event.ForwardedRoomKey;
 import io.github.ma1uta.matrix.event.FullyRead;
 import io.github.ma1uta.matrix.event.IgnoredUserList;
+import io.github.ma1uta.matrix.event.KeyVerificationAccept;
+import io.github.ma1uta.matrix.event.KeyVerificationCancel;
+import io.github.ma1uta.matrix.event.KeyVerificationKey;
+import io.github.ma1uta.matrix.event.KeyVerificationMac;
+import io.github.ma1uta.matrix.event.KeyVerificationRequest;
+import io.github.ma1uta.matrix.event.KeyVerificationStart;
 import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.Receipt;
@@ -48,6 +55,7 @@ import io.github.ma1uta.matrix.event.RoomPowerLevels;
 import io.github.ma1uta.matrix.event.RoomRedaction;
 import io.github.ma1uta.matrix.event.RoomServerAcl;
 import io.github.ma1uta.matrix.event.RoomThirdPartyInvite;
+import io.github.ma1uta.matrix.event.RoomTombstone;
 import io.github.ma1uta.matrix.event.RoomTopic;
 import io.github.ma1uta.matrix.event.Sticker;
 import io.github.ma1uta.matrix.event.Tag;
@@ -57,10 +65,17 @@ import io.github.ma1uta.matrix.event.content.CallCandidatesContent;
 import io.github.ma1uta.matrix.event.content.CallHangupContent;
 import io.github.ma1uta.matrix.event.content.CallInviteContent;
 import io.github.ma1uta.matrix.event.content.DirectContent;
+import io.github.ma1uta.matrix.event.content.DummyContent;
 import io.github.ma1uta.matrix.event.content.EventContent;
 import io.github.ma1uta.matrix.event.content.ForwardedRoomKeyContent;
 import io.github.ma1uta.matrix.event.content.FullyReadContent;
 import io.github.ma1uta.matrix.event.content.IgnoredUserListContent;
+import io.github.ma1uta.matrix.event.content.KeyVerificationAcceptContent;
+import io.github.ma1uta.matrix.event.content.KeyVerificationCancelContent;
+import io.github.ma1uta.matrix.event.content.KeyVerificationKeyContent;
+import io.github.ma1uta.matrix.event.content.KeyVerificationMacContent;
+import io.github.ma1uta.matrix.event.content.KeyVerificationRequestContent;
+import io.github.ma1uta.matrix.event.content.KeyVerificationStartContent;
 import io.github.ma1uta.matrix.event.content.PresenceContent;
 import io.github.ma1uta.matrix.event.content.PushRulesContent;
 import io.github.ma1uta.matrix.event.content.RawEventContent;
@@ -88,6 +103,7 @@ import io.github.ma1uta.matrix.event.content.RoomThirdPartyInviteContent;
 import io.github.ma1uta.matrix.event.content.RoomTopicContent;
 import io.github.ma1uta.matrix.event.content.StickerContent;
 import io.github.ma1uta.matrix.event.content.TagContent;
+import io.github.ma1uta.matrix.event.content.TombstoneContent;
 import io.github.ma1uta.matrix.event.content.TypingContent;
 
 import java.io.IOException;
@@ -119,14 +135,30 @@ public class EventContentDeserializer {
                 return mapper.readValue(content, CallInviteContent.class);
             case Direct.TYPE:
                 return mapper.readValue(content, DirectContent.class);
+            case Dummy.TYPE:
+                return mapper.readValue(content, DummyContent.class);
             case ForwardedRoomKey.TYPE:
                 return mapper.readValue(content, ForwardedRoomKeyContent.class);
             case FullyRead.TYPE:
                 return mapper.readValue(content, FullyReadContent.class);
             case IgnoredUserList.TYPE:
                 return mapper.readValue(content, IgnoredUserListContent.class);
+            case KeyVerificationAccept.TYPE:
+                return mapper.readValue(content, KeyVerificationAcceptContent.class);
+            case KeyVerificationCancel.TYPE:
+                return mapper.readValue(content, KeyVerificationCancelContent.class);
+            case KeyVerificationKey.TYPE:
+                return mapper.readValue(content, KeyVerificationKeyContent.class);
+            case KeyVerificationMac.TYPE:
+                return mapper.readValue(content, KeyVerificationMacContent.class);
+            case KeyVerificationRequest.TYPE:
+                return mapper.readValue(content, KeyVerificationRequestContent.class);
+            case KeyVerificationStart.TYPE:
+                return mapper.readValue(content, KeyVerificationStartContent.class);
             case Presence.TYPE:
                 return mapper.readValue(content, PresenceContent.class);
+            case PushRules.TYPE:
+                return mapper.readValue(content, PushRulesContent.class);
             case Receipt.TYPE:
                 return mapper.readValue(content, ReceiptContent.class);
             case RoomAliases.TYPE:
@@ -175,10 +207,10 @@ public class EventContentDeserializer {
                 return mapper.readValue(content, TagContent.class);
             case Typing.TYPE:
                 return mapper.readValue(content, TypingContent.class);
+            case RoomTombstone.TYPE:
+                return mapper.readValue(content, TombstoneContent.class);
             case RoomServerAcl.TYPE:
                 return mapper.readValue(content, RoomServerAclContent.class);
-            case PushRules.TYPE:
-                return mapper.readValue(content, PushRulesContent.class);
             default:
                 return parse(content, mapper);
         }

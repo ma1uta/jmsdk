@@ -27,10 +27,17 @@ import io.github.ma1uta.matrix.event.CallCandidates;
 import io.github.ma1uta.matrix.event.CallHangup;
 import io.github.ma1uta.matrix.event.CallInvite;
 import io.github.ma1uta.matrix.event.Direct;
+import io.github.ma1uta.matrix.event.Dummy;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.ForwardedRoomKey;
 import io.github.ma1uta.matrix.event.FullyRead;
 import io.github.ma1uta.matrix.event.IgnoredUserList;
+import io.github.ma1uta.matrix.event.KeyVerificationAccept;
+import io.github.ma1uta.matrix.event.KeyVerificationCancel;
+import io.github.ma1uta.matrix.event.KeyVerificationKey;
+import io.github.ma1uta.matrix.event.KeyVerificationMac;
+import io.github.ma1uta.matrix.event.KeyVerificationRequest;
+import io.github.ma1uta.matrix.event.KeyVerificationStart;
 import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.RawEvent;
@@ -55,6 +62,7 @@ import io.github.ma1uta.matrix.event.RoomPowerLevels;
 import io.github.ma1uta.matrix.event.RoomRedaction;
 import io.github.ma1uta.matrix.event.RoomServerAcl;
 import io.github.ma1uta.matrix.event.RoomThirdPartyInvite;
+import io.github.ma1uta.matrix.event.RoomTombstone;
 import io.github.ma1uta.matrix.event.RoomTopic;
 import io.github.ma1uta.matrix.event.Sticker;
 import io.github.ma1uta.matrix.event.Tag;
@@ -149,6 +157,22 @@ public class EventDeserializer extends JsonDeserializer<Event> {
                 return codec.treeToValue(node, RoomServerAcl.class);
             case PushRules.TYPE:
                 return codec.treeToValue(node, PushRules.class);
+            case RoomTombstone.TYPE:
+                return codec.treeToValue(node, RoomTombstone.class);
+            case Dummy.TYPE:
+                return codec.treeToValue(node, Dummy.class);
+            case KeyVerificationAccept.TYPE:
+                return codec.treeToValue(node, KeyVerificationAccept.class);
+            case KeyVerificationCancel.TYPE:
+                return codec.treeToValue(node, KeyVerificationCancel.class);
+            case KeyVerificationKey.TYPE:
+                return codec.treeToValue(node, KeyVerificationKey.class);
+            case KeyVerificationMac.TYPE:
+                return codec.treeToValue(node, KeyVerificationMac.class);
+            case KeyVerificationRequest.TYPE:
+                return codec.treeToValue(node, KeyVerificationRequest.class);
+            case KeyVerificationStart.TYPE:
+                return codec.treeToValue(node, KeyVerificationStart.class);
             default:
                 return parse(node, codec, ctxt, type.asText());
         }

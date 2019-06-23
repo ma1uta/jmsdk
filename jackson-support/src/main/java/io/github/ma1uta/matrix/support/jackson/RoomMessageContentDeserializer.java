@@ -29,6 +29,7 @@ import io.github.ma1uta.matrix.event.message.Image;
 import io.github.ma1uta.matrix.event.message.Location;
 import io.github.ma1uta.matrix.event.message.Notice;
 import io.github.ma1uta.matrix.event.message.RawMessageContent;
+import io.github.ma1uta.matrix.event.message.ServerNotice;
 import io.github.ma1uta.matrix.event.message.Text;
 import io.github.ma1uta.matrix.event.message.Video;
 
@@ -70,6 +71,8 @@ public class RoomMessageContentDeserializer extends JsonDeserializer<RoomMessage
                 return codec.treeToValue(node, Text.class);
             case Video.MSGTYPE:
                 return codec.treeToValue(node, Video.class);
+            case ServerNotice.MSGTYPE:
+                return codec.treeToValue(node, ServerNotice.class);
             default:
                 return parse(node, ctxt, codec, msgtype);
         }
