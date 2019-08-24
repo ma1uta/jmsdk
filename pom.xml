@@ -96,7 +96,7 @@
         <version.lib.jersey.hk2>2.28</version.lib.jersey.hk2>
         <version.lib.jersey-media-json-jackson>2.28</version.lib.jersey-media-json-jackson>
         <version.lib.jackson-jaxrs-json-provider>2.9.9</version.lib.jackson-jaxrs-json-provider>
-        <version.lib.microprofile>2.2</version.lib.microprofile>
+        <version.lib.microprofile>3.0</version.lib.microprofile>
 
         <!-- compatibility -->
         <version.lib.jakarta.activation-api>1.2.1</version.lib.jakarta.activation-api>
@@ -542,5 +542,6 @@
         <module>jackson-support</module>
         <module>jsonb-support</module>
         <module>client-jaxrs</module>
+        <module>rest-client</module>
     </modules>
 </project>
