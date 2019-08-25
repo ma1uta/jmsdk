@@ -35,6 +35,7 @@
         <version.lib.jackson-core>2.9.9</version.lib.jackson-core>
         <version.lib.wiremock>2.24.1</version.lib.wiremock>
         <version.lib.handlebars>4.0.7</version.lib.handlebars>
+        <version.lib.jakarta.activation-api>1.2.1</version.lib.jakarta.activation-api>
     </properties>
 
     <dependencies>
@@ -191,6 +192,12 @@
             <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>${version.lib.jakarta.activation-api}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -201,14 +208,6 @@
                     <instructions>
                         <Automatic-Module-Name>matrix.client.jaxrs</Automatic-Module-Name>
                     </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>--illegal-access=permit</argLine>
-<!--                    <argLine>&#45;&#45;illegal-access=permit &#45;&#45;add-modules java.xml.bind,java.ws.rs</argLine>-->
                 </configuration>
             </plugin>
         </plugins>
