@@ -17,9 +17,6 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.RoomApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.room.CreateRoomRequest;
 import io.github.ma1uta.matrix.client.model.room.InviteRequest;
 import io.github.ma1uta.matrix.client.model.room.JoinRequest;
@@ -30,8 +27,11 @@ import io.github.ma1uta.matrix.client.model.room.PublicRoomsRequest;
 import io.github.ma1uta.matrix.client.model.room.PublicRoomsResponse;
 import io.github.ma1uta.matrix.client.model.room.ReplacementRoom;
 import io.github.ma1uta.matrix.client.model.room.RoomId;
+import io.github.ma1uta.matrix.client.model.room.RoomResolveResponse;
 import io.github.ma1uta.matrix.client.model.room.RoomVisibility;
 import io.github.ma1uta.matrix.client.model.room.UnbanRequest;
+import io.github.ma1uta.matrix.client.rest.RoomApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,10 +40,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Room api.
  */
-public class RoomMethods extends AbstractMethods {
+public class RoomMethods {
 
-    public RoomMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final RoomApi roomApi;
+
+    public RoomMethods(RestClientBuilder restClientBuilder) {
+        this.roomApi = restClientBuilder.build(RoomApi.class);
     }
 
     /**
@@ -53,7 +55,7 @@ public class RoomMethods extends AbstractMethods {
      * @return Information about the newly created room.
      */
     public CompletableFuture<RoomId> create(CreateRoomRequest request) {
-        return factory().post(RoomApi.class, "create", defaults(), request, RoomId.class);
+        return roomApi.create(request).toCompletableFuture();
     }
 
     /**
@@ -67,8 +69,7 @@ public class RoomMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(alias, "Alias cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomAlias", alias);
-        return factory().put(RoomApi.class, "createAlias", params, roomId, EmptyResponse.class);
+        return roomApi.createAlias(alias, roomId).toCompletableFuture();
     }
 
     /**
@@ -77,11 +78,10 @@ public class RoomMethods extends AbstractMethods {
      * @param alias The room alias.
      * @return The room ID and other information for this alias.
      */
-    public CompletableFuture<RoomId> resolveAlias(String alias) {
+    public CompletableFuture<RoomResolveResponse> resolveAlias(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomAlias", alias);
-        return factory().get(RoomApi.class, "resolveAlias", params, RoomId.class);
+        return roomApi.resolveAlias(alias).toCompletableFuture();
     }
 
     /**
@@ -93,8 +93,7 @@ public class RoomMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> delete(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomAlias", alias);
-        return factory().delete(RoomApi.class, "deleteAlias", params);
+        return roomApi.deleteAlias(alias).toCompletableFuture();
     }
 
     /**
@@ -102,9 +101,8 @@ public class RoomMethods extends AbstractMethods {
      *
      * @return Joined room ids.
      */
-    public CompletableFuture<List<String>> joinedRooms() {
-        return factory().get(RoomApi.class, "joinedRooms", defaults(), JoinedRoomsResponse.class)
-            .thenApply(JoinedRoomsResponse::getJoinedRooms);
+    public CompletableFuture<JoinedRoomsResponse> joinedRooms() {
+        return roomApi.joinedRooms().toCompletableFuture();
     }
 
     /**
@@ -122,8 +120,7 @@ public class RoomMethods extends AbstractMethods {
         Objects.requireNonNull(request.getMedium(), "Medium cannot be empty.");
         Objects.requireNonNull(request.getUserId(), "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().post(RoomApi.class, "invite", params, request, EmptyResponse.class);
+        return roomApi.invite(roomId, request).toCompletableFuture();
     }
 
     /**
@@ -136,21 +133,21 @@ public class RoomMethods extends AbstractMethods {
     public CompletableFuture<RoomId> joinById(String roomId, JoinRequest request) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().post(RoomApi.class, "joinById", params, request, RoomId.class);
+        return roomApi.joinById(roomId, request).toCompletableFuture();
     }
 
     /**
      * Join to the room.
      *
-     * @param idOrAlias The room id or alias.
+     * @param idOrAlias   The room id or alias.
+     * @param serverNames The servers to attempt to join the room through. One of the servers must be participating in the room.
+     * @param joinRequest Third party invite request.
      * @return The joined room id.
      */
-    public CompletableFuture<RoomId> joinByIdOrAlias(String idOrAlias) {
+    public CompletableFuture<RoomId> joinByIdOrAlias(String idOrAlias, List<String> serverNames, JoinRequest joinRequest) {
         Objects.requireNonNull(idOrAlias, "IdOrAlias cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomIdOrAlias", idOrAlias.toString());
-        return factory().post(RoomApi.class, "joinByIdOrAlias", params, new JoinRequest(), RoomId.class);
+        return roomApi.joinByIdOrAlias(idOrAlias, serverNames, joinRequest).toCompletableFuture();
     }
 
     /**
@@ -162,8 +159,7 @@ public class RoomMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> leave(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().post(RoomApi.class, "leave", params, "", EmptyResponse.class);
+        return roomApi.leave(roomId).toCompletableFuture();
     }
 
     /**
@@ -175,8 +171,7 @@ public class RoomMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> forget(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().post(RoomApi.class, "forget", params, "", EmptyResponse.class);
+        return roomApi.forget(roomId).toCompletableFuture();
     }
 
     /**
@@ -191,11 +186,11 @@ public class RoomMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
         KickRequest request = new KickRequest();
         request.setUserId(userId);
         request.setReason(reason);
-        return factory().post(RoomApi.class, "kick", params, request, EmptyResponse.class);
+
+        return roomApi.kick(roomId, request).toCompletableFuture();
     }
 
     /**
@@ -210,11 +205,11 @@ public class RoomMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
         KickRequest request = new KickRequest();
         request.setUserId(userId);
         request.setReason(reason);
-        return factory().post(RoomApi.class, "ban", params, request, EmptyResponse.class);
+
+        return roomApi.ban(roomId, request).toCompletableFuture();
     }
 
     /**
@@ -229,10 +224,10 @@ public class RoomMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
         UnbanRequest request = new UnbanRequest();
         request.setUserId(userId);
-        return factory().post(RoomApi.class, "unban", params, request, EmptyResponse.class);
+
+        return roomApi.unban(roomId, request).toCompletableFuture();
     }
 
     /**
@@ -241,11 +236,10 @@ public class RoomMethods extends AbstractMethods {
      * @param roomId The room ID.
      * @return The visibility of the room in the directory.
      */
-    public CompletableFuture<String> getVisibility(String roomId) {
+    public CompletableFuture<RoomVisibility> getVisibility(String roomId) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().get(RoomApi.class, "getVisibility", params, RoomVisibility.class).thenApply(RoomVisibility::getVisibility);
+        return roomApi.getVisibility(roomId).toCompletableFuture();
     }
 
     /**
@@ -258,10 +252,10 @@ public class RoomMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> setVisibility(String roomId, String visibility) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
         RoomVisibility request = new RoomVisibility();
         request.setVisibility(visibility);
-        return factory().put(RoomApi.class, "setVisibility", params, request, EmptyResponse.class);
+
+        return roomApi.setVisibility(roomId, request).toCompletableFuture();
     }
 
     /**
@@ -274,8 +268,7 @@ public class RoomMethods extends AbstractMethods {
      * @return A list of the rooms on the server.
      */
     public CompletableFuture<PublicRoomsResponse> showPublicRooms(Long limit, String since, String server) {
-        RequestParams params = defaults().clone().query("since", since).query("server", server).query("limit", limit);
-        return factory().get(RoomApi.class, "showPublicRooms", params, PublicRoomsResponse.class);
+        return roomApi.showPublicRooms(limit, since, server).toCompletableFuture();
     }
 
     /**
@@ -286,8 +279,7 @@ public class RoomMethods extends AbstractMethods {
      * @return A list of the rooms on the server.
      */
     public CompletableFuture<PublicRoomsResponse> searchPublicRooms(String server, PublicRoomsRequest request) {
-        RequestParams params = defaults().clone().query("server", server);
-        return factory().post(RoomApi.class, "searchPublicRooms", params, request, PublicRoomsResponse.class);
+        return roomApi.searchPublicRooms(server, request).toCompletableFuture();
     }
 
     /**
@@ -301,9 +293,9 @@ public class RoomMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(newVersion, "New version cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
         NewVersion request = new NewVersion();
         request.setNewVersion(newVersion);
-        return factory().post(RoomApi.class, "upgrade", params, request, ReplacementRoom.class);
+
+        return roomApi.upgrade(roomId, request).toCompletableFuture();
     }
 }

@@ -16,25 +16,26 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.ThirdPartyProtocolApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.rest.ThirdPartyProtocolApi;
 import io.github.ma1uta.matrix.protocol.Protocol;
 import io.github.ma1uta.matrix.protocol.ProtocolLocation;
+import io.github.ma1uta.matrix.protocol.ProtocolUser;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.GenericType;
 
 /**
  * Protocol methods.
  */
-public class ProtocolMethods extends AbstractMethods {
+public class ProtocolMethods {
 
-    public ProtocolMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final ThirdPartyProtocolApi thirdPartyProtocolApi;
+
+    public ProtocolMethods(RestClientBuilder restClientBuilder) {
+        this.thirdPartyProtocolApi = restClientBuilder.build(ThirdPartyProtocolApi.class);
     }
 
     /**
@@ -44,8 +45,7 @@ public class ProtocolMethods extends AbstractMethods {
      * @return The protocols map.
      */
     public CompletableFuture<Map<String, Protocol>> protocols() {
-        return factory().get(ThirdPartyProtocolApi.class, "protocols", defaults(), new GenericType<Map<String, Protocol>>() {
-        });
+        return thirdPartyProtocolApi.protocols().toCompletableFuture();
     }
 
     /**
@@ -57,8 +57,7 @@ public class ProtocolMethods extends AbstractMethods {
     public CompletableFuture<Protocol> protocol(String protocol) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
 
-        RequestParams params = defaults().clone().path("protocol", protocol);
-        return factory().get(ThirdPartyProtocolApi.class, "protocol", params, Protocol.class);
+        return thirdPartyProtocolApi.protocol(protocol).toCompletableFuture();
     }
 
 
@@ -69,33 +68,25 @@ public class ProtocolMethods extends AbstractMethods {
      * containing the network-specific fields that comprise this identifier. It should attempt to canonicalise the identifier
      * as much as reasonably possible given the network type.
      *
-     * @param protocol    Required. The protocol used to communicate to the third party network.
-     * @param queryParams Query params.
+     * @param protocol Required. The protocol used to communicate to the third party network.
      * @return Founded protocols.
      */
-    public CompletableFuture<List<Protocol>> locations(String protocol, Map<String, String> queryParams) {
+    public CompletableFuture<List<ProtocolLocation>> locations(String protocol) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
 
-        RequestParams params = defaults().clone().path("protocol", protocol);
-        params.getQueryParams().putAll(queryParams);
-        return factory().get(ThirdPartyProtocolApi.class, "locationProtocol", params, new GenericType<List<Protocol>>() {
-        });
+        return thirdPartyProtocolApi.location(protocol).toCompletableFuture();
     }
 
     /**
      * Retrieve a Matrix User ID linked to a user on the third party service, given a set of user parameters.
      *
-     * @param protocol    Required. The name of the protocol.
-     * @param queryParams Query params.
+     * @param protocol Required. The name of the protocol.
      * @return Founded users.
      */
-    public CompletableFuture<List<Protocol>> users(String protocol, Map<String, String> queryParams) {
+    public CompletableFuture<List<ProtocolUser>> users(String protocol) {
         Objects.requireNonNull(protocol, "Protocol cannot be empty.");
 
-        RequestParams params = defaults().clone().path("protocol", protocol);
-        params.getQueryParams().putAll(queryParams);
-        return factory().get(ThirdPartyProtocolApi.class, "userProtocol", params, new GenericType<List<Protocol>>() {
-        });
+        return thirdPartyProtocolApi.userProtocol(protocol).toCompletableFuture();
     }
 
     /**
@@ -107,9 +98,7 @@ public class ProtocolMethods extends AbstractMethods {
     public CompletableFuture<List<ProtocolLocation>> location(String alias) {
         Objects.requireNonNull(alias, "Alias cannot be empty.");
 
-        RequestParams params = defaults().clone().query("alias", alias);
-        return factory().get(ThirdPartyProtocolApi.class, "location", params, new GenericType<List<ProtocolLocation>>() {
-        });
+        return thirdPartyProtocolApi.location(alias).toCompletableFuture();
     }
 
     /**
@@ -118,11 +107,9 @@ public class ProtocolMethods extends AbstractMethods {
      * @param userId Required. The Matrix User ID to look up.
      * @return Founded users.
      */
-    public CompletableFuture<List<ProtocolLocation>> user(String userId) {
+    public CompletableFuture<List<ProtocolUser>> user(String userId) {
         Objects.requireNonNull(userId, "userId cannot be empty.");
 
-        RequestParams params = defaults().clone().query("userid", userId);
-        return factory().get(ThirdPartyProtocolApi.class, "user", params, new GenericType<List<ProtocolLocation>>() {
-        });
+        return thirdPartyProtocolApi.user(userId).toCompletableFuture();
     }
 }

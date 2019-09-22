@@ -17,11 +17,11 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.TagApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.AccountInfo;
 import io.github.ma1uta.matrix.client.model.tag.Tags;
+import io.github.ma1uta.matrix.client.rest.TagApi;
 import io.github.ma1uta.matrix.event.nested.TagInfo;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -29,10 +29,15 @@ import java.util.concurrent.CompletableFuture;
 /**
  * TagInfo methods.
  */
-public class TagMethods extends AbstractMethods {
+public class TagMethods {
 
-    public TagMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final TagApi tagApi;
+
+    private final AccountInfo accountInfo;
+
+    public TagMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+        this.tagApi = restClientBuilder.build(TagApi.class);
+        this.accountInfo = accountInfo;
     }
 
     /**
@@ -42,14 +47,11 @@ public class TagMethods extends AbstractMethods {
      * @return The list of tags for the user for the room.
      */
     public CompletableFuture<Tags> show(String roomId) {
-        String userId = defaults().getUserId();
+        String userId = accountInfo.getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults()
-            .clone().path("userId", userId)
-            .path("roomId", roomId);
-        return factory().get(TagApi.class, "showTags", params, Tags.class);
+        return tagApi.showTags(userId, roomId).toCompletableFuture();
     }
 
     /**
@@ -61,18 +63,15 @@ public class TagMethods extends AbstractMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> add(String roomId, String tag, Long order) {
-        String userId = defaults().getUserId();
+        String userId = accountInfo.getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(tag, "TagInfo cannot be empty.");
 
         TagInfo tagInfo = new TagInfo();
         tagInfo.setOrder(order);
-        RequestParams params = defaults().clone()
-            .path("userId", userId)
-            .path("roomId", roomId)
-            .path("tag", tag);
-        return factory().put(TagApi.class, "addTag", params, tagInfo, EmptyResponse.class);
+
+        return tagApi.addTag(userId, roomId, tag, tagInfo).toCompletableFuture();
     }
 
     /**
@@ -83,15 +82,11 @@ public class TagMethods extends AbstractMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> delete(String roomId, String tag) {
-        String userId = defaults().getUserId();
+        String userId = accountInfo.getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(tag, "TagContent cannot be empty.");
 
-        RequestParams params = defaults().clone()
-            .path("userId", userId)
-            .path("roomId", roomId)
-            .path("tag", tag);
-        return factory().delete(TagApi.class, "deleteTag", params);
+        return tagApi.deleteTag(userId, roomId, tag).toCompletableFuture();
     }
 }

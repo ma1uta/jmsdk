@@ -17,19 +17,16 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.PushApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.push.NotificationResponse;
 import io.github.ma1uta.matrix.client.model.push.PushActions;
 import io.github.ma1uta.matrix.client.model.push.PushEnable;
 import io.github.ma1uta.matrix.client.model.push.PushRulesResponse;
 import io.github.ma1uta.matrix.client.model.push.PushUpdateRequest;
-import io.github.ma1uta.matrix.client.model.push.Pusher;
 import io.github.ma1uta.matrix.client.model.push.PushersRequest;
 import io.github.ma1uta.matrix.client.model.push.PushersResponse;
+import io.github.ma1uta.matrix.client.rest.PushApi;
 import io.github.ma1uta.matrix.event.nested.PushRule;
-import io.github.ma1uta.matrix.event.nested.Ruleset;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,10 +35,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Push methods.
  */
-public class PushMethods extends AbstractMethods {
+public class PushMethods {
 
-    public PushMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final PushApi pushApi;
+
+    public PushMethods(RestClientBuilder restClientBuilder) {
+        this.pushApi = restClientBuilder.build(PushApi.class);
     }
 
     /**
@@ -49,8 +48,8 @@ public class PushMethods extends AbstractMethods {
      *
      * @return The pushers for this user.
      */
-    public CompletableFuture<List<Pusher>> showPushers() {
-        return factory().get(PushApi.class, "showPushers", defaults(), PushersResponse.class).thenApply(PushersResponse::getPushers);
+    public CompletableFuture<PushersResponse> showPushers() {
+        return pushApi.showPushers().toCompletableFuture();
     }
 
     /**
@@ -61,7 +60,7 @@ public class PushMethods extends AbstractMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setPushers(PushersRequest request) {
-        return factory().post(PushApi.class, "setPushers", defaults(), request, EmptyResponse.class);
+        return pushApi.setPushers(request).toCompletableFuture();
     }
 
     /**
@@ -74,8 +73,7 @@ public class PushMethods extends AbstractMethods {
      * @return A batch of events is being returned.
      */
     public CompletableFuture<NotificationResponse> notifications(String from, String only, Long limit) {
-        RequestParams params = defaults().clone().query("from", from).query("only", only).query("limit", limit);
-        return factory().get(PushApi.class, "notifications", params, NotificationResponse.class);
+        return pushApi.notifications(from, only, limit).toCompletableFuture();
     }
 
     /**
@@ -83,9 +81,8 @@ public class PushMethods extends AbstractMethods {
      *
      * @return All the push rulesets for this user.
      */
-    public CompletableFuture<Ruleset> pushRules() {
-        return factory().get(PushApi.class, "pushRules", new RequestParams(), PushRulesResponse.class)
-            .thenApply(PushRulesResponse::getGlobal);
+    public CompletableFuture<PushRulesResponse> pushRules() {
+        return pushApi.pushRules().toCompletableFuture();
     }
 
     /**
@@ -102,8 +99,7 @@ public class PushMethods extends AbstractMethods {
         Objects.requireNonNull(kind, "Kind cannot be empty.");
         Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("scope", scope).path("kind", kind).path("ruleId", ruleId);
-        return factory().get(PushApi.class, "pushRule", params, PushRule.class);
+        return pushApi.pushRule(scope, kind, ruleId).toCompletableFuture();
     }
 
     /**
@@ -119,8 +115,7 @@ public class PushMethods extends AbstractMethods {
         Objects.requireNonNull(kind, "Kind cannot be empty.");
         Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("scope", scope).path("kind", kind).path("ruleId", ruleId);
-        return factory().delete(PushApi.class, "deleteRule", params);
+        return pushApi.deleteRule(scope, kind, ruleId).toCompletableFuture();
     }
 
     /**
@@ -146,9 +141,7 @@ public class PushMethods extends AbstractMethods {
             throw new NullPointerException("Actions cannot be empty.");
         }
 
-        RequestParams params = defaults().clone().path("scope", scope).path("kind", kind).path("ruleId", ruleId)
-            .query("before", before).query("after", after);
-        return factory().put(PushApi.class, "updateRule", params, request, EmptyResponse.class);
+        return pushApi.updateRule(scope, kind, ruleId, before, after, request).toCompletableFuture();
     }
 
     /**
@@ -159,13 +152,12 @@ public class PushMethods extends AbstractMethods {
      * @param ruleId The identifier for the rule.
      * @return Whether the push rule is enabled.
      */
-    public CompletableFuture<Boolean> getEnabled(String scope, String kind, String ruleId) {
+    public CompletableFuture<PushEnable> getEnabled(String scope, String kind, String ruleId) {
         Objects.requireNonNull(scope, "Scope cannot be empty.");
         Objects.requireNonNull(kind, "Kind cannot be empty.");
         Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("scope", scope).path("kind", kind).path("ruleId", ruleId);
-        return factory().get(PushApi.class, "getEnabled", params, PushEnable.class).thenApply(PushEnable::getEnabled);
+        return pushApi.getEnabled(scope, kind, ruleId).toCompletableFuture();
     }
 
     /**
@@ -182,10 +174,10 @@ public class PushMethods extends AbstractMethods {
         Objects.requireNonNull(kind, "Kind cannot be empty.");
         Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("scope", scope).path("kind", kind).path("ruleId", ruleId);
         PushEnable request = new PushEnable();
         request.setEnabled(enabled);
-        return factory().put(PushApi.class, "setEnabled", params, request, EmptyResponse.class);
+
+        return pushApi.setEnabled(scope, kind, ruleId, request).toCompletableFuture();
     }
 
     /**
@@ -196,13 +188,12 @@ public class PushMethods extends AbstractMethods {
      * @param ruleId The identifier for the rule.
      * @return The actions for this push rule.
      */
-    public CompletableFuture<List<String>> getActions(String scope, String kind, String ruleId) {
+    public CompletableFuture<PushActions> getActions(String scope, String kind, String ruleId) {
         Objects.requireNonNull(scope, "Scope cannot be empty.");
         Objects.requireNonNull(kind, "Kind cannot be empty.");
         Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("scope", scope).path("kind", kind).path("ruleId", ruleId);
-        return factory().get(PushApi.class, "getActions", params, PushActions.class).thenApply(PushActions::getActions);
+        return pushApi.getActions(scope, kind, ruleId).toCompletableFuture();
     }
 
     /**
@@ -219,9 +210,9 @@ public class PushMethods extends AbstractMethods {
         Objects.requireNonNull(kind, "Kind cannot be empty.");
         Objects.requireNonNull(ruleId, "RuleId cannot be empty.");
 
-        RequestParams params = defaults().path("scope", scope).path("kind", kind).path("ruleId", ruleId);
         PushActions request = new PushActions();
         request.setActions(actions);
-        return factory().put(PushApi.class, "setActions", params, request, EmptyResponse.class);
+
+        return pushApi.setActions(scope, kind, ruleId, request).toCompletableFuture();
     }
 }

@@ -16,11 +16,10 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.UserDirectoryApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchRequest;
 import io.github.ma1uta.matrix.client.model.userdirectory.SearchResponse;
+import io.github.ma1uta.matrix.client.rest.UserDirectoryApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +27,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * User directory methods.
  */
-public class UserDirectoryMethods extends AbstractMethods {
+public class UserDirectoryMethods {
 
-    public UserDirectoryMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final UserDirectoryApi userDirectoryApi;
+
+    public UserDirectoryMethods(RestClientBuilder restClientBuilder) {
+        this.userDirectoryApi = restClientBuilder.build(UserDirectoryApi.class);
     }
 
     /**
@@ -44,6 +45,6 @@ public class UserDirectoryMethods extends AbstractMethods {
     public CompletableFuture<SearchResponse> search(SearchRequest request) {
         Objects.requireNonNull(request.getSearchTerm(), "SearchTerm cannot be empty.");
 
-        return factory().post(UserDirectoryApi.class, "searchUsers", defaults(), request, SearchResponse.class);
+        return userDirectoryApi.searchUsers(request).toCompletableFuture();
     }
 }

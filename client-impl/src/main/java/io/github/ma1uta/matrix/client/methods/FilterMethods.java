@@ -16,11 +16,11 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.FilterApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.AccountInfo;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.FilterResponse;
+import io.github.ma1uta.matrix.client.rest.FilterApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +28,15 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Filter methods.
  */
-public class FilterMethods extends AbstractMethods {
+public class FilterMethods {
 
-    public FilterMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final FilterApi filterApi;
+
+    private final AccountInfo accountInfo;
+
+    public FilterMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+        this.filterApi = restClientBuilder.build(FilterApi.class);
+        this.accountInfo = accountInfo;
     }
 
     /**
@@ -41,10 +46,10 @@ public class FilterMethods extends AbstractMethods {
      * @return The filter id.
      */
     public CompletableFuture<FilterResponse> uploadFilter(FilterData filter) {
-        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
+        String userId = accountInfo.getUserId();
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", defaults().getUserId().toString());
-        return factory().post(FilterApi.class, "uploadFilter", params, filter, FilterResponse.class);
+        return filterApi.uploadFilter(userId, filter).toCompletableFuture();
     }
 
     /**
@@ -54,12 +59,10 @@ public class FilterMethods extends AbstractMethods {
      * @return The filter data.
      */
     public CompletableFuture<FilterData> getFilter(String filterId) {
-        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
+        String userId = accountInfo.getUserId();
+        Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(filterId, "FilterId cannot be empty.");
 
-        RequestParams params = defaults().clone()
-            .path("userId", defaults().getUserId().toString())
-            .path("filterId", filterId);
-        return factory().get(FilterApi.class, "getFilter", params, FilterData.class);
+        return filterApi.getFilter(userId, filterId).toCompletableFuture();
     }
 }

@@ -16,6 +16,8 @@
 
 package io.github.ma1uta.matrix.client;
 
+import io.github.ma1uta.matrix.client.model.serverdiscovery.HomeserverInfo;
+import io.github.ma1uta.matrix.client.model.serverdiscovery.IdentityServerInfo;
 import io.github.ma1uta.matrix.client.model.serverdiscovery.ServerDiscoveryResponse;
 
 /**
@@ -30,6 +32,26 @@ public class AccountInfo {
     private String deviceId;
 
     private ServerDiscoveryResponse serverInfo;
+
+    public AccountInfo() {
+    }
+
+    public AccountInfo(AccountInfo accountInfo) {
+        this.userId = accountInfo.getUserId();
+        this.accessToken = accountInfo.getAccessToken();
+        this.deviceId = accountInfo.getDeviceId();
+        if (accountInfo.getServerInfo() != null) {
+            this.serverInfo = new ServerDiscoveryResponse();
+            if (accountInfo.getServerInfo().getHomeserver() != null) {
+                this.serverInfo.setHomeserver(new HomeserverInfo());
+                this.serverInfo.getHomeserver().setBaseUrl(accountInfo.getServerInfo().getHomeserver().getBaseUrl());
+            }
+            if (accountInfo.getServerInfo().getIdentityServer() != null) {
+                this.serverInfo.setIdentityServer(new IdentityServerInfo());
+                this.serverInfo.getIdentityServer().setBaseUrl(accountInfo.getServerInfo().getIdentityServer().getBaseUrl());
+            }
+        }
+    }
 
     public String getUserId() {
         return userId;

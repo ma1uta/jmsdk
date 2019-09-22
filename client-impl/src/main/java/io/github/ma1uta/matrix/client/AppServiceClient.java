@@ -17,16 +17,30 @@
 package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.filter.CustomQueryParamsClientFilter;
+import io.github.ma1uta.matrix.client.methods.AuthMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
+
+import java.util.Objects;
 
 /**
  * Application Service Client.
  */
 public class AppServiceClient extends MatrixClient {
 
-    public AppServiceClient(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final CustomQueryParamsClientFilter queryParamsClientFilter = new CustomQueryParamsClientFilter();
+
+    public AppServiceClient(String domain, AccountInfo accountInfo) {
+        super(domain, accountInfo);
+        String userId = accountInfo.getUserId();
+        Objects.requireNonNull(userId, "UserId must be configured.");
+        queryParamsClientFilter.addParam("user_id", userId);
+    }
+
+    @Override
+    protected RestClientBuilder newClientBuilder() {
+        return super.newClientBuilder().register(queryParamsClientFilter);
     }
 
     /**
@@ -36,7 +50,15 @@ public class AppServiceClient extends MatrixClient {
      * @return The new AppService client.
      */
     public AppServiceClient userId(String userId) {
-        return new AppServiceClient(getRequestFactory(), getDefaultParams().clone().userId(userId));
+        AccountInfo newAccountInfo = new AccountInfo(getAccountInfo());
+        newAccountInfo.setUserId(userId);
+        return new AppServiceClient(getDomain(), newAccountInfo);
+    }
+
+    @Override
+    public AuthMethods auth() {
+        throw new UnsupportedOperationException(
+            "Application service client must not login/logout due access_token setup via the configuration.");
     }
 
     @Override
@@ -56,7 +78,7 @@ public class AppServiceClient extends MatrixClient {
 
         @Override
         public AppServiceClient newInstance() {
-            return new AppServiceClient(getFactory(), getDefaultParams());
+            return new AppServiceClient(domain, accountInfo);
         }
     }
 }

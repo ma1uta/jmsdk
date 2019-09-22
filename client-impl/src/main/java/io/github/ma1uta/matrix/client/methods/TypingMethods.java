@@ -17,10 +17,10 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.TypingApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.AccountInfo;
 import io.github.ma1uta.matrix.client.model.typing.TypingRequest;
+import io.github.ma1uta.matrix.client.rest.TypingApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +28,15 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Typing methods.
  */
-public class TypingMethods extends AbstractMethods {
+public class TypingMethods {
 
-    public TypingMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final TypingApi typingApi;
+
+    private final AccountInfo accountInfo;
+
+    public TypingMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+        this.typingApi = restClientBuilder.build(TypingApi.class);
+        this.accountInfo = accountInfo;
     }
 
     /**
@@ -44,17 +49,15 @@ public class TypingMethods extends AbstractMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> typing(String roomId, Boolean typing, Long timeout) {
-        String userId = defaults().getUserId();
+        String userId = accountInfo.getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(typing, "Typing cannot be empty.");
 
-        RequestParams params = defaults().clone()
-            .path("userId", userId)
-            .path("roomId", roomId);
         TypingRequest request = new TypingRequest();
         request.setTyping(typing);
         request.setTimeout(timeout);
-        return factory().put(TypingApi.class, "typing", params, request, EmptyResponse.class);
+
+        return typingApi.typing(roomId, userId, request).toCompletableFuture();
     }
 }

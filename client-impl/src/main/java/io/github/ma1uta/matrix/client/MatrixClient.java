@@ -103,17 +103,21 @@ public class MatrixClient implements Closeable {
         return accountInfo;
     }
 
-    protected RestClientBuilder createClientBuilder() {
+    protected RestClientBuilder newClientBuilder() {
+        return RestClientBuilder.newBuilder()
+            .register(new ErrorFilter())
+            .register(new LoggingFilter())
+            .register(headerClientFilter)
+            .baseUrl(getHomeserverUrl());
+    }
+
+    protected RestClientBuilder getClientBuilder() {
         if (builder == null) {
             synchronized (this) {
                 if (builder != null) {
                     return builder;
                 }
-                builder = RestClientBuilder.newBuilder()
-                    .register(new ErrorFilter())
-                    .register(new LoggingFilter())
-                    .register(headerClientFilter)
-                    .baseUrl(getHomeserverUrl());
+                builder = newClientBuilder();
                 ServiceLoader.load(RestClientBuilderConfigurer.class).iterator().forEachRemaining(c -> c.configure(builder));
             }
         }
@@ -122,6 +126,15 @@ public class MatrixClient implements Closeable {
 
     protected <T> T getMethod(Class<T> clazz, Supplier<T> creator) {
         return clazz.cast(methods.computeIfAbsent(clazz, key -> creator.get()));
+    }
+
+    /**
+     * Get the homeserver domain.
+     *
+     * @return The homeserver domain.
+     */
+    public String getDomain() {
+        return domain;
     }
 
     /**
@@ -306,7 +319,7 @@ public class MatrixClient implements Closeable {
      * @return filter methods.
      */
     public FilterMethods filter() {
-        return new FilterMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(FilterMethods.class, () -> new FilterMethods(getClientBuilder(), getAccountInfo()));
     }
 
     /**
@@ -315,7 +328,7 @@ public class MatrixClient implements Closeable {
      * @return room apis.
      */
     public RoomMethods room() {
-        return new RoomMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(RoomMethods.class, () -> new RoomMethods(getClientBuilder()));
     }
 
     /**
@@ -324,7 +337,7 @@ public class MatrixClient implements Closeable {
      * @return tag methods.
      */
     public TagMethods tag() {
-        return new TagMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(TagMethods.class, () -> new TagMethods(getClientBuilder(), getAccountInfo()));
     }
 
     /**
@@ -333,7 +346,7 @@ public class MatrixClient implements Closeable {
      * @return typing methods.
      */
     public TypingMethods typing() {
-        return new TypingMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(TypingMethods.class, () -> new TypingMethods(getClientBuilder(), getAccountInfo()));
     }
 
     /**
@@ -342,7 +355,7 @@ public class MatrixClient implements Closeable {
      * @return user directory method.
      */
     public UserDirectoryMethods userDirectory() {
-        return new UserDirectoryMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(UserDirectoryMethods.class, () -> new UserDirectoryMethods(getClientBuilder()));
     }
 
     /**
@@ -351,7 +364,7 @@ public class MatrixClient implements Closeable {
      * @return the versions method.
      */
     public VersionMethods versions() {
-        return getMethod(VersionMethods.class, () -> new VersionMethods(createClientBuilder()));
+        return getMethod(VersionMethods.class, () -> new VersionMethods(getClientBuilder()));
     }
 
     /**
@@ -360,7 +373,7 @@ public class MatrixClient implements Closeable {
      * @return the voip methods.
      */
     public VoipMethods turnServers() {
-        return getMethod(VoipMethods.class, () -> new VoipMethods(createClientBuilder()));
+        return getMethod(VoipMethods.class, () -> new VoipMethods(getClientBuilder()));
     }
 
     /**
@@ -369,7 +382,7 @@ public class MatrixClient implements Closeable {
      * @return the push methods.
      */
     public PushMethods push() {
-        return new PushMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(PushMethods.class, () -> new PushMethods(getClientBuilder()));
     }
 
     /**
@@ -378,7 +391,7 @@ public class MatrixClient implements Closeable {
      * @return the protocol methods.
      */
     public ProtocolMethods protocol() {
-        return new ProtocolMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(ProtocolMethods.class, () -> new ProtocolMethods(getClientBuilder()));
     }
 
     /**
@@ -387,7 +400,7 @@ public class MatrixClient implements Closeable {
      * @return the capabilities methods.
      */
     public CapabilityMethods capabilities() {
-        return getMethod(CapabilityMethods.class, () -> new CapabilityMethods(createClientBuilder()));
+        return getMethod(CapabilityMethods.class, () -> new CapabilityMethods(getClientBuilder()));
     }
 
     /**
