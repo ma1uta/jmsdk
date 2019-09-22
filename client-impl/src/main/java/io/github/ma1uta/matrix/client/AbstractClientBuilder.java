@@ -16,8 +16,6 @@
 
 package io.github.ma1uta.matrix.client;
 
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
-
 import java.util.Objects;
 
 /**
@@ -27,19 +25,12 @@ import java.util.Objects;
  */
 public abstract class AbstractClientBuilder<C> {
 
-    private RequestParams defaultParams = new RequestParams();
-    private RequestFactory factory;
+    protected AccountInfo accountInfo = new AccountInfo();
+    protected String domain = null;
 
     protected AbstractClientBuilder() {
     }
 
-    protected RequestParams getDefaultParams() {
-        return defaultParams;
-    }
-
-    public RequestFactory getFactory() {
-        return factory;
-    }
 
     /**
      * Specify a user ID.
@@ -48,7 +39,7 @@ public abstract class AbstractClientBuilder<C> {
      * @return This builder.
      */
     public AbstractClientBuilder<C> userId(String userId) {
-        this.defaultParams.userId(userId);
+        this.accountInfo.setUserId(userId);
         return this;
     }
 
@@ -59,18 +50,18 @@ public abstract class AbstractClientBuilder<C> {
      * @return This builder.
      */
     public AbstractClientBuilder<C> accessToken(String accessToken) {
-        this.defaultParams.accessToken(accessToken);
+        this.accountInfo.setAccessToken(accessToken);
         return this;
     }
 
     /**
-     * Specify a request factory.
+     * Specify the domain.
      *
-     * @param factory The request factory.
+     * @param domain Domain.
      * @return This builder.
      */
-    public AbstractClientBuilder<C> requestFactory(RequestFactory factory) {
-        this.factory = factory;
+    public AbstractClientBuilder<C> domain(String domain) {
+        this.domain = domain;
         return this;
     }
 
@@ -80,7 +71,7 @@ public abstract class AbstractClientBuilder<C> {
      * @return The new client.
      */
     public C build() {
-        Objects.requireNonNull(this.factory, "Request factory must be set.");
+        Objects.requireNonNull(this.domain, "Domain must be set.");
         return newInstance();
     }
 

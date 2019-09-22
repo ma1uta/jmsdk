@@ -31,9 +31,14 @@
     <properties>
         <version.lib.client-api>0.9.2-SNAPSHOT</version.lib.client-api>
         <version.lib.common-impl>0.9.2-SNAPSHOT</version.lib.common-impl>
+        <version.lib.resteasy>4.3.0.Final</version.lib.resteasy>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.eclipse.microprofile.rest.client</groupId>
+            <artifactId>microprofile-rest-client-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>client-api</artifactId>
@@ -43,6 +48,51 @@
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>common-impl</artifactId>
             <version>${version.lib.common-impl}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client-microprofile</artifactId>
+            <version>${version.lib.resteasy}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
+            <version>${version.lib.resteasy}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.ma1uta.matrix</groupId>
+            <artifactId>jackson-support</artifactId>
+            <version>0.9.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client.methods;
+package io.github.ma1uta.matrix.client.rest;
 
 import io.github.ma1uta.matrix.client.model.voip.VoipResponse;
-import io.github.ma1uta.matrix.client.rest.VoipApi;
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
- * Voip methods.
+ * The homeserver MAY provide a TURN server which clients can use to contact the remote party. The following HTTP API endpoints will
+ * be used by clients in order to get information about the TURN server.
  */
-public class VoipMethods {
-
-    private final VoipApi voipApi;
-
-    public VoipMethods(RestClientBuilder restClientBuilder) {
-        voipApi = restClientBuilder.build(VoipApi.class);
-    }
+@Path("/_matrix/client/r0/voip")
+@Produces(MediaType.APPLICATION_JSON)
+public interface VoipApi {
 
     /**
      * This API provides credentials for the client to use when initiating calls.
      *
-     * @return The TURN server credentials.
+     * @return {@link VoipResponse}.
      */
-    public CompletableFuture<VoipResponse> turnServers() {
-        return voipApi.turnServer().toCompletableFuture();
-    }
+    @GET
+    @Path("/turnServer")
+    CompletionStage<VoipResponse> turnServer();
 }

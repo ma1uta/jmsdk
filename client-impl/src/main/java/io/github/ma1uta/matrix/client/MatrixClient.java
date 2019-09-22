@@ -16,8 +16,13 @@
 
 package io.github.ma1uta.matrix.client;
 
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.filter.CustomHeaderClientFilter;
+import io.github.ma1uta.matrix.client.filter.ErrorFilter;
+import io.github.ma1uta.matrix.client.filter.LoggingFilter;
 import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.AdminMethods;
 import io.github.ma1uta.matrix.client.methods.AuthMethods;
@@ -45,25 +50,78 @@ import io.github.ma1uta.matrix.client.methods.UserDirectoryMethods;
 import io.github.ma1uta.matrix.client.methods.VersionMethods;
 import io.github.ma1uta.matrix.client.methods.VoipMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import io.github.ma1uta.matrix.impl.RestClientBuilderConfigurer;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.io.Closeable;
-import java.util.Objects;
+import java.net.URL;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * Matrix client.
  */
 public class MatrixClient implements Closeable {
 
-    private final RequestFactory requestFactory;
-    private final RequestParams defaultParams;
+    private volatile URL homeserverURL;
+    private volatile RestClientBuilder builder;
+    private final HomeServerResolver homeServerResolver = new HomeServerResolver();
+    private final String domain;
+    private final CustomHeaderClientFilter headerClientFilter = new CustomHeaderClientFilter();
+    private final Map<Class<?>, Object> methods = new ConcurrentHashMap<>();
+    private final AccountInfo accountInfo;
 
-    public MatrixClient(RequestFactory requestFactory) {
-        this(requestFactory, new RequestParams());
+    public MatrixClient(String domain) {
+        this(domain, new AccountInfo());
     }
 
-    public MatrixClient(RequestFactory requestFactory, RequestParams defaultParams) {
-        this.defaultParams = Objects.requireNonNull(defaultParams, "The default `RequestParams` should be specified.");
-        this.requestFactory = requestFactory;
+    public MatrixClient(String domain, AccountInfo accountInfo) {
+        this.domain = domain;
+        this.accountInfo = accountInfo;
+    }
+
+    /**
+     * Get homeserver URL.
+     *
+     * @return homeserver URL.
+     */
+    public URL getHomeserverUrl() {
+        if (homeserverURL == null) {
+            synchronized (this) {
+                if (homeserverURL != null) {
+                    return homeserverURL;
+                }
+                homeserverURL = homeServerResolver.resolve(domain);
+            }
+        }
+        return homeserverURL;
+    }
+
+    public AccountInfo getAccountInfo() {
+        return accountInfo;
+    }
+
+    protected RestClientBuilder createClientBuilder() {
+        if (builder == null) {
+            synchronized (this) {
+                if (builder != null) {
+                    return builder;
+                }
+                builder = RestClientBuilder.newBuilder()
+                    .register(new ErrorFilter())
+                    .register(new LoggingFilter())
+                    .register(headerClientFilter)
+                    .baseUrl(getHomeserverUrl());
+                ServiceLoader.load(RestClientBuilderConfigurer.class).iterator().forEachRemaining(c -> c.configure(builder));
+            }
+        }
+        return builder;
+    }
+
+    protected <T> T getMethod(Class<T> clazz, Supplier<T> creator) {
+        return clazz.cast(methods.computeIfAbsent(clazz, key -> creator.get()));
     }
 
     /**
@@ -72,7 +130,7 @@ public class MatrixClient implements Closeable {
      * @return The access token.
      */
     public String getAccessToken() {
-        return getDefaultParams().getAccessToken();
+        return getAccountInfo().getAccessToken();
     }
 
     /**
@@ -91,15 +149,6 @@ public class MatrixClient implements Closeable {
      */
     public RequestParams getDefaultParams() {
         return defaultParams;
-    }
-
-    /**
-     * Return homeserver url.
-     *
-     * @return homeserver url.
-     */
-    public String getHomeserverUrl() {
-        return getRequestFactory().getHomeserverUrl();
     }
 
     @Override
@@ -302,7 +351,7 @@ public class MatrixClient implements Closeable {
      * @return the versions method.
      */
     public VersionMethods versions() {
-        return new VersionMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(VersionMethods.class, () -> new VersionMethods(createClientBuilder()));
     }
 
     /**
@@ -311,7 +360,7 @@ public class MatrixClient implements Closeable {
      * @return the voip methods.
      */
     public VoipMethods turnServers() {
-        return new VoipMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(VoipMethods.class, () -> new VoipMethods(createClientBuilder()));
     }
 
     /**
@@ -338,7 +387,7 @@ public class MatrixClient implements Closeable {
      * @return the capabilities methods.
      */
     public CapabilityMethods capabilities() {
-        return new CapabilityMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(CapabilityMethods.class, () -> new CapabilityMethods(createClientBuilder()));
     }
 
     /**
@@ -347,7 +396,7 @@ public class MatrixClient implements Closeable {
      * @return the user MXID.
      */
     public String getUserId() {
-        return getDefaultParams().getUserId();
+        return getAccountInfo().getUserId();
     }
 
     /**
@@ -358,11 +407,14 @@ public class MatrixClient implements Closeable {
      */
     public LoginResponse afterLogin(LoginResponse loginResponse) {
         if (loginResponse == null) {
-            getDefaultParams().accessToken(null);
+            afterLogout(null);
         } else {
-            getDefaultParams().userId(loginResponse.getUserId());
-            getDefaultParams().accessToken(loginResponse.getAccessToken());
-            getDefaultParams().deviceId(loginResponse.getDeviceId());
+            getAccountInfo().setUserId(loginResponse.getUserId());
+            getAccountInfo().setAccessToken(loginResponse.getAccessToken());
+            getAccountInfo().setDeviceId(loginResponse.getDeviceId());
+            getAccountInfo().setServerInfo(loginResponse.getWellKnown());
+
+            headerClientFilter.addHeader(AUTHORIZATION, "Bearer " + loginResponse.getAccessToken());
         }
         return loginResponse;
     }
@@ -374,8 +426,10 @@ public class MatrixClient implements Closeable {
      * @return The login response.
      */
     public EmptyResponse afterLogout(EmptyResponse response) {
-        getDefaultParams().accessToken(null);
-        getDefaultParams().deviceId(null);
+        getAccountInfo().setAccessToken(null);
+        getAccountInfo().setDeviceId(null);
+
+        headerClientFilter.removeHeader(AUTHORIZATION);
         return response;
     }
 
@@ -386,7 +440,7 @@ public class MatrixClient implements Closeable {
 
         @Override
         public MatrixClient newInstance() {
-            return new MatrixClient(getFactory(), getDefaultParams());
+            return new MatrixClient(domain, accountInfo);
         }
     }
 }

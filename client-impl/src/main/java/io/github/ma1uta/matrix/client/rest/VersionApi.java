@@ -14,31 +14,33 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client.methods;
+package io.github.ma1uta.matrix.client.rest;
 
 import io.github.ma1uta.matrix.client.model.version.VersionsResponse;
-import io.github.ma1uta.matrix.client.rest.VersionApi;
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
- * Version methods.
+ * Gets the versions of the specification supported by the server.
+ * <br>
+ * Values will take the form rX.Y.Z.
+ * <br>
+ * Only the latest Z value will be reported for each supported X.Y value.
+ * i.e. if the server implements r0.0.0, r0.0.1, and r1.2.0, it will report r0.0.1 and r1.2.0.
  */
-public class VersionMethods {
-
-    private final VersionApi versionApi;
-
-    public VersionMethods(RestClientBuilder restClientBuilder) {
-        this.versionApi = restClientBuilder.build(VersionApi.class);
-    }
+@Path("/_matrix/client/versions")
+@Produces(MediaType.APPLICATION_JSON)
+public interface VersionApi {
 
     /**
      * Gets the versions of the specification supported by the server.
      *
-     * @return The versions supported by the server.
+     * @return {@link VersionsResponse}.
      */
-    public CompletableFuture<VersionsResponse> versions() {
-        return versionApi.versions().toCompletableFuture();
-    }
+    @GET
+    CompletionStage<VersionsResponse> versions();
 }

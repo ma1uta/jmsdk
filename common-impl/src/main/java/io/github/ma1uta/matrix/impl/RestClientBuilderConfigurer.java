@@ -14,31 +14,21 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.client.methods;
+package io.github.ma1uta.matrix.impl;
 
-import io.github.ma1uta.matrix.client.model.voip.VoipResponse;
-import io.github.ma1uta.matrix.client.rest.VoipApi;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
- * Voip methods.
+ * Configurer for {@link org.eclipse.microprofile.rest.client.RestClientBuilder}.
  */
-public class VoipMethods {
-
-    private final VoipApi voipApi;
-
-    public VoipMethods(RestClientBuilder restClientBuilder) {
-        voipApi = restClientBuilder.build(VoipApi.class);
-    }
+public interface RestClientBuilderConfigurer {
 
     /**
-     * This API provides credentials for the client to use when initiating calls.
+     * Configure the builder.
+     * <br>
+     * Configurer modifies the argument.
      *
-     * @return The TURN server credentials.
+     * @param builder builder.
      */
-    public CompletableFuture<VoipResponse> turnServers() {
-        return voipApi.turnServer().toCompletableFuture();
-    }
+    void configure(RestClientBuilder builder);
 }

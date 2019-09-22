@@ -16,20 +16,21 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.CapabilitiesApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.capability.CapabilitiesResponse;
+import io.github.ma1uta.matrix.client.rest.CapabilitiesApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Capability methods.
  */
-public class CapabilityMethods extends AbstractMethods {
+public class CapabilityMethods {
 
-    public CapabilityMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final CapabilitiesApi capabilitiesApi;
+
+    public CapabilityMethods(RestClientBuilder restClientBuilder) {
+        this.capabilitiesApi = restClientBuilder.build(CapabilitiesApi.class);
     }
 
     /**
@@ -37,7 +38,7 @@ public class CapabilityMethods extends AbstractMethods {
      *
      * @return server capabilities.
      */
-    public CompletableFuture<CapabilitiesResponse> versions() {
-        return factory().get(CapabilitiesApi.class, "capabilities", defaults(), CapabilitiesResponse.class);
+    public CompletableFuture<CapabilitiesResponse> capabilities() {
+        return capabilitiesApi.capabilities().toCompletableFuture();
     }
 }
