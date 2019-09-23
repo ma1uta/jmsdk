@@ -16,11 +16,10 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.SearchApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.search.SearchRequest;
 import io.github.ma1uta.matrix.client.model.search.SearchResponse;
+import io.github.ma1uta.matrix.client.rest.SearchApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +27,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Search methods.
  */
-public class SearchMethods extends AbstractMethods {
+public class SearchMethods {
 
-    public SearchMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final SearchApi searchApi;
+
+    public SearchMethods(RestClientBuilder restClientBuilder) {
+        this.searchApi = restClientBuilder.build(SearchApi.class);
     }
 
     /**
@@ -45,7 +46,6 @@ public class SearchMethods extends AbstractMethods {
     public CompletableFuture<SearchResponse> search(SearchRequest request, String nextBatch) {
         Objects.requireNonNull(request.getSearchCategories(), "Search categories cannot be empty.");
 
-        RequestParams params = defaults().clone().query("nextBatch", nextBatch);
-        return factory().post(SearchApi.class, "search", params, request, SearchResponse.class);
+        return searchApi.search(nextBatch, request).toCompletableFuture();
     }
 }

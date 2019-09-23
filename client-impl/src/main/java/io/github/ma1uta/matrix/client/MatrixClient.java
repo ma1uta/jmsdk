@@ -265,7 +265,7 @@ public class MatrixClient implements Closeable {
      * @return receipt method.
      */
     public ReceiptMethods receipt() {
-        return new ReceiptMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(ReceiptMethods.class, () -> new ReceiptMethods(getClientBuilder()));
     }
 
     /**
@@ -274,7 +274,7 @@ public class MatrixClient implements Closeable {
      * @return the report method.
      */
     public ReportMethods report() {
-        return new ReportMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(ReportMethods.class, () -> new ReportMethods(getClientBuilder()));
     }
 
     /**
@@ -283,7 +283,7 @@ public class MatrixClient implements Closeable {
      * @return the search method.
      */
     public SearchMethods search() {
-        return new SearchMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(SearchMethods.class, () -> new SearchMethods(getClientBuilder()));
     }
 
     /**
@@ -292,7 +292,7 @@ public class MatrixClient implements Closeable {
      * @return the send to device method.
      */
     public SendToDeviceMethods sendToDevice() {
-        return new SendToDeviceMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(SendToDeviceMethods.class, () -> new SendToDeviceMethods(getClientBuilder()));
     }
 
     /**
@@ -301,7 +301,7 @@ public class MatrixClient implements Closeable {
      * @return sync method.
      */
     public SyncMethods sync() {
-        return new SyncMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(SyncMethods.class, () -> new SyncMethods(getClientBuilder()));
     }
 
     /**
@@ -310,7 +310,7 @@ public class MatrixClient implements Closeable {
      * @return event methods.
      */
     public EventMethods event() {
-        return new EventMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(EventMethods.class, () -> new EventMethods(getClientBuilder()));
     }
 
     /**

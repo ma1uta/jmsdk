@@ -17,22 +17,22 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.Page;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.SyncApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
+import io.github.ma1uta.matrix.client.rest.SyncApi;
 import io.github.ma1uta.matrix.event.Event;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.GenericType;
 
 /**
  * Sync method.
  */
-public class SyncMethods extends AbstractMethods {
+public class SyncMethods {
 
-    public SyncMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final SyncApi syncApi;
+
+    public SyncMethods(RestClientBuilder restClientBuilder) {
+        this.syncApi = restClientBuilder.build(SyncApi.class);
     }
 
     /**
@@ -46,13 +46,7 @@ public class SyncMethods extends AbstractMethods {
      * @return The sync data.
      */
     public CompletableFuture<SyncResponse> sync(String filter, String since, boolean fullState, String presence, Long timeout) {
-        RequestParams params = defaults().clone()
-            .query("filter", filter)
-            .query("since", since)
-            .query("fullState", fullState)
-            .query("presence", presence)
-            .query("timeout", timeout);
-        return factory().get(SyncApi.class, "sync", params, SyncResponse.class);
+        return syncApi.sync(filter, since, fullState, presence, timeout).toCompletableFuture();
     }
 
     /**
@@ -66,11 +60,6 @@ public class SyncMethods extends AbstractMethods {
      * @return The events received, which may be none.
      */
     public CompletableFuture<Page<Event>> events(String from, Long timeout, String roomId) {
-        RequestParams params = defaults().clone()
-            .query("from", from)
-            .query("roomId", roomId)
-            .query("timeout", timeout);
-        return factory().get(SyncApi.class, "events", params, new GenericType<Page<Event>>() {
-        });
+        return syncApi.events(from, timeout, roomId).toCompletableFuture();
     }
 }

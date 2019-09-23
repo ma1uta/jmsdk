@@ -17,10 +17,9 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.SendToDeviceApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.sendtodevice.SendToDeviceRequest;
+import io.github.ma1uta.matrix.client.rest.SendToDeviceApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +27,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Send to device method.
  */
-public class SendToDeviceMethods extends AbstractMethods {
+public class SendToDeviceMethods {
 
-    public SendToDeviceMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final SendToDeviceApi sendToDeviceApi;
+
+    public SendToDeviceMethods(RestClientBuilder restClientBuilder) {
+        this.sendToDeviceApi = restClientBuilder.build(SendToDeviceApi.class);
     }
 
     /**
@@ -44,7 +45,6 @@ public class SendToDeviceMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> sendToDevice(String eventType, SendToDeviceRequest request) {
         Objects.requireNonNull(eventType, "RoomId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("eventType", eventType).path("txnId", Long.toString(System.currentTimeMillis()));
-        return factory().put(SendToDeviceApi.class, "send", params, request, EmptyResponse.class);
+        return sendToDeviceApi.send(eventType, Long.toString(System.currentTimeMillis()), request).toCompletableFuture();
     }
 }

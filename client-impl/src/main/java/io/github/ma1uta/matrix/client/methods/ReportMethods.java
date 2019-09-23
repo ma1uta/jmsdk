@@ -17,10 +17,9 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.ReportApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.report.ReportRequest;
+import io.github.ma1uta.matrix.client.rest.ReportApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +27,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Report methods.
  */
-public class ReportMethods extends AbstractMethods {
+public class ReportMethods {
 
-    public ReportMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final ReportApi reportApi;
+
+    public ReportMethods(RestClientBuilder restClientBuilder) {
+        this.reportApi = restClientBuilder.build(ReportApi.class);
     }
 
     /**
@@ -49,12 +50,10 @@ public class ReportMethods extends AbstractMethods {
         Objects.requireNonNull(reason, "Reason cannot be empty.");
         Objects.requireNonNull(score, "Score cannot be empty.");
 
-        RequestParams params = defaults().clone()
-            .path("roomId", roomId)
-            .path("eventId", eventId);
         ReportRequest request = new ReportRequest();
         request.setReason(reason);
         request.setScore(score);
-        return factory().post(ReportApi.class, "report", params, reason, EmptyResponse.class);
+
+        return reportApi.report(roomId, eventId, request).toCompletableFuture();
     }
 }

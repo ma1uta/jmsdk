@@ -17,10 +17,9 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.ReceiptApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.receipt.ReadMarkersRequest;
+import io.github.ma1uta.matrix.client.rest.ReceiptApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -28,10 +27,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Receipt method.
  */
-public class ReceiptMethods extends AbstractMethods {
+public class ReceiptMethods {
 
-    public ReceiptMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final ReceiptApi receiptApi;
+
+    public ReceiptMethods(RestClientBuilder restClientBuilder) {
+        this.receiptApi = restClientBuilder.build(ReceiptApi.class);
     }
 
     /**
@@ -45,11 +46,7 @@ public class ReceiptMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
 
-        RequestParams params = defaults().clone()
-            .path("roomId", roomId)
-            .path("eventId", eventId)
-            .path("receiptType", ReceiptApi.Receipt.READ);
-        return factory().post(ReceiptApi.class, "receipt", params, "", EmptyResponse.class);
+        return receiptApi.receipt(roomId, io.github.ma1uta.matrix.client.api.ReceiptApi.Receipt.READ, eventId).toCompletableFuture();
     }
 
     /**
@@ -62,7 +59,6 @@ public class ReceiptMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> readMarkers(String roomId, ReadMarkersRequest request) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("roomId", roomId);
-        return factory().post(ReceiptApi.class, "readMarkers", params, request, EmptyResponse.class);
+        return receiptApi.readMarkers(roomId, request).toCompletableFuture();
     }
 }
