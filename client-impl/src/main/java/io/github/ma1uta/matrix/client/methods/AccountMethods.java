@@ -17,12 +17,10 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.AccountApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
 import io.github.ma1uta.matrix.client.model.account.DeactivateRequest;
+import io.github.ma1uta.matrix.client.model.account.DeactivateResponse;
 import io.github.ma1uta.matrix.client.model.account.Delete3PidRequest;
 import io.github.ma1uta.matrix.client.model.account.EmailRequestToken;
 import io.github.ma1uta.matrix.client.model.account.MsisdnRequestToken;
@@ -32,7 +30,9 @@ import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import io.github.ma1uta.matrix.client.rest.AccountApi;
 import io.github.ma1uta.matrix.thirdpid.SessionResponse;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -41,17 +41,14 @@ import java.util.function.Function;
 /**
  * Account methods.
  */
-public class AccountMethods extends AbstractMethods {
+public class AccountMethods {
 
+    private final AccountApi accountApi;
     private final Function<LoginResponse, LoginResponse> afterLogin;
 
-    public AccountMethods(RequestFactory factory, RequestParams defaultParams, Function<LoginResponse, LoginResponse> afterLogin) {
-        super(factory, defaultParams);
+    public AccountMethods(RestClientBuilder restClientBuilder, Function<LoginResponse, LoginResponse> afterLogin) {
+        this.accountApi = restClientBuilder.build(AccountApi.class);
         this.afterLogin = afterLogin;
-    }
-
-    protected Function<LoginResponse, LoginResponse> getAfterLogin() {
-        return afterLogin;
     }
 
     /**
@@ -61,8 +58,8 @@ public class AccountMethods extends AbstractMethods {
      * @return The date of the registered user..
      */
     public CompletableFuture<LoginResponse> register(RegisterRequest request) {
-        RequestParams params = defaults().clone().query("kind", AccountApi.RegisterType.USER);
-        return factory().post(AccountApi.class, "register", params, request, LoginResponse.class).thenApply(getAfterLogin());
+        return accountApi.register(io.github.ma1uta.matrix.client.api.AccountApi.RegisterType.USER, request).thenApply(afterLogin)
+            .toCompletableFuture();
     }
 
     /**
@@ -76,7 +73,7 @@ public class AccountMethods extends AbstractMethods {
         Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "emailRequestToken", defaults(), requestToken, SessionResponse.class);
+        return accountApi.emailRequestToken(requestToken).toCompletableFuture();
     }
 
     /**
@@ -91,7 +88,7 @@ public class AccountMethods extends AbstractMethods {
         Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "msisdnRequestToken", defaults(), requestToken, SessionResponse.class);
+        return accountApi.msisdnRequestToken(requestToken).toCompletableFuture();
     }
 
     /**
@@ -107,7 +104,8 @@ public class AccountMethods extends AbstractMethods {
         PasswordRequest request = new PasswordRequest();
         request.setNewPassword(password);
         request.setAuth(auth);
-        return factory().post(AccountApi.class, "password", defaults(), request, EmptyResponse.class);
+
+        return accountApi.password(request).toCompletableFuture();
     }
 
     /**
@@ -121,7 +119,7 @@ public class AccountMethods extends AbstractMethods {
         Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "passwordEmailRequestToken", defaults(), requestToken, SessionResponse.class);
+        return accountApi.passwordEmailRequestToken(requestToken).toCompletableFuture();
     }
 
     /**
@@ -136,19 +134,20 @@ public class AccountMethods extends AbstractMethods {
         Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "passwordMsisdnRequestToken", defaults(), requestToken, SessionResponse.class);
+        return accountApi.passwordMsisdnRequestToken(requestToken).toCompletableFuture();
     }
 
     /**
      * Deactivate user.
      *
      * @param auth The authentication data.
-     * @return The empty response.
+     * @return The unbind result.
      */
-    public CompletableFuture<EmptyResponse> deactivate(AuthenticationData auth) {
+    public CompletableFuture<DeactivateResponse> deactivate(AuthenticationData auth) {
         DeactivateRequest request = new DeactivateRequest();
         request.setAuth(auth);
-        return factory().post(AccountApi.class, "deactivate", defaults(), request, EmptyResponse.class);
+
+        return accountApi.deactivate(request).toCompletableFuture();
     }
 
     /**
@@ -157,11 +156,10 @@ public class AccountMethods extends AbstractMethods {
      * @param username The checked username.
      * @return {@code true} if available, else {@code false}.
      */
-    public CompletableFuture<Boolean> available(String username) {
+    public CompletableFuture<AvailableResponse> available(String username) {
         Objects.requireNonNull(username, "Username cannot be empty");
 
-        RequestParams params = defaults().clone().query("username", username);
-        return factory().get(AccountApi.class, "available", params, AvailableResponse.class).thenApply(AvailableResponse::getAvailable);
+        return accountApi.available(username).toCompletableFuture();
     }
 
     /**
@@ -170,7 +168,7 @@ public class AccountMethods extends AbstractMethods {
      * @return The third party identifiers.
      */
     public CompletableFuture<ThreePidResponse> getThreePid() {
-        return factory().get(AccountApi.class, "getThreePid", defaults(), ThreePidResponse.class);
+        return accountApi.getThreePid().toCompletableFuture();
     }
 
     /**
@@ -183,7 +181,7 @@ public class AccountMethods extends AbstractMethods {
         String error = "Threepids cannot be empty.";
         Objects.requireNonNull(request.getThreePidCreds(), error);
 
-        return factory().post(AccountApi.class, "updateThreePid", defaults(), request, EmptyResponse.class);
+        return accountApi.updateThreePid(request).toCompletableFuture();
     }
 
     /**
@@ -191,16 +189,17 @@ public class AccountMethods extends AbstractMethods {
      *
      * @param medium  The medium of the 3pid identifier.
      * @param address The 3pid address (email of phone).
-     * @return The empty response.
+     * @return The unbind resule.
      */
-    public CompletableFuture<EmptyResponse> deleteThreePid(String medium, String address) {
+    public CompletableFuture<DeactivateResponse> deleteThreePid(String medium, String address) {
         Objects.requireNonNull(medium, "Medium cannot be empty.");
         Objects.requireNonNull(address, "Address cannot be empty.");
 
         Delete3PidRequest request = new Delete3PidRequest();
         request.setMedium(medium);
         request.setAddress(address);
-        return factory().post(AccountApi.class, "deleteThreePid", defaults(), request, EmptyResponse.class);
+
+        return accountApi.deleteThreePid(request).toCompletableFuture();
     }
 
     /**
@@ -214,7 +213,7 @@ public class AccountMethods extends AbstractMethods {
         Objects.requireNonNull(requestToken.getEmail(), "Email cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "threePidEmailRequestToken", defaults(), requestToken, SessionResponse.class);
+        return accountApi.threePidEmailRequestToken(requestToken).toCompletableFuture();
     }
 
     /**
@@ -229,7 +228,7 @@ public class AccountMethods extends AbstractMethods {
         Objects.requireNonNull(requestToken.getPhoneNumber(), "Phone number cannot be empty.");
         Objects.requireNonNull(requestToken.getSendAttempt(), "Send attempt cannot be empty.");
 
-        return factory().post(AccountApi.class, "threePidMsisdnRequestToken", defaults(), requestToken, SessionResponse.class);
+        return accountApi.threePidMsisdnRequestToken(requestToken).toCompletableFuture();
     }
 
     /**
@@ -238,6 +237,6 @@ public class AccountMethods extends AbstractMethods {
      * @return The information about the owner of a given access token.
      */
     public CompletableFuture<WhoamiResponse> whoami() {
-        return factory().get(AccountApi.class, "whoami", defaults(), WhoamiResponse.class);
+        return accountApi.whoami().toCompletableFuture();
     }
 }

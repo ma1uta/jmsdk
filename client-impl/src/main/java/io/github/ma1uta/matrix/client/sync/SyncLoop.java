@@ -105,7 +105,7 @@ public class SyncLoop implements Runnable {
                     current.setNextBatch(sync.getNextBatch());
                 }
 
-                setCurrent(getInboundListener().apply(sync, new SyncParams(current)));
+                setCurrent(getInboundListener().apply(sync, getCurrent()));
             } catch (TimeoutException e) {
                 LOGGER.error("Timeout exceeded", e);
             } catch (InterruptedException e) {

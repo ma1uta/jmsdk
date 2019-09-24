@@ -18,7 +18,7 @@ package io.github.ma1uta.matrix.impl;
 
 import io.github.ma1uta.matrix.event.content.EventContent;
 
-import java.io.InputStream;
+import java.io.IOException;
 
 /**
  * Deserializer.
@@ -32,18 +32,9 @@ public interface Deserializer {
      * @param clazz class name.
      * @param <T>   class type.
      * @return deserialized object.
+     * @throws IOException when unable to deserialize object.
      */
-    <T> T deserialize(byte[] bytes, Class<T> clazz);
-
-    /**
-     * Deserialize bytes to class.
-     *
-     * @param inputStream input stream.
-     * @param clazz       class name.
-     * @param <T>         class type.
-     * @return deserialized object.
-     */
-    <T> T deserialize(InputStream inputStream, Class<T> clazz);
+    <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException;
 
     /**
      * Deserialize bytes to {@link io.github.ma1uta.matrix.event.content.EventContent}.
@@ -51,6 +42,7 @@ public interface Deserializer {
      * @param bytes     instance content.
      * @param eventType event type.
      * @return event content.
+     * @throws IOException when unable to deserialize object.
      */
-    EventContent deserializeEventContent(byte[] bytes, String eventType);
+    EventContent deserializeEventContent(byte[] bytes, String eventType) throws IOException;
 }

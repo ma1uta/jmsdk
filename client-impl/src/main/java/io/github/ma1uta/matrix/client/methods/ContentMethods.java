@@ -16,25 +16,25 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.ContentApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.content.ContentConfig;
 import io.github.ma1uta.matrix.client.model.content.ContentUri;
+import io.github.ma1uta.matrix.client.rest.ContentApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.GenericType;
 
 /**
  * Content methods.
  */
-public class ContentMethods extends AbstractMethods {
+public class ContentMethods {
 
-    public ContentMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final ContentApi contentApi;
+
+    public ContentMethods(RestClientBuilder restClientBuilder) {
+        this.contentApi = restClientBuilder.build(ContentApi.class);
     }
 
     /**
@@ -42,13 +42,10 @@ public class ContentMethods extends AbstractMethods {
      *
      * @param inputStream The file content.
      * @param filename    The name of the file being uploaded.
-     * @param contentType The content type of the file being uploaded.
      * @return The MXC URI to the uploaded content.
      */
-    public CompletableFuture<String> upload(InputStream inputStream, String filename, String contentType) {
-        RequestParams params = defaults().clone().query("filename", filename).header("Content-Type", contentType);
-        return factory().post(ContentApi.class, "upload", params, inputStream, ContentUri.class, contentType)
-            .thenApply(ContentUri::getContentUri);
+    public CompletableFuture<ContentUri> upload(InputStream inputStream, String filename) {
+        return contentApi.upload(inputStream, filename).toCompletableFuture();
     }
 
     /**
@@ -64,8 +61,7 @@ public class ContentMethods extends AbstractMethods {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("serverName", serverName).path("mediaId", mediaId).query("allowRemote", allowRemote);
-        return factory().get(ContentApi.class, "download", params, InputStream.class);
+        return contentApi.download(serverName, mediaId, allowRemote).toCompletableFuture();
     }
 
     /**
@@ -85,14 +81,7 @@ public class ContentMethods extends AbstractMethods {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
 
-        RequestParams params = defaults().clone()
-            .path("serverName", serverName)
-            .path("mediaId", mediaId)
-            .query("width", width)
-            .query("height", height)
-            .query("method", method)
-            .query("allowRemote", allowRemote);
-        return factory().get(ContentApi.class, "thumbnail", params, InputStream.class);
+        return contentApi.thumbnail(serverName, mediaId, width, height, method, allowRemote).toCompletableFuture();
     }
 
     /**
@@ -105,9 +94,8 @@ public class ContentMethods extends AbstractMethods {
      */
     public CompletableFuture<Map<String, String>> previewInfo(String url, String ts) {
         Objects.requireNonNull(url, "Url cannot be empty.");
-        RequestParams params = defaults().clone().query("url", url).query("ts", ts);
-        return factory().get(ContentApi.class, "previewUrl", params, new GenericType<Map<String, String>>() {
-        });
+
+        return contentApi.previewUrl(url, ts).toCompletableFuture();
     }
 
     /**
@@ -115,7 +103,7 @@ public class ContentMethods extends AbstractMethods {
      *
      * @return supported upload size.
      */
-    public CompletableFuture<Long> getUploadSize() {
-        return factory().get(ContentApi.class, "config", new RequestParams(), ContentConfig.class).thenApply(ContentConfig::getUploadSize);
+    public CompletableFuture<ContentConfig> getUploadSize() {
+        return contentApi.config().toCompletableFuture();
     }
 }

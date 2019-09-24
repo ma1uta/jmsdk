@@ -16,10 +16,9 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.EventContextApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.eventcontext.EventContextResponse;
+import io.github.ma1uta.matrix.client.rest.EventContextApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -27,10 +26,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Event context methods.
  */
-public class EventContextMethods extends AbstractMethods {
+public class EventContextMethods {
 
-    public EventContextMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final EventContextApi eventContextApi;
+
+    public EventContextMethods(RestClientBuilder restClientBuilder) {
+        this.eventContextApi = restClientBuilder.build(EventContextApi.class);
     }
 
     /**
@@ -46,10 +47,6 @@ public class EventContextMethods extends AbstractMethods {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(eventId, "EventId cannot be empty.");
 
-        RequestParams params = defaults().clone()
-            .path("roomId", roomId)
-            .path("eventId", eventId)
-            .query("limit", limit);
-        return factory().get(EventContextApi.class, "context", params, EventContextResponse.class);
+        return eventContextApi.context(roomId, eventId, limit).toCompletableFuture();
     }
 }

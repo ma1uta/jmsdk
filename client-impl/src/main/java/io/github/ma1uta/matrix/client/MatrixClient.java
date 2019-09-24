@@ -19,7 +19,6 @@ package io.github.ma1uta.matrix.client;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.filter.CustomHeaderClientFilter;
 import io.github.ma1uta.matrix.client.filter.ErrorFilter;
 import io.github.ma1uta.matrix.client.filter.LoggingFilter;
@@ -146,24 +145,6 @@ public class MatrixClient implements Closeable {
         return getAccountInfo().getAccessToken();
     }
 
-    /**
-     * Get the request factory.
-     *
-     * @return The {@link RequestFactory} instance.
-     */
-    public RequestFactory getRequestFactory() {
-        return requestFactory;
-    }
-
-    /**
-     * Get the default request params.
-     *
-     * @return The {@link RequestParams} instance.
-     */
-    public RequestParams getDefaultParams() {
-        return defaultParams;
-    }
-
     @Override
     public void close() {
         auth().logout();
@@ -175,7 +156,7 @@ public class MatrixClient implements Closeable {
      * @return account methods.
      */
     public AccountMethods account() {
-        return new AccountMethods(getRequestFactory(), getDefaultParams(), this::afterLogin);
+        return getMethod(AccountMethods.class, () -> new AccountMethods(getClientBuilder(), this::afterLogin));
     }
 
     /**
@@ -184,7 +165,7 @@ public class MatrixClient implements Closeable {
      * @return admin methods.
      */
     public AdminMethods admin() {
-        return new AdminMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(AdminMethods.class, () -> new AdminMethods(getClientBuilder()));
     }
 
     /**
@@ -193,7 +174,7 @@ public class MatrixClient implements Closeable {
      * @return auth methods.
      */
     public AuthMethods auth() {
-        return new AuthMethods(getRequestFactory(), getDefaultParams(), this::afterLogin, this::afterLogout);
+        return getMethod(AuthMethods.class, () -> new AuthMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
     }
 
     /**
@@ -202,7 +183,7 @@ public class MatrixClient implements Closeable {
      * @return client config methods.
      */
     public ClientConfigMethods clientConfig() {
-        return new ClientConfigMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(ClientConfigMethods.class, () -> new ClientConfigMethods(getClientBuilder(), getAccountInfo()));
     }
 
     /**
@@ -211,7 +192,7 @@ public class MatrixClient implements Closeable {
      * @return content methods.
      */
     public ContentMethods content() {
-        return new ContentMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(ContentMethods.class, () -> new ContentMethods(getClientBuilder()));
     }
 
     /**
@@ -220,7 +201,7 @@ public class MatrixClient implements Closeable {
      * @return device methods.
      */
     public DeviceMethods device() {
-        return new DeviceMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(DeviceMethods.class, () -> new DeviceMethods(getClientBuilder(), getAccountInfo()));
     }
 
     /**
@@ -229,7 +210,7 @@ public class MatrixClient implements Closeable {
      * @return encryption methods.
      */
     public EncryptionMethods encryption() {
-        return new EncryptionMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(EncryptionMethods.class, () -> new EncryptionMethods(getClientBuilder()));
     }
 
     /**
@@ -238,7 +219,7 @@ public class MatrixClient implements Closeable {
      * @return event context method.
      */
     public EventContextMethods eventContext() {
-        return new EventContextMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(EventContextMethods.class, () -> new EventContextMethods(getClientBuilder()));
     }
 
     /**
@@ -247,7 +228,7 @@ public class MatrixClient implements Closeable {
      * @return presence methods.
      */
     public PresenceMethods presence() {
-        return new PresenceMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(PresenceMethods.class, () -> new PresenceMethods(getClientBuilder(), getAccountInfo()));
     }
 
     /**
@@ -256,7 +237,7 @@ public class MatrixClient implements Closeable {
      * @return profile methods.
      */
     public ProfileMethods profile() {
-        return new ProfileMethods(getRequestFactory(), getDefaultParams());
+        return getMethod(ProfileMethods.class, () -> new ProfileMethods(getClientBuilder(), getAccountInfo()));
     }
 
     /**

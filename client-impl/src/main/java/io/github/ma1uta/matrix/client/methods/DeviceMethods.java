@@ -17,14 +17,14 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.DeviceApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.AccountInfo;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.device.Device;
 import io.github.ma1uta.matrix.client.model.device.DeviceUpdateRequest;
 import io.github.ma1uta.matrix.client.model.device.DevicesDeleteRequest;
 import io.github.ma1uta.matrix.client.model.device.DevicesResponse;
+import io.github.ma1uta.matrix.client.rest.DeviceApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,10 +34,15 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Admin methods.
  */
-public class DeviceMethods extends AbstractMethods {
+public class DeviceMethods {
 
-    public DeviceMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final DeviceApi deviceApi;
+
+    private final AccountInfo accountInfo;
+
+    public DeviceMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+        this.deviceApi = restClientBuilder.build(DeviceApi.class);
+        this.accountInfo = accountInfo;
     }
 
     /**
@@ -45,8 +50,8 @@ public class DeviceMethods extends AbstractMethods {
      *
      * @return The devices.
      */
-    public CompletableFuture<List<Device>> devices() {
-        return factory().get(DeviceApi.class, "devices", defaults(), DevicesResponse.class).thenApply(DevicesResponse::getDevices);
+    public CompletableFuture<DevicesResponse> devices() {
+        return deviceApi.devices().toCompletableFuture();
     }
 
     /**
@@ -58,8 +63,7 @@ public class DeviceMethods extends AbstractMethods {
     public CompletableFuture<Device> device(String deviceId) {
         Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("deviceId", deviceId);
-        return factory().get(DeviceApi.class, "device", params, Device.class);
+        return deviceApi.device(deviceId).toCompletableFuture();
     }
 
     /**
@@ -72,10 +76,10 @@ public class DeviceMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> update(String deviceId, String displayName) {
         Objects.requireNonNull(deviceId, "DeviceId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("deviceId", deviceId);
         DeviceUpdateRequest request = new DeviceUpdateRequest();
         request.setDisplayName(displayName);
-        return factory().put(DeviceApi.class, "updateDevice", params, request, EmptyResponse.class);
+
+        return deviceApi.updateDevice(deviceId, request).toCompletableFuture();
     }
 
     /**
@@ -87,14 +91,14 @@ public class DeviceMethods extends AbstractMethods {
     public CompletableFuture<EmptyResponse> delete(AuthenticationData auth) {
         DevicesDeleteRequest request = new DevicesDeleteRequest();
         request.setAuth(auth);
-        List<String> devices = Collections.singletonList(defaults().getDeviceId());
+        List<String> devices = Collections.singletonList(accountInfo.getDeviceId());
         request.setDevices(devices);
-        return factory().post(DeviceApi.class, "deleteDevices", defaults(), request, EmptyResponse.class)
-            .thenApply(r -> {
-                defaults().deviceId(null);
-                defaults().accessToken(null);
-                return r;
-            });
+
+        return deviceApi.deleteDevices(request).thenApply(r -> {
+            accountInfo.setDeviceId(null);
+            accountInfo.setAccessToken(null);
+            return r;
+        }).toCompletableFuture();
     }
 
     /**
@@ -110,13 +114,12 @@ public class DeviceMethods extends AbstractMethods {
             throw new NullPointerException(error);
         }
 
-        return factory().post(DeviceApi.class, "deleteDevices", defaults(), request, EmptyResponse.class)
-            .thenApply(r -> {
-                if (request.getDevices().contains(defaults().getDeviceId())) {
-                    defaults().deviceId(null);
-                    defaults().accessToken(null);
-                }
-                return r;
-            });
+        return deviceApi.deleteDevices(request).thenApply(r -> {
+            if (request.getDevices().contains(accountInfo.getDeviceId())) {
+                accountInfo.setDeviceId(null);
+                accountInfo.setAccessToken(null);
+            }
+            return r;
+        }).toCompletableFuture();
     }
 }

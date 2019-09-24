@@ -17,10 +17,11 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.PresenceApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.AccountInfo;
+import io.github.ma1uta.matrix.client.model.presence.PresenceRequest;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
+import io.github.ma1uta.matrix.client.rest.PresenceApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -28,11 +29,15 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Presence methods.
  */
-public class PresenceMethods extends AbstractMethods {
+public class PresenceMethods {
 
-    public PresenceMethods(RequestFactory factory,
-                           RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final PresenceApi presenceApi;
+
+    private final AccountInfo accountInfo;
+
+    public PresenceMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+        this.presenceApi = restClientBuilder.build(PresenceApi.class);
+        this.accountInfo = accountInfo;
     }
 
     /**
@@ -40,16 +45,20 @@ public class PresenceMethods extends AbstractMethods {
      * that activity; the client does not need to specify the last_active_ago field. You cannot set the presence state of
      * another user.
      *
-     * @param status The new presence status
+     * @param presence The new presence.
+     * @param status   The new presence status.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> setPresenceStatus(PresenceStatus status) {
-        String userId = defaults().getUserId();
+    public CompletableFuture<EmptyResponse> setPresenceStatus(String presence, String status) {
+        String userId = accountInfo.getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
-        Objects.requireNonNull(status.getPresence(), "Presence cannot be empty.");
+        Objects.requireNonNull(presence, "Presence cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId);
-        return factory().put(PresenceApi.class, "setPresenceStatus", params, status, EmptyResponse.class);
+        PresenceRequest request = new PresenceRequest();
+        request.setPresence(presence);
+        request.setStatusMsg(status);
+
+        return presenceApi.setPresenceStatus(userId, request).toCompletableFuture();
     }
 
     /**
@@ -61,7 +70,6 @@ public class PresenceMethods extends AbstractMethods {
     public CompletableFuture<PresenceStatus> getPresenceStatus(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId);
-        return factory().get(PresenceApi.class, "getPresenceStatus", params, PresenceStatus.class);
+        return presenceApi.getPresenceStatus(userId).toCompletableFuture();
     }
 }

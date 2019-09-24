@@ -16,10 +16,9 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.AdminApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
+import io.github.ma1uta.matrix.client.rest.AdminApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -27,10 +26,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Admin methods.
  */
-public class AdminMethods extends AbstractMethods {
+public class AdminMethods {
 
-    public AdminMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final AdminApi adminApi;
+
+    public AdminMethods(RestClientBuilder restClientBuilder) {
+        this.adminApi = restClientBuilder.build(AdminApi.class);
     }
 
     /**
@@ -43,7 +44,6 @@ public class AdminMethods extends AbstractMethods {
     public CompletableFuture<AdminResponse> whois(String userId) {
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
-        RequestParams params = defaults().clone().path("userId", userId.toString());
-        return factory().get(AdminApi.class, "whois", params, AdminResponse.class);
+        return adminApi.whois(userId).toCompletableFuture();
     }
 }

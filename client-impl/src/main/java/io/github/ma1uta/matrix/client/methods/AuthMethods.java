@@ -17,18 +17,15 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.AuthApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
-import io.github.ma1uta.matrix.client.model.auth.LoginType;
 import io.github.ma1uta.matrix.client.model.auth.SupportedLoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.UserIdentifier;
+import io.github.ma1uta.matrix.client.rest.AuthApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -36,27 +33,20 @@ import java.util.function.Function;
 /**
  * Authentication methods.
  */
-public class AuthMethods extends AbstractMethods {
+public class AuthMethods {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthMethods.class);
 
     private final Function<LoginResponse, LoginResponse> afterLogin;
     private final Function<EmptyResponse, EmptyResponse> afterLogout;
+    private final AuthApi authApi;
 
-    public AuthMethods(RequestFactory factory, RequestParams defaultParams,
+    public AuthMethods(RestClientBuilder restClientBuilder,
                        Function<LoginResponse, LoginResponse> afterLogin,
                        Function<EmptyResponse, EmptyResponse> afterLogout) {
-        super(factory, defaultParams);
+        this.authApi = restClientBuilder.build(AuthApi.class);
         this.afterLogin = afterLogin;
         this.afterLogout = afterLogout;
-    }
-
-    protected Function<LoginResponse, LoginResponse> afterLogin() {
-        return afterLogin;
-    }
-
-    protected Function<EmptyResponse, EmptyResponse> afterLogout() {
-        return afterLogout;
     }
 
     /**
@@ -69,7 +59,7 @@ public class AuthMethods extends AbstractMethods {
     public CompletableFuture<LoginResponse> login(String login, char[] password) {
         LOGGER.debug("Login with username: ''{}'' and password: ''<redacted>''", login);
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setType(AuthApi.AuthType.PASSWORD);
+        loginRequest.setType(io.github.ma1uta.matrix.client.api.AuthApi.AuthType.PASSWORD);
         UserIdentifier identifier = new UserIdentifier();
         identifier.setUser(login);
         loginRequest.setIdentifier(identifier);
@@ -87,7 +77,7 @@ public class AuthMethods extends AbstractMethods {
     public CompletableFuture<LoginResponse> login(LoginRequest loginRequest) {
         Objects.requireNonNull(loginRequest.getType(), "Type cannot be empty.");
 
-        return factory().post(AuthApi.class, "login", defaults(), loginRequest, LoginResponse.class).thenApply(afterLogin());
+        return authApi.login(loginRequest).thenApply(afterLogin).toCompletableFuture();
     }
 
     /**
@@ -97,7 +87,7 @@ public class AuthMethods extends AbstractMethods {
      */
     public CompletableFuture<EmptyResponse> logout() {
         LOGGER.debug("Logout");
-        return factory().post(AuthApi.class, "logout", defaults(), "", EmptyResponse.class).thenApply(afterLogout());
+        return authApi.logout().thenApply(afterLogout).toCompletableFuture();
     }
 
     /**
@@ -106,7 +96,7 @@ public class AuthMethods extends AbstractMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> logoutAll() {
-        return factory().post(AuthApi.class, "logoutAll", defaults(), "", EmptyResponse.class).thenApply(afterLogout());
+        return authApi.logoutAll().thenApply(afterLogout).toCompletableFuture();
     }
 
     /**
@@ -114,8 +104,7 @@ public class AuthMethods extends AbstractMethods {
      *
      * @return The supported login types.
      */
-    public CompletableFuture<List<LoginType>> loginTypes() {
-        return factory().get(AuthApi.class, "supportedLoginTypes", defaults(), SupportedLoginResponse.class)
-            .thenApply(SupportedLoginResponse::getFlows);
+    public CompletableFuture<SupportedLoginResponse> loginTypes() {
+        return authApi.supportedLoginTypes().toCompletableFuture();
     }
 }

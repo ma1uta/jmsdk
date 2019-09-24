@@ -16,9 +16,6 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.EncryptionApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.encryption.ChangesResponse;
 import io.github.ma1uta.matrix.client.model.encryption.ClaimRequest;
 import io.github.ma1uta.matrix.client.model.encryption.ClaimResponse;
@@ -26,6 +23,8 @@ import io.github.ma1uta.matrix.client.model.encryption.QueryRequest;
 import io.github.ma1uta.matrix.client.model.encryption.QueryResponse;
 import io.github.ma1uta.matrix.client.model.encryption.UploadRequest;
 import io.github.ma1uta.matrix.client.model.encryption.UploadResponse;
+import io.github.ma1uta.matrix.client.rest.EncryptionApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -33,10 +32,12 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Admin methods.
  */
-public class EncryptionMethods extends AbstractMethods {
+public class EncryptionMethods {
 
-    public EncryptionMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final EncryptionApi encryptionApi;
+
+    public EncryptionMethods(RestClientBuilder restClientBuilder) {
+        this.encryptionApi = restClientBuilder.build(EncryptionApi.class);
     }
 
     /**
@@ -46,7 +47,7 @@ public class EncryptionMethods extends AbstractMethods {
      * @return For each key algorithm, the number of unclaimed one-time keys of that type currently held on the server for this device.
      */
     public CompletableFuture<UploadResponse> uploadKey(UploadRequest request) {
-        return factory().post(EncryptionApi.class, "uploadKey", defaults(), request, UploadResponse.class);
+        return encryptionApi.uploadKey(request).toCompletableFuture();
     }
 
     /**
@@ -59,7 +60,7 @@ public class EncryptionMethods extends AbstractMethods {
         if (request.getDeviceKeys() == null || request.getDeviceKeys().isEmpty()) {
             throw new NullPointerException("DeviceKeys cannot be empty.");
         }
-        return factory().post(EncryptionApi.class, "query", defaults(), request, QueryResponse.class);
+        return encryptionApi.query(request).toCompletableFuture();
     }
 
     /**
@@ -72,7 +73,7 @@ public class EncryptionMethods extends AbstractMethods {
         if (request.getOneTimeKeys().isEmpty()) {
             throw new NullPointerException("OneTimeKeys cannot be empty.");
         }
-        return factory().post(EncryptionApi.class, "claim", defaults(), request, ClaimResponse.class);
+        return encryptionApi.claim(request).toCompletableFuture();
     }
 
     /**
@@ -90,7 +91,6 @@ public class EncryptionMethods extends AbstractMethods {
         Objects.requireNonNull(from, "From cannot be empty.");
         Objects.requireNonNull(to, "To cannot be empty.");
 
-        RequestParams params = defaults().clone().query("from", from).query("to", to);
-        return factory().get(EncryptionApi.class, "changes", params, ChangesResponse.class);
+        return encryptionApi.changes(from, to).toCompletableFuture();
     }
 }

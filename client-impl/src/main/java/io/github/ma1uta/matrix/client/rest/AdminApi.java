@@ -16,13 +16,10 @@
 
 package io.github.ma1uta.matrix.client.rest;
 
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-
 import io.github.ma1uta.matrix.client.model.admin.AdminResponse;
 
 import java.util.concurrent.CompletionStage;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -44,14 +41,12 @@ public interface AdminApi {
      * Return: {@link AdminResponse}.
      * <p>Status code 200: The lookup was successful.</p>
      *
-     * @param bearer authorization token.
      * @param userId Required. The user to look up.
      * @return {@link AdminResponse}
      */
     @GET
     @Path("/whois/{userId}")
     CompletionStage<AdminResponse> whois(
-        @HeaderParam(AUTHORIZATION) String bearer,
         @PathParam("userId") String userId
     );
 }

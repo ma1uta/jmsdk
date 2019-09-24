@@ -17,9 +17,9 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.api.ClientConfigApi;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.AccountInfo;
+import io.github.ma1uta.matrix.client.rest.ClientConfigApi;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Map;
 import java.util.Objects;
@@ -28,10 +28,15 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Client config methods.
  */
-public class ClientConfigMethods extends AbstractMethods {
+public class ClientConfigMethods {
 
-    public ClientConfigMethods(RequestFactory factory, RequestParams defaultParams) {
-        super(factory, defaultParams);
+    private final ClientConfigApi clientConfigApi;
+
+    private final AccountInfo accountInfo;
+
+    public ClientConfigMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+        this.clientConfigApi = restClientBuilder.build(ClientConfigApi.class);
+        this.accountInfo = accountInfo;
     }
 
     /**
@@ -42,14 +47,11 @@ public class ClientConfigMethods extends AbstractMethods {
      * @param accountData The account data.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> addConfig(String type, Map<String, String> accountData) {
+    public CompletableFuture<EmptyResponse> addConfig(String type, Map<String, Object> accountData) {
         Objects.requireNonNull(type, "Type cannot be empty.");
-        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
-        RequestParams params = defaults().clone()
-            .path("userId", defaults().getUserId())
-            .path("type", type);
+        Objects.requireNonNull(accountInfo.getUserId(), "UserId cannot be empty.");
 
-        return factory().put(ClientConfigApi.class, "addConfig", params, accountData, EmptyResponse.class);
+        return clientConfigApi.addConfig(accountInfo.getUserId(), type, accountData).toCompletableFuture();
     }
 
     /**
@@ -60,12 +62,9 @@ public class ClientConfigMethods extends AbstractMethods {
      */
     public CompletableFuture<Map> getConfig(String type) {
         Objects.requireNonNull(type, "Type cannot be empty.");
-        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty.");
-        RequestParams params = defaults().clone()
-            .path("userId", defaults().getUserId())
-            .path("type", type);
+        Objects.requireNonNull(accountInfo.getUserId(), "UserId cannot be empty.");
 
-        return factory().get(ClientConfigApi.class, "getConfig", params, Map.class);
+        return clientConfigApi.getConfig(accountInfo.getUserId(), type).toCompletableFuture();
     }
 
     /**
@@ -77,16 +76,12 @@ public class ClientConfigMethods extends AbstractMethods {
      * @param accountData The account data.
      * @return The empty response.
      */
-    public CompletableFuture<EmptyResponse> addRoomConfig(String roomId, String type, Map<String, String> accountData) {
+    public CompletableFuture<EmptyResponse> addRoomConfig(String roomId, String type, Map<String, Object> accountData) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(type, "Type cannot be empty");
-        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty");
+        Objects.requireNonNull(accountInfo.getUserId(), "UserId cannot be empty");
 
-        RequestParams params = defaults().clone()
-            .path("userId", defaults().getUserId())
-            .path("roomId", roomId)
-            .path("type", type);
-        return factory().put(ClientConfigApi.class, "addRoomConfig", params, accountData, EmptyResponse.class);
+        return clientConfigApi.addRoomConfig(accountInfo.getUserId(), roomId, type, accountData).toCompletableFuture();
     }
 
     /**
@@ -99,12 +94,8 @@ public class ClientConfigMethods extends AbstractMethods {
     public CompletableFuture<Map> getRoomConfig(String roomId, String type) {
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(type, "Type cannot be empty");
-        Objects.requireNonNull(defaults().getUserId(), "UserId cannot be empty");
+        Objects.requireNonNull(accountInfo.getUserId(), "UserId cannot be empty");
 
-        RequestParams params = defaults().clone()
-            .path("userId", defaults().getUserId())
-            .path("roomId", roomId)
-            .path("type", type);
-        return factory().get(ClientConfigApi.class, "getRoomConfig", params, Map.class);
+        return clientConfigApi.getRoomConfig(accountInfo.getUserId(), roomId, type).toCompletableFuture();
     }
 }
