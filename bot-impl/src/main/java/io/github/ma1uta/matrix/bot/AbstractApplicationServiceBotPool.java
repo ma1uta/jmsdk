@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
 import io.github.ma1uta.matrix.event.RoomMember;
@@ -43,9 +42,9 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
 
     private final String appToken;
 
-    public AbstractApplicationServiceBotPool(RequestFactory requestFactory, String displayName, String appToken, S service,
+    public AbstractApplicationServiceBotPool(String displayName, String appToken, S service,
                                              List<Class<? extends Command<C, D, S, E>>> commandClasses) {
-        super(requestFactory, displayName, service, commandClasses);
+        super(displayName, service, commandClasses);
         this.appToken = appToken;
     }
 
@@ -70,7 +69,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
                 }
                 List<String> joinedRooms;
                 try {
-                    joinedRooms = context.getMatrixClient().room().joinedRooms().join();
+                    joinedRooms = context.getMatrixClient().room().joinedRooms().join().getJoinedRooms();
                 } catch (Exception e) {
                     LOGGER.error("Cannot retrieve joined rooms.", e);
                     return false;
@@ -107,7 +106,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
 
     @Override
     protected ApplicationServiceBot<C, D, S, E> createBotInstance(C config) {
-        return new ApplicationServiceBot<>(getRequestFactory(), getAppToken(), true, config, getService(), getCommandClasses());
+        return new ApplicationServiceBot<>(getAppToken(), true, config, getService(), getCommandClasses());
     }
 
     @Override

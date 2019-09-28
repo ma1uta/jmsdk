@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.matrix.support.jackson;
+package io.github.ma1uta.matrix.client.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.ContextResolver;
+import java.io.IOException;
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.ext.Provider;
 
 /**
- * Provides Jackson ObjectMapper with custom deserializers.
+ * Filter to specify custom headers.
  */
 @Provider
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
-
-    private final ObjectMapper mapper = ObjectMapperProvider.getInstance().get();
+public class ContentTypeFilter implements ClientRequestFilter {
 
     @Override
-    public ObjectMapper getContext(Class<?> type) {
-        return mapper;
+    public void filter(ClientRequestContext requestContext) throws IOException {
+        String contentType = requestContext.getHeaderString("X-Content-Type");
+        if (contentType != null) {
+            requestContext.getHeaders().putSingle(CONTENT_TYPE, contentType);
+            requestContext.getHeaders().remove("X-Content-Type");
+        }
     }
 }

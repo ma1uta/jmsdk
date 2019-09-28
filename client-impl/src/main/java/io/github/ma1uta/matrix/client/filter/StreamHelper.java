@@ -25,7 +25,7 @@ import java.io.InputStream;
  * <br>
  * Obsolete for java 9+.
  */
-public class StreamHelper {
+public final class StreamHelper {
 
     private static final int BUFFER_LENGTH = 4096;
 

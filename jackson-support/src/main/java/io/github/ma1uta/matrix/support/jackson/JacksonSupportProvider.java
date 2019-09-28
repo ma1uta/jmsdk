@@ -16,26 +16,18 @@
 
 package io.github.ma1uta.matrix.support.jackson;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
+
 /**
- * Provides Jackson ObjectMapper with custom deserializers.
+ * JAX-RS provider for serialization/deserialization.
  */
 @Provider
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
-
-    private final ObjectMapper mapper = ObjectMapperProvider.getInstance().get();
-
-    @Override
-    public ObjectMapper getContext(Class<?> type) {
-        return mapper;
-    }
+@Consumes( {"application/json", "application/*+json", "text/json"})
+@Produces( {"application/json", "application/*+json", "text/json"})
+public class JacksonSupportProvider extends JacksonJaxbJsonProvider {
 }

@@ -100,8 +100,7 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
         }
         if (MediaType.APPLICATION_JSON_TYPE.equals(responseContext.getMediaType())) {
             byte[] content = StreamHelper.toByteArray(responseContext.getEntityStream());
-            String response = new String(content, StandardCharsets.UTF_8);
-            LOGGER.info("Body: " + response);
+            LOGGER.info("Body:\n" + new String(content, StandardCharsets.UTF_8));
             responseContext.setEntityStream(new ByteArrayInputStream(content));
         }
     }
@@ -130,7 +129,7 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
             super.write(b, off, len);
-            LOGGER.info("Body: " + baos.toString(StandardCharsets.UTF_8.name()));
+            LOGGER.info("Body:\n" + baos.toString(StandardCharsets.UTF_8.name()));
         }
     }
 }

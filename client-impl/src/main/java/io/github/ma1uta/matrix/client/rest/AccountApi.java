@@ -31,7 +31,6 @@ import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.thirdpid.SessionResponse;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -58,7 +57,7 @@ public interface AccountApi {
      */
     @POST
     @Path("/register")
-    CompletableFuture<LoginResponse> register(
+    CompletionStage<LoginResponse> register(
         @QueryParam("kind") String kind,
         RegisterRequest registerRequest
     );
@@ -73,7 +72,7 @@ public interface AccountApi {
      */
     @POST
     @Path("/register/email/requestToken")
-    CompletableFuture<SessionResponse> emailRequestToken(
+    CompletionStage<SessionResponse> emailRequestToken(
         EmailRequestToken emailRequestToken
     );
 
@@ -86,7 +85,7 @@ public interface AccountApi {
      */
     @POST
     @Path("/register/msisdn/requestToken")
-    CompletableFuture<SessionResponse> msisdnRequestToken(
+    CompletionStage<SessionResponse> msisdnRequestToken(
         MsisdnRequestToken msisdnRequestToken
     );
 
@@ -98,7 +97,7 @@ public interface AccountApi {
      */
     @POST
     @Path("/account/password")
-    CompletableFuture<EmptyResponse> password(
+    CompletionStage<EmptyResponse> password(
         PasswordRequest passwordRequest
     );
 
@@ -115,7 +114,7 @@ public interface AccountApi {
      */
     @POST
     @Path("/account/password/email/requestToken")
-    CompletableFuture<SessionResponse> passwordEmailRequestToken(
+    CompletionStage<SessionResponse> passwordEmailRequestToken(
         EmailRequestToken requestToken
     );
 
@@ -131,7 +130,7 @@ public interface AccountApi {
      */
     @POST
     @Path("/account/password/msisdn/requestToken")
-    CompletableFuture<SessionResponse> passwordMsisdnRequestToken(
+    CompletionStage<SessionResponse> passwordMsisdnRequestToken(
         MsisdnRequestToken requestToken
     );
 
@@ -212,8 +211,7 @@ public interface AccountApi {
      */
     @GET
     @Path("/account/3pid")
-    CompletionStage<ThreePidResponse> getThreePid(
-    );
+    CompletionStage<ThreePidResponse> getThreePid();
 
     /**
      * Adds contact information to the user's account.

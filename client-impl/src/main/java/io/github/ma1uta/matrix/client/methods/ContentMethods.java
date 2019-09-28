@@ -42,10 +42,11 @@ public class ContentMethods {
      *
      * @param inputStream The file content.
      * @param filename    The name of the file being uploaded.
+     * @param contentType Mime-type.
      * @return The MXC URI to the uploaded content.
      */
-    public CompletableFuture<ContentUri> upload(InputStream inputStream, String filename) {
-        return contentApi.upload(inputStream, filename).toCompletableFuture();
+    public CompletableFuture<ContentUri> upload(InputStream inputStream, String filename, String contentType) {
+        return contentApi.upload(inputStream, filename, contentType).toCompletableFuture();
     }
 
     /**

@@ -17,7 +17,6 @@
 package io.github.ma1uta.matrix.bot;
 
 import io.github.ma1uta.matrix.client.MatrixClient;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import io.github.ma1uta.matrix.client.model.sync.InvitedRoom;
 import io.github.ma1uta.matrix.client.model.sync.JoinedRoom;
 import io.github.ma1uta.matrix.client.model.sync.LeftRoom;
@@ -46,9 +45,9 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandaloneBot.class);
 
-    public StandaloneBot(RequestFactory factory, boolean exitOnEmptyRooms, C config, S service,
+    public StandaloneBot(boolean exitOnEmptyRooms, C config, S service,
                          List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        super(factory, null, exitOnEmptyRooms, config, service, commandsClasses);
+        super(null, exitOnEmptyRooms, config, service, commandsClasses);
     }
 
     @Override
@@ -153,7 +152,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
             Rooms rooms = sync.getRooms();
 
             MatrixClient matrixClient = getContext().getMatrixClient();
-            List<String> joinedRooms = matrixClient.room().joinedRooms().join();
+            List<String> joinedRooms = matrixClient.room().joinedRooms().join().getJoinedRooms();
             for (Map.Entry<String, LeftRoom> roomEntry : rooms.getLeave().entrySet()) {
                 String leftRoom = roomEntry.getKey();
                 if (joinedRooms.contains(leftRoom)) {
@@ -180,7 +179,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
                 }
             }
 
-            if (getContext().getMatrixClient().room().joinedRooms().join().isEmpty()) {
+            if (getContext().getMatrixClient().room().joinedRooms().join().getJoinedRooms().isEmpty()) {
                 getContext().runInTransaction((context, dao) -> {
                     context.getConfig().setState(isExitOnEmptyRooms() ? BotState.DELETED : BotState.REGISTERED);
                 });

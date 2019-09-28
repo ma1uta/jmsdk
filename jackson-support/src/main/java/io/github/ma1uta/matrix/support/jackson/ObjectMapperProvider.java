@@ -18,24 +18,22 @@ package io.github.ma1uta.matrix.support.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
+import java.util.Iterator;
+import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 /**
- * Provides Jackson ObjectMapper with custom deserializers.
+ * Supplier for ObjectMapper.
  */
-@Provider
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
+public interface ObjectMapperProvider extends Supplier<ObjectMapper> {
 
-    private final ObjectMapper mapper = ObjectMapperProvider.getInstance().get();
-
-    @Override
-    public ObjectMapper getContext(Class<?> type) {
-        return mapper;
+    /**
+     * Get ObjectMapperProvides. Search first a customer provider.
+     *
+     * @return {@link ObjectMapperProvider}.
+     */
+    static ObjectMapperProvider getInstance() {
+        Iterator<ObjectMapperProvider> iterator = ServiceLoader.load(ObjectMapperProvider.class).iterator();
+        return iterator.hasNext() ? iterator.next() : new DefaultObjectMapperProvider();
     }
 }

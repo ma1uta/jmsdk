@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -64,6 +65,8 @@ public interface ContentApi {
      *
      * @param inputStream The file content.
      * @param filename    The name of the file being uploaded.
+     * @param contentType Mime-type of the content. Uses the non-standard header due some implementations cannot change
+     *                    content type header dynamically.
      * @return {@link ContentUri}
      */
     @POST
@@ -71,7 +74,8 @@ public interface ContentApi {
     @Consumes(MediaType.WILDCARD)
     CompletionStage<ContentUri> upload(
         InputStream inputStream,
-        @QueryParam("filename") String filename
+        @QueryParam("filename") String filename,
+        @HeaderParam("X-Content-Type") String contentType
     );
 
     /**

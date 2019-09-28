@@ -17,25 +17,26 @@
 package io.github.ma1uta.matrix.support.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.ma1uta.matrix.event.content.EventContent;
+import io.github.ma1uta.matrix.impl.Deserializer;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
+import java.io.IOException;
 
 /**
- * Provides Jackson ObjectMapper with custom deserializers.
+ * Matrix Jackson-based deserializer.
  */
-@Provider
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
+public class JacksonDeserializer implements Deserializer {
 
     private final ObjectMapper mapper = ObjectMapperProvider.getInstance().get();
+    private final EventContentDeserializer eventContentDeserializer = new EventContentDeserializer();
 
     @Override
-    public ObjectMapper getContext(Class<?> type) {
-        return mapper;
+    public <T> T deserialize(byte[] bytes, Class<T> clazz) throws IOException {
+        return mapper.readValue(bytes, clazz);
+    }
+
+    @Override
+    public EventContent deserializeEventContent(byte[] bytes, String eventType) throws IOException {
+        return eventContentDeserializer.deserialize(bytes, eventType, mapper);
     }
 }

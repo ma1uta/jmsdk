@@ -31,6 +31,7 @@ import io.github.ma1uta.matrix.event.message.Text;
 import io.github.ma1uta.matrix.impl.Deserializer;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -86,7 +87,13 @@ public class EventMethods {
         Objects.requireNonNull(stateKey, "StateKey cannot be empty.");
 
         return eventApi.roomEventWithTypeAndState(roomId, eventType, stateKey)
-            .thenApply(bytes -> deserializer.deserializeEventContent(bytes, eventType)).toCompletableFuture();
+            .thenApply(bytes -> {
+                try {
+                    return deserializer.deserializeEventContent(bytes, eventType);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).toCompletableFuture();
     }
 
     /**

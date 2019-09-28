@@ -16,10 +16,9 @@
 
 package io.github.ma1uta.matrix.client;
 
-import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.filter.CustomQueryParamsClientFilter;
-import io.github.ma1uta.matrix.client.methods.AuthMethods;
-import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+
+import io.github.ma1uta.matrix.client.filter.QueryParamsClientFilter;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
@@ -29,13 +28,17 @@ import java.util.Objects;
  */
 public class AppServiceClient extends MatrixClient {
 
-    private final CustomQueryParamsClientFilter queryParamsClientFilter = new CustomQueryParamsClientFilter();
+    private final QueryParamsClientFilter queryParamsClientFilter = new QueryParamsClientFilter();
 
     public AppServiceClient(String domain, AccountInfo accountInfo) {
         super(domain, accountInfo);
         String userId = accountInfo.getUserId();
         Objects.requireNonNull(userId, "UserId must be configured.");
         queryParamsClientFilter.addParam("user_id", userId);
+
+        String accessToken = accountInfo.getAccessToken();
+        Objects.requireNonNull(accessToken, "AccessToken must be configured");
+        getHeaderClientFilter().addHeader(AUTHORIZATION, "Bearer " + accessToken);
     }
 
     @Override
@@ -53,22 +56,6 @@ public class AppServiceClient extends MatrixClient {
         AccountInfo newAccountInfo = new AccountInfo(getAccountInfo());
         newAccountInfo.setUserId(userId);
         return new AppServiceClient(getDomain(), newAccountInfo);
-    }
-
-    @Override
-    public AuthMethods auth() {
-        throw new UnsupportedOperationException(
-            "Application service client must not login/logout due access_token setup via the configuration.");
-    }
-
-    @Override
-    public LoginResponse afterLogin(LoginResponse loginResponse) {
-        return loginResponse;
-    }
-
-    @Override
-    public EmptyResponse afterLogout(EmptyResponse response) {
-        return response;
     }
 
     /**

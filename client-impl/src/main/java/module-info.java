@@ -3,13 +3,11 @@ module matrix.client.impl {
     uses io.github.ma1uta.matrix.impl.RestClientBuilderConfigurer;
 
     exports io.github.ma1uta.matrix.client;
-    exports io.github.ma1uta.matrix.client.factory;
     exports io.github.ma1uta.matrix.client.methods;
     exports io.github.ma1uta.matrix.client.sync;
 
     requires transitive matrix.client.api;
     requires transitive matrix.common.impl;
     requires transitive java.naming;
-    requires transitive com.fasterxml.jackson.databind;
     requires transitive microprofile.rest.client.api;
 }

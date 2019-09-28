@@ -16,26 +16,21 @@
 
 package io.github.ma1uta.matrix.support.jackson;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
+import io.github.ma1uta.matrix.impl.RestClientBuilderConfigurer;
+import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 /**
- * Provides Jackson ObjectMapper with custom deserializers.
+ * Provides Jackson's object mapper for REST clients.
  */
-@Provider
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
+public class JacksonRestClientBuilderConfigurer implements RestClientBuilderConfigurer {
 
-    private final ObjectMapper mapper = ObjectMapperProvider.getInstance().get();
+    private static final int JSON_PROVIDER_PRIORITY = 100;
 
     @Override
-    public ObjectMapper getContext(Class<?> type) {
-        return mapper;
+    public void configure(RestClientBuilder builder) {
+        JacksonSupportProvider provider = new JacksonSupportProvider();
+        provider.setMapper(ObjectMapperProvider.getInstance().get());
+
+        builder.register(provider, JSON_PROVIDER_PRIORITY);
     }
 }

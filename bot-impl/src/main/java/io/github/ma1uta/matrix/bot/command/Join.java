@@ -55,7 +55,7 @@ public class Join<C extends BotConfig, D extends BotDao<C>, S extends Persistent
             matrixClient.event().sendNotice(roomId, "Usage: " + usage());
         } else {
             try {
-                RoomId result = matrixClient.room().joinByIdOrAlias(String.valueOf(arguments)).join();
+                RoomId result = matrixClient.room().joinByIdOrAlias(arguments, null, null).join();
                 context.getBot().getSkipTimelineRooms().add(result.getRoomId());
             } catch (Exception e) {
                 String msg = String.format("Cannot join: %s", e.getMessage());

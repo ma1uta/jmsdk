@@ -32,6 +32,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,6 +55,11 @@ public class HomeServerResolver {
     private static final String SCHEMA_PREFIX = "https://";
 
     private static final int DEFAULT_PORT = 8448;
+
+    /**
+     * Option to disable addition check correctness of the homeserver url.
+     */
+    public static final String DISABLE_HOMESERVER_URL = "jmsdk.resolver.disable";
 
     private static final Pattern IPv4_PATTERN = Pattern.compile(
         "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])(:\\d{2,5})?$");
@@ -92,7 +98,12 @@ public class HomeServerResolver {
             throw new IllegalArgumentException("Unable to get homeserver url of the domain: " + domain);
         }
 
-        checkHomeserver(homeserverUrl);
+        if (Objects.equals(System.getProperty(DISABLE_HOMESERVER_URL), Boolean.FALSE.toString())) {
+            LOGGER.trace("Check homeserver url: {}", homeserverUrl);
+            checkHomeserver(homeserverUrl);
+        } else {
+            LOGGER.trace("Checking homeserver url disabled.");
+        }
         LOGGER.info("Resolved: {} => {}", domain, homeserverUrl.toString());
         return homeserverUrl;
     }
@@ -153,7 +164,10 @@ public class HomeServerResolver {
     }
 
     private URL tryDirectUrl(String domain) {
-        String homeserverUrl = SCHEMA_PREFIX + domain + ":" + DEFAULT_PORT;
+        int portIndex = domain.lastIndexOf(":");
+        String domainWithPort = portIndex != -1 ? domain : domain + ":" + DEFAULT_PORT;
+        int schemaIndex = domain.indexOf("://");
+        String homeserverUrl = schemaIndex != -1 ? domainWithPort : SCHEMA_PREFIX + domainWithPort;
         try {
             return new URL(homeserverUrl);
         } catch (MalformedURLException e) {

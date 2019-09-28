@@ -16,15 +16,11 @@
 
 package io.github.ma1uta.matrix.client;
 
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-
-import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.filter.CustomHeaderClientFilter;
+import io.github.ma1uta.matrix.client.filter.ContentTypeFilter;
 import io.github.ma1uta.matrix.client.filter.ErrorFilter;
+import io.github.ma1uta.matrix.client.filter.HeaderClientFilter;
 import io.github.ma1uta.matrix.client.filter.LoggingFilter;
-import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.AdminMethods;
-import io.github.ma1uta.matrix.client.methods.AuthMethods;
 import io.github.ma1uta.matrix.client.methods.CapabilityMethods;
 import io.github.ma1uta.matrix.client.methods.ClientConfigMethods;
 import io.github.ma1uta.matrix.client.methods.ContentMethods;
@@ -48,7 +44,6 @@ import io.github.ma1uta.matrix.client.methods.TypingMethods;
 import io.github.ma1uta.matrix.client.methods.UserDirectoryMethods;
 import io.github.ma1uta.matrix.client.methods.VersionMethods;
 import io.github.ma1uta.matrix.client.methods.VoipMethods;
-import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.impl.RestClientBuilderConfigurer;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
@@ -68,7 +63,7 @@ public class MatrixClient implements Closeable {
     private volatile RestClientBuilder builder;
     private final HomeServerResolver homeServerResolver = new HomeServerResolver();
     private final String domain;
-    private final CustomHeaderClientFilter headerClientFilter = new CustomHeaderClientFilter();
+    private final HeaderClientFilter headerClientFilter = new HeaderClientFilter();
     private final Map<Class<?>, Object> methods = new ConcurrentHashMap<>();
     private final AccountInfo accountInfo;
 
@@ -107,6 +102,7 @@ public class MatrixClient implements Closeable {
             .register(new ErrorFilter())
             .register(new LoggingFilter())
             .register(headerClientFilter)
+            .register(new ContentTypeFilter())
             .baseUrl(getHomeserverUrl());
     }
 
@@ -121,6 +117,10 @@ public class MatrixClient implements Closeable {
             }
         }
         return builder;
+    }
+
+    protected HeaderClientFilter getHeaderClientFilter() {
+        return headerClientFilter;
     }
 
     protected <T> T getMethod(Class<T> clazz, Supplier<T> creator) {
@@ -147,16 +147,6 @@ public class MatrixClient implements Closeable {
 
     @Override
     public void close() {
-        auth().logout();
-    }
-
-    /**
-     * Account methods.
-     *
-     * @return account methods.
-     */
-    public AccountMethods account() {
-        return getMethod(AccountMethods.class, () -> new AccountMethods(getClientBuilder(), this::afterLogin));
     }
 
     /**
@@ -166,15 +156,6 @@ public class MatrixClient implements Closeable {
      */
     public AdminMethods admin() {
         return getMethod(AdminMethods.class, () -> new AdminMethods(getClientBuilder()));
-    }
-
-    /**
-     * Auth methods.
-     *
-     * @return auth methods.
-     */
-    public AuthMethods auth() {
-        return getMethod(AuthMethods.class, () -> new AuthMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
     }
 
     /**
@@ -391,40 +372,6 @@ public class MatrixClient implements Closeable {
      */
     public String getUserId() {
         return getAccountInfo().getUserId();
-    }
-
-    /**
-     * Action after login/register.
-     *
-     * @param loginResponse The login response.
-     * @return The login response.
-     */
-    public LoginResponse afterLogin(LoginResponse loginResponse) {
-        if (loginResponse == null) {
-            afterLogout(null);
-        } else {
-            getAccountInfo().setUserId(loginResponse.getUserId());
-            getAccountInfo().setAccessToken(loginResponse.getAccessToken());
-            getAccountInfo().setDeviceId(loginResponse.getDeviceId());
-            getAccountInfo().setServerInfo(loginResponse.getWellKnown());
-
-            headerClientFilter.addHeader(AUTHORIZATION, "Bearer " + loginResponse.getAccessToken());
-        }
-        return loginResponse;
-    }
-
-    /**
-     * Action after logout/logoutAll.
-     *
-     * @param response The empty response.
-     * @return The login response.
-     */
-    public EmptyResponse afterLogout(EmptyResponse response) {
-        getAccountInfo().setAccessToken(null);
-        getAccountInfo().setDeviceId(null);
-
-        headerClientFilter.removeHeader(AUTHORIZATION);
-        return response;
     }
 
     /**

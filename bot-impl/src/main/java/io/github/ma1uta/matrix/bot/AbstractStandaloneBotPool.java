@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +41,8 @@ public abstract class AbstractStandaloneBotPool<C extends BotConfig, D extends B
 
     private final ExecutorService pool;
 
-    public AbstractStandaloneBotPool(RequestFactory requestFactory, String displayName, S service,
-                                     List<Class<? extends Command<C, D, S, E>>> commandClasses) {
-        super(requestFactory, displayName, service, commandClasses);
+    public AbstractStandaloneBotPool(String displayName, S service, List<Class<? extends Command<C, D, S, E>>> commandClasses) {
+        super(displayName, service, commandClasses);
         pool = Executors.newCachedThreadPool();
     }
 
@@ -54,7 +52,7 @@ public abstract class AbstractStandaloneBotPool<C extends BotConfig, D extends B
 
     @Override
     protected StandaloneBot<C, D, S, E> createBotInstance(C config) {
-        return new StandaloneBot<>(getRequestFactory(), true, config, getService(), getCommandClasses());
+        return new StandaloneBot<>(true, config, getService(), getCommandClasses());
     }
 
     @Override

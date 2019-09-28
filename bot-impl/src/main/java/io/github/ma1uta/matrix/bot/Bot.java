@@ -18,8 +18,7 @@ package io.github.ma1uta.matrix.bot;
 
 import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.MatrixClient;
-import io.github.ma1uta.matrix.client.RequestParams;
-import io.github.ma1uta.matrix.client.factory.RequestFactory;
+import io.github.ma1uta.matrix.client.StandaloneClient;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.RoomEventFilter;
@@ -67,9 +66,9 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
 
     private final Set<String> skipTimelineRooms = new HashSet<>();
 
-    public Bot(RequestFactory factory, String asToken, boolean exitOnEmptyRooms, C config, S service,
+    public Bot(String asToken, boolean exitOnEmptyRooms, C config, S service,
                List<Class<? extends Command<C, D, S, E>>> commandsClasses) {
-        this.context = init(factory, asToken, config, service);
+        this.context = init(asToken, config, service);
         this.exitOnEmptyRooms = exitOnEmptyRooms;
         this.commands = new HashMap<>(commandsClasses.size());
         commandsClasses.forEach(cl -> {
@@ -82,9 +81,8 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         });
     }
 
-    protected Context<C, D, S, E> init(RequestFactory factory, String asToken, C config, S service) {
-        MatrixClient matrixClient = new MatrixClient(factory,
-            new RequestParams().userId(String.valueOf(config.getUserId())).accessToken(asToken));
+    protected Context<C, D, S, E> init(String asToken, C config, S service) {
+        MatrixClient matrixClient = new StandaloneClient.Builder().userId(config.getUserId()).accessToken(asToken).build();
         Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
         context.setConfig(config);
         return context;
@@ -96,7 +94,10 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     public void init() {
         Context<C, D, S, E> context = getContext();
         C config = context.getConfig();
-        context.getMatrixClient().auth().login(config.getUserId(), config.getPassword());
+        MatrixClient matrixClient = context.getMatrixClient();
+        if (matrixClient instanceof StandaloneClient) {
+            ((StandaloneClient) matrixClient).auth().login(config.getUserId(), config.getPassword()).join();
+        }
 
         if (getInitAction() != null) {
             context.runInTransaction((ctx, dao) -> {
@@ -148,7 +149,9 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             registerRequest.setDeviceId(config.getDeviceId());
 
             MatrixClient matrixClient = context.getMatrixClient();
-            matrixClient.account().register(registerRequest);
+            if (matrixClient instanceof StandaloneClient) {
+                ((StandaloneClient) matrixClient).account().register(registerRequest);
+            }
             LOGGER.debug("Set new display name: {}", config.getDisplayName());
             matrixClient.profile().setDisplayName(config.getDisplayName());
 
@@ -206,7 +209,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
                     if (state instanceof RoomEvent) {
                         String roomId = eventEntry.getKey();
                         LOGGER.debug("Join to room {}", roomId);
-                        context.getMatrixClient().room().joinByIdOrAlias(roomId);
+                        context.getMatrixClient().room().joinByIdOrAlias(roomId, null, null);
 
                         C config = context.getConfig();
                         config.setState(BotState.JOINED);
@@ -228,7 +231,10 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     public LoopState deletedState() {
         getContext().runInTransaction((context, dao) -> {
             LOGGER.debug("Delete bot");
-            context.getMatrixClient().account().deactivate(null);
+            MatrixClient matrixClient = context.getMatrixClient();
+            if (matrixClient instanceof StandaloneClient) {
+                ((StandaloneClient) matrixClient).account().deactivate(null);
+            }
             dao.delete(context.getConfig());
         });
         return LoopState.EXIT;
