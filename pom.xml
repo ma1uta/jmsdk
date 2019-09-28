@@ -97,6 +97,8 @@
         <version.lib.jersey.hk2>2.29.1</version.lib.jersey.hk2>
         <version.lib.jersey-media-json-jackson>2.29.1</version.lib.jersey-media-json-jackson>
         <version.lib.microprofile>3.0</version.lib.microprofile>
+
+        <version.lib.asm>7.1</version.lib.asm>
     </properties>
 
     <build>
@@ -449,7 +451,7 @@
                 <jdk>[9,)</jdk>
             </activation>
             <properties>
-                <packaging.type>jar</packaging.type>
+                <packaging.type>bundle</packaging.type>
             </properties>
             <build>
                 <pluginManagement>
@@ -492,6 +494,13 @@
                             <configuration>
                                 <argLine>--illegal-access=permit</argLine>
                             </configuration>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>org.ow2.asm</groupId>
+                                    <artifactId>asm</artifactId>
+                                    <version>${version.lib.asm}</version> <!-- Use newer version of ASM -->
+                                </dependency>
+                            </dependencies>
                         </plugin>
                     </plugins>
                 </pluginManagement>
