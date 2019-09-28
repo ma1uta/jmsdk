@@ -25,10 +25,10 @@ module matrix.support.jackson {
     exports io.github.ma1uta.matrix.support.jackson;
 
     requires transitive matrix.common.api;
+    requires transitive matrix.common.impl;
     requires transitive com.fasterxml.jackson.core;
     requires transitive com.fasterxml.jackson.databind;
     requires transitive com.fasterxml.jackson.jaxrs.json;
-    requires matrix.common.impl;
 
     provides Deserializer with JacksonDeserializer;
     provides RestClientBuilderConfigurer with JacksonRestClientBuilderConfigurer;

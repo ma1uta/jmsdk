@@ -30,27 +30,24 @@ import io.github.ma1uta.matrix.event.content.RoomMessageContent;
  */
 public class DefaultObjectMapperProvider implements ObjectMapperProvider {
 
-    private volatile ObjectMapper mapper;
+    private final ObjectMapper mapper;
+
+    public DefaultObjectMapperProvider() {
+        mapper = new ObjectMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+
+        SimpleModule eventModule = new SimpleModule("Jackson Matrix Module");
+        eventModule.addDeserializer(Event.class, new EventDeserializer());
+        eventModule.addDeserializer(RoomEncryptedContent.class, new RoomEncryptedContentDeserializer());
+        eventModule.addDeserializer(RoomMessageContent.class, new RoomMessageContentDeserializer());
+
+        mapper.registerModule(eventModule);
+    }
 
     @Override
     public ObjectMapper get() {
-        if (mapper == null) {
-            synchronized (this) {
-                if (mapper == null) {
-                    mapper = new ObjectMapper();
-                    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-                    mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-                    mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-
-                    SimpleModule eventModule = new SimpleModule("Jackson Matrix Module");
-                    eventModule.addDeserializer(Event.class, new EventDeserializer());
-                    eventModule.addDeserializer(RoomEncryptedContent.class, new RoomEncryptedContentDeserializer());
-                    eventModule.addDeserializer(RoomMessageContent.class, new RoomMessageContentDeserializer());
-
-                    mapper.registerModule(eventModule);
-                }
-            }
-        }
         return mapper;
     }
 }

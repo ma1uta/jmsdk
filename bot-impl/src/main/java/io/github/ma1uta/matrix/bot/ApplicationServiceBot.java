@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.bot;
 
+import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.AppServiceClient;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
@@ -47,7 +48,11 @@ public class ApplicationServiceBot<C extends BotConfig, D extends BotDao<C>, S e
 
     @Override
     protected Context<C, D, S, E> init(String asToken, C config, S service) {
-        AppServiceClient matrixClient = new AppServiceClient.Builder().userId(config.getUserId()).accessToken(asToken).build();
+        String userId = config.getUserId();
+        AppServiceClient matrixClient = new AppServiceClient.Builder()
+            .userId(Id.localPart(userId).orElseThrow(() -> new IllegalArgumentException("Wrong userId, missing localpart: " + userId)))
+            .domain(Id.serverName(userId).orElseThrow(() -> new IllegalArgumentException("Wrong userId, missing server name: " + userId)))
+            .accessToken(asToken).build();
         Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
         context.setConfig(config);
         return context;

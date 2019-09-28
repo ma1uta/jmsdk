@@ -82,7 +82,11 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
     }
 
     protected Context<C, D, S, E> init(String asToken, C config, S service) {
-        MatrixClient matrixClient = new StandaloneClient.Builder().userId(config.getUserId()).accessToken(asToken).build();
+        String userId = config.getUserId();
+        MatrixClient matrixClient = new StandaloneClient.Builder()
+            .userId(Id.localPart(userId).orElseThrow(() -> new IllegalArgumentException("Wrong userId, missing localpart: " + userId)))
+            .domain(Id.serverName(userId).orElseThrow(() -> new IllegalArgumentException("Wrong userId, missing server name: " + userId)))
+            .accessToken(asToken).build();
         Context<C, D, S, E> context = new Context<>(matrixClient, service, this);
         context.setConfig(config);
         return context;
