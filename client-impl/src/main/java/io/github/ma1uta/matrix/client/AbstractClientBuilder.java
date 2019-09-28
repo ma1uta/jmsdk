@@ -25,12 +25,10 @@ import java.util.Objects;
  */
 public abstract class AbstractClientBuilder<C> {
 
-    protected AccountInfo accountInfo = new AccountInfo();
-    protected String domain = null;
+    protected ConnectionInfo connectionInfo = new ConnectionInfo();
 
     protected AbstractClientBuilder() {
     }
-
 
     /**
      * Specify a user ID.
@@ -39,7 +37,7 @@ public abstract class AbstractClientBuilder<C> {
      * @return This builder.
      */
     public AbstractClientBuilder<C> userId(String userId) {
-        this.accountInfo.setUserId(userId);
+        this.connectionInfo.setUserId(userId);
         return this;
     }
 
@@ -50,7 +48,7 @@ public abstract class AbstractClientBuilder<C> {
      * @return This builder.
      */
     public AbstractClientBuilder<C> accessToken(String accessToken) {
-        this.accountInfo.setAccessToken(accessToken);
+        this.connectionInfo.setAccessToken(accessToken);
         return this;
     }
 
@@ -61,7 +59,7 @@ public abstract class AbstractClientBuilder<C> {
      * @return This builder.
      */
     public AbstractClientBuilder<C> domain(String domain) {
-        this.domain = domain;
+        this.connectionInfo.setDomain(domain);
         return this;
     }
 
@@ -71,7 +69,7 @@ public abstract class AbstractClientBuilder<C> {
      * @return The new client.
      */
     public C build() {
-        Objects.requireNonNull(this.domain, "Domain must be set.");
+        Objects.requireNonNull(this.connectionInfo.getDomain(), "Domain must be set.");
         return newInstance();
     }
 

@@ -17,7 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.AccountInfo;
+import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.presence.PresenceRequest;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
 import io.github.ma1uta.matrix.client.rest.PresenceApi;
@@ -33,11 +33,11 @@ public class PresenceMethods {
 
     private final PresenceApi presenceApi;
 
-    private final AccountInfo accountInfo;
+    private final ConnectionInfo connectionInfo;
 
-    public PresenceMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+    public PresenceMethods(RestClientBuilder restClientBuilder, ConnectionInfo connectionInfo) {
         this.presenceApi = restClientBuilder.build(PresenceApi.class);
-        this.accountInfo = accountInfo;
+        this.connectionInfo = connectionInfo;
     }
 
     /**
@@ -50,7 +50,7 @@ public class PresenceMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setPresenceStatus(String presence, String status) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(presence, "Presence cannot be empty.");
 

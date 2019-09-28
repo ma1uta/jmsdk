@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
-import io.github.ma1uta.matrix.client.AccountInfo;
+import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.FilterResponse;
 import io.github.ma1uta.matrix.client.rest.FilterApi;
@@ -32,11 +32,11 @@ public class FilterMethods {
 
     private final FilterApi filterApi;
 
-    private final AccountInfo accountInfo;
+    private final ConnectionInfo connectionInfo;
 
-    public FilterMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+    public FilterMethods(RestClientBuilder restClientBuilder, ConnectionInfo connectionInfo) {
         this.filterApi = restClientBuilder.build(FilterApi.class);
-        this.accountInfo = accountInfo;
+        this.connectionInfo = connectionInfo;
     }
 
     /**
@@ -46,7 +46,7 @@ public class FilterMethods {
      * @return The filter id.
      */
     public CompletableFuture<FilterResponse> uploadFilter(FilterData filter) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
         return filterApi.uploadFilter(userId, filter).toCompletableFuture();
@@ -59,7 +59,7 @@ public class FilterMethods {
      * @return The filter data.
      */
     public CompletableFuture<FilterData> getFilter(String filterId) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(filterId, "FilterId cannot be empty.");
 

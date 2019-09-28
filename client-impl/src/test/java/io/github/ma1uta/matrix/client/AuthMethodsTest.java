@@ -117,7 +117,7 @@ class AuthMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         EmptyResponse res = getMatrixClient().auth().logout().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(res);
@@ -146,7 +146,7 @@ class AuthMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         EmptyResponse res = getMatrixClient().auth().logoutAll().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(res);

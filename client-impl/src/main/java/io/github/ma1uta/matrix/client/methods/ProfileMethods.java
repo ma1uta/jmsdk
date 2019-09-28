@@ -17,7 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.AccountInfo;
+import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.profile.AvatarUrl;
 import io.github.ma1uta.matrix.client.model.profile.DisplayName;
 import io.github.ma1uta.matrix.client.model.profile.Profile;
@@ -34,11 +34,11 @@ public class ProfileMethods {
 
     private final ProfileApi profileApi;
 
-    private final AccountInfo accountInfo;
+    private final ConnectionInfo connectionInfo;
 
-    public ProfileMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+    public ProfileMethods(RestClientBuilder restClientBuilder, ConnectionInfo connectionInfo) {
         this.profileApi = restClientBuilder.build(ProfileApi.class);
-        this.accountInfo = accountInfo;
+        this.connectionInfo = connectionInfo;
     }
 
     /**
@@ -48,7 +48,7 @@ public class ProfileMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> setDisplayName(String displayName) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
         DisplayName request = new DisplayName();
@@ -78,7 +78,7 @@ public class ProfileMethods {
      * @return empty response.
      */
     public CompletableFuture<EmptyResponse> setAvaterUrl(String avatarUrl) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
         AvatarUrl request = new AvatarUrl();

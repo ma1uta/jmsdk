@@ -16,34 +16,37 @@
 
 package io.github.ma1uta.matrix.client;
 
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-
-import io.github.ma1uta.matrix.client.filter.QueryParamsClientFilter;
+import io.github.ma1uta.matrix.client.filter.UserIdClientFilter;
+import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Application Service Client.
  */
 public class AppServiceClient extends MatrixClient {
 
-    private final QueryParamsClientFilter queryParamsClientFilter = new QueryParamsClientFilter();
+    private final UserIdClientFilter userIdClientFilter;
 
-    public AppServiceClient(String domain, AccountInfo accountInfo) {
-        super(domain, accountInfo);
-        String userId = accountInfo.getUserId();
+    public AppServiceClient(String domain) {
+        this(new ConnectionInfo(domain));
+    }
+
+    public AppServiceClient(ConnectionInfo connectionInfo) {
+        super(connectionInfo);
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(userId, "UserId must be configured.");
-        queryParamsClientFilter.addParam("user_id", userId);
-
-        String accessToken = accountInfo.getAccessToken();
+        String accessToken = connectionInfo.getAccessToken();
         Objects.requireNonNull(accessToken, "AccessToken must be configured");
-        getHeaderClientFilter().addHeader(AUTHORIZATION, "Bearer " + accessToken);
+
+        this.userIdClientFilter = new UserIdClientFilter(connectionInfo);
     }
 
     @Override
     protected RestClientBuilder newClientBuilder() {
-        return super.newClientBuilder().register(queryParamsClientFilter);
+        return super.newClientBuilder().register(userIdClientFilter);
     }
 
     /**
@@ -53,9 +56,19 @@ public class AppServiceClient extends MatrixClient {
      * @return The new AppService client.
      */
     public AppServiceClient userId(String userId) {
-        AccountInfo newAccountInfo = new AccountInfo(getAccountInfo());
-        newAccountInfo.setUserId(userId);
-        return new AppServiceClient(getDomain(), newAccountInfo);
+        ConnectionInfo newConnectionInfo = new ConnectionInfo(getConnectionInfo());
+        newConnectionInfo.setUserId(userId);
+        return new AppServiceClient(newConnectionInfo);
+    }
+
+    /**
+     * Account methods.
+     *
+     * @return account methods.
+     */
+    @Override
+    public AccountMethods account() {
+        return getMethod(AccountMethods.class, () -> new AccountMethods(getClientBuilder(), Function.identity()));
     }
 
     /**
@@ -65,7 +78,7 @@ public class AppServiceClient extends MatrixClient {
 
         @Override
         public AppServiceClient newInstance() {
-            return new AppServiceClient(domain, accountInfo);
+            return new AppServiceClient(connectionInfo);
         }
     }
 }

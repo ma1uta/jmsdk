@@ -67,7 +67,7 @@ class AdminMethodsTest extends MockServer {
                 )
         );
 
-        getMatrixClient().setAccessToken(ACCESS_TOKEN);
+        getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         AdminResponse res = getMatrixClient().admin().whois("@peter:rabbit.rocks").get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(res);
         assertEquals("@peter:rabbit.rocks", res.getUserId());

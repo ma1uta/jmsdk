@@ -2,7 +2,7 @@
 
 There are two classes: `MatrixClient` and `SyncLoop`.
 
-`MatrixClient` is a core classes with full support of the [Client-Server API](https://matrix.org/docs/spec/client_server/r0.4.0.html).
+`MatrixClient` is a core classe with full support of the [Client-Server API](https://matrix.org/docs/spec/client_server/r0.4.0.html).
 
 Access to the methods organized via api methods (event() for Event Api, room() for Room Api, ...).
 You can find implemented API [here](https://github.com/ma1uta/jeon/tree/master/client-api/src/main/java/io/github/ma1uta/matrix/client/api)
@@ -10,25 +10,25 @@ You can find implemented API [here](https://github.com/ma1uta/jeon/tree/master/c
 ### Usage
 
 ```$java
-MatrixClient mxClient = new MatrixClient("matrix.homeserver.tld");
+StandaloneClient mxClient = new StandaloneClient.Builder().domain("matrix.homeserver.tld").build();
 
 // login
-mxClient.auth().login("username", "password");
+mxClient.auth().login("username", "password").join();
 
 // set display name via profile api
-mxCLient.profile().setDisplayName("my new display name");
+mxCLient.profile().setDisplayName("my new display name").join();
 
 // retrieve all joined rooms
 List<String> rooms = mxClient.room().joinedRooms().join();
 String roomId = rooms.get(0);
 // or join to the room
-String roomId = mxClient.room().joinByIdOrAlias("#test:matrix.org").join();
+String roomId = mxClient.room().joinByIdOrAlias("#test:matrix.org", null, null).join();
 
 // send message to the room
-mxCLient.event().sendMessage(roomId, "Hello, World!");
+mxCLient.event().sendMessage(roomId, "Hello, World!").join();
 
 // logout
-mxClient.auth().logout();
+mxClient.auth().logout().join();
 ```
 
 There are two ways to receive events from the server:

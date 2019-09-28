@@ -16,47 +16,32 @@
 
 package io.github.ma1uta.matrix.client.filter;
 
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+
+import io.github.ma1uta.matrix.client.ConnectionInfo;
+
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.Provider;
 
 /**
  * Filter to specify custom headers.
  */
 @Provider
-public class QueryParamsClientFilter implements ClientRequestFilter {
+public class AuthorizationFilter implements ClientRequestFilter {
 
-    private final Map<String, String> params = new HashMap<>();
+    private final ConnectionInfo connectionInfo;
 
-    /**
-     * Add the custom query param.
-     *
-     * @param name  query param name.
-     * @param value query param value.
-     */
-    public void addParam(String name, String value) {
-        params.put(name, value);
-    }
-
-    /**
-     * Remove name.
-     *
-     * @param name query param name.
-     */
-    public void removeParam(String name) {
-        params.remove(name);
+    public AuthorizationFilter(ConnectionInfo connectionInfo) {
+        this.connectionInfo = Objects.requireNonNull(connectionInfo, "Connection info must be specified.");
     }
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        UriBuilder uriBuilder = UriBuilder.fromUri(requestContext.getUri());
-        for (Map.Entry<String, String> param : params.entrySet()) {
-            uriBuilder = uriBuilder.queryParam(param.getKey(), param.getValue());
+        if (connectionInfo.getAccessToken() != null) {
+            requestContext.getHeaders().putSingle(AUTHORIZATION, "Bearer " + connectionInfo.getAccessToken());
         }
-        requestContext.setUri(uriBuilder.build());
     }
 }

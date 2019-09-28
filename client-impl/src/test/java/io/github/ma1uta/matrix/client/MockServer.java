@@ -27,17 +27,17 @@ public class MockServer {
 
     public static final String ACCESS_TOKEN = "$ome_sEcreT_t0keN";
 
-    private TestClient matrixClient;
+    private StandaloneClient matrixClient;
     public WireMockServer wireMockServer;
 
-    public TestClient getMatrixClient() {
+    public StandaloneClient getMatrixClient() {
         return matrixClient;
     }
 
     @BeforeEach
     public void setUp() {
         System.setProperty("jmsdk.resolver.disable", "true");
-        matrixClient = new TestClient("http://localhost:8089", new AccountInfo());
+        matrixClient = new StandaloneClient("http://localhost:8089");
         wireMockServer = new WireMockServer(options().port(8089).notifier(new ConsoleNotifier(true)));
         wireMockServer.start();
     }

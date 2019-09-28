@@ -21,9 +21,11 @@ import io.github.ma1uta.matrix.client.model.serverdiscovery.IdentityServerInfo;
 import io.github.ma1uta.matrix.client.model.serverdiscovery.ServerDiscoveryResponse;
 
 /**
- * Account info.
+ * Connection info.
  */
-public class AccountInfo {
+public class ConnectionInfo {
+
+    private String domain;
 
     private String userId;
 
@@ -33,24 +35,37 @@ public class AccountInfo {
 
     private ServerDiscoveryResponse serverInfo;
 
-    public AccountInfo() {
+    public ConnectionInfo() {
     }
 
-    public AccountInfo(AccountInfo accountInfo) {
-        this.userId = accountInfo.getUserId();
-        this.accessToken = accountInfo.getAccessToken();
-        this.deviceId = accountInfo.getDeviceId();
-        if (accountInfo.getServerInfo() != null) {
+    public ConnectionInfo(String domain) {
+        this.domain = domain;
+    }
+
+    public ConnectionInfo(ConnectionInfo connectionInfo) {
+        this.domain = connectionInfo.getDomain();
+        this.userId = connectionInfo.getUserId();
+        this.accessToken = connectionInfo.getAccessToken();
+        this.deviceId = connectionInfo.getDeviceId();
+        if (connectionInfo.getServerInfo() != null) {
             this.serverInfo = new ServerDiscoveryResponse();
-            if (accountInfo.getServerInfo().getHomeserver() != null) {
+            if (connectionInfo.getServerInfo().getHomeserver() != null) {
                 this.serverInfo.setHomeserver(new HomeserverInfo());
-                this.serverInfo.getHomeserver().setBaseUrl(accountInfo.getServerInfo().getHomeserver().getBaseUrl());
+                this.serverInfo.getHomeserver().setBaseUrl(connectionInfo.getServerInfo().getHomeserver().getBaseUrl());
             }
-            if (accountInfo.getServerInfo().getIdentityServer() != null) {
+            if (connectionInfo.getServerInfo().getIdentityServer() != null) {
                 this.serverInfo.setIdentityServer(new IdentityServerInfo());
-                this.serverInfo.getIdentityServer().setBaseUrl(accountInfo.getServerInfo().getIdentityServer().getBaseUrl());
+                this.serverInfo.getIdentityServer().setBaseUrl(connectionInfo.getServerInfo().getIdentityServer().getBaseUrl());
             }
         }
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     public String getUserId() {

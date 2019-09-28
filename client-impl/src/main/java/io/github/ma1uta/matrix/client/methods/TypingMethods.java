@@ -17,7 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.AccountInfo;
+import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.typing.TypingRequest;
 import io.github.ma1uta.matrix.client.rest.TypingApi;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
@@ -32,11 +32,11 @@ public class TypingMethods {
 
     private final TypingApi typingApi;
 
-    private final AccountInfo accountInfo;
+    private final ConnectionInfo connectionInfo;
 
-    public TypingMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+    public TypingMethods(RestClientBuilder restClientBuilder, ConnectionInfo connectionInfo) {
         this.typingApi = restClientBuilder.build(TypingApi.class);
-        this.accountInfo = accountInfo;
+        this.connectionInfo = connectionInfo;
     }
 
     /**
@@ -49,7 +49,7 @@ public class TypingMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> typing(String roomId, Boolean typing, Long timeout) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(typing, "Typing cannot be empty.");

@@ -60,7 +60,7 @@ class VoipMethodsTest extends MockServer {
                 "}")
             )
         );
-        getMatrixClient().setAccessToken(ACCESS_TOKEN);
+        getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         VoipResponse voip = getMatrixClient().turnServers().turnServers().join();
         assertNotNull(voip);
         assertEquals("1443779631:@user:example.com", voip.getUsername());

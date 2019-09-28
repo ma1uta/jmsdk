@@ -228,7 +228,7 @@ public class AccountMethodsTest extends MockServer {
         }
 
         if (withToken) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         AuthenticationData auth = new AuthenticationData();
         if (withAuth) {
@@ -344,7 +344,7 @@ public class AccountMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         AuthenticationData auth = new AuthenticationData();
         if (withAuth) {
@@ -405,7 +405,7 @@ public class AccountMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         ThreePidResponse threePidResponse = getMatrixClient().account().getThreePid().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(threePidResponse);
@@ -446,7 +446,7 @@ public class AccountMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         ThreePidRequest request = new ThreePidRequest();
         request.setBind(false);
@@ -486,7 +486,7 @@ public class AccountMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         DeactivateResponse res = getMatrixClient().account().deleteThreePid("email", "example@domain.com").get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(res);
@@ -577,7 +577,7 @@ public class AccountMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         WhoamiResponse whoamiResponse = getMatrixClient().account().whoami().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(whoamiResponse);

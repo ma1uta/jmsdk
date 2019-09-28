@@ -16,8 +16,6 @@
 
 package io.github.ma1uta.matrix.client;
 
-import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
-
 import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.AuthMethods;
@@ -28,8 +26,12 @@ import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
  */
 public class StandaloneClient extends MatrixClient {
 
-    public StandaloneClient(String domain, AccountInfo accountInfo) {
-        super(domain, accountInfo);
+    public StandaloneClient(String domain) {
+        super(domain);
+    }
+
+    public StandaloneClient(ConnectionInfo connectionInfo) {
+        super(connectionInfo);
     }
 
     /**
@@ -46,6 +48,7 @@ public class StandaloneClient extends MatrixClient {
      *
      * @return account methods.
      */
+    @Override
     public AccountMethods account() {
         return getMethod(AccountMethods.class, () -> new AccountMethods(getClientBuilder(), this::afterLogin));
     }
@@ -65,12 +68,10 @@ public class StandaloneClient extends MatrixClient {
         if (loginResponse == null) {
             afterLogout(null);
         } else {
-            getAccountInfo().setUserId(loginResponse.getUserId());
-            getAccountInfo().setAccessToken(loginResponse.getAccessToken());
-            getAccountInfo().setDeviceId(loginResponse.getDeviceId());
-            getAccountInfo().setServerInfo(loginResponse.getWellKnown());
-
-            getHeaderClientFilter().addHeader(AUTHORIZATION, "Bearer " + loginResponse.getAccessToken());
+            getConnectionInfo().setUserId(loginResponse.getUserId());
+            getConnectionInfo().setAccessToken(loginResponse.getAccessToken());
+            getConnectionInfo().setDeviceId(loginResponse.getDeviceId());
+            getConnectionInfo().setServerInfo(loginResponse.getWellKnown());
         }
         return loginResponse;
     }
@@ -82,10 +83,8 @@ public class StandaloneClient extends MatrixClient {
      * @return The login response.
      */
     public EmptyResponse afterLogout(EmptyResponse response) {
-        getAccountInfo().setAccessToken(null);
-        getAccountInfo().setDeviceId(null);
-
-        getHeaderClientFilter().removeHeader(AUTHORIZATION);
+        getConnectionInfo().setAccessToken(null);
+        getConnectionInfo().setDeviceId(null);
         return response;
     }
 
@@ -96,7 +95,7 @@ public class StandaloneClient extends MatrixClient {
 
         @Override
         public StandaloneClient newInstance() {
-            return new StandaloneClient(domain, accountInfo);
+            return new StandaloneClient(connectionInfo);
         }
     }
 }

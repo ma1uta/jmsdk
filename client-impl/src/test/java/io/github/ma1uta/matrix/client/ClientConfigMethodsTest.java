@@ -54,8 +54,8 @@ class ClientConfigMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().getAccountInfo().setUserId("@alice:example.com");
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setUserId("@alice:example.com");
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         Map<String, Object> config = new HashMap<>();
         config.put("custom_account_data_key", "custom_config_value");
@@ -85,8 +85,8 @@ class ClientConfigMethodsTest extends MockServer {
         );
 
         if (withToken) {
-            getMatrixClient().getAccountInfo().setUserId("@alice:example.com");
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setUserId("@alice:example.com");
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
         Map<String, Object> config = new HashMap<>();
         config.put("custom_account_data_key", "custom_config_value");

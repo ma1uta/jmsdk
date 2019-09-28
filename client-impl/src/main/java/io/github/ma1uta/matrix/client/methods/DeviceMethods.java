@@ -17,7 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.AccountInfo;
+import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.device.Device;
 import io.github.ma1uta.matrix.client.model.device.DeviceUpdateRequest;
@@ -38,11 +38,11 @@ public class DeviceMethods {
 
     private final DeviceApi deviceApi;
 
-    private final AccountInfo accountInfo;
+    private final ConnectionInfo connectionInfo;
 
-    public DeviceMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+    public DeviceMethods(RestClientBuilder restClientBuilder, ConnectionInfo connectionInfo) {
         this.deviceApi = restClientBuilder.build(DeviceApi.class);
-        this.accountInfo = accountInfo;
+        this.connectionInfo = connectionInfo;
     }
 
     /**
@@ -91,12 +91,12 @@ public class DeviceMethods {
     public CompletableFuture<EmptyResponse> delete(AuthenticationData auth) {
         DevicesDeleteRequest request = new DevicesDeleteRequest();
         request.setAuth(auth);
-        List<String> devices = Collections.singletonList(accountInfo.getDeviceId());
+        List<String> devices = Collections.singletonList(connectionInfo.getDeviceId());
         request.setDevices(devices);
 
         return deviceApi.deleteDevices(request).thenApply(r -> {
-            accountInfo.setDeviceId(null);
-            accountInfo.setAccessToken(null);
+            connectionInfo.setDeviceId(null);
+            connectionInfo.setAccessToken(null);
             return r;
         }).toCompletableFuture();
     }
@@ -115,9 +115,9 @@ public class DeviceMethods {
         }
 
         return deviceApi.deleteDevices(request).thenApply(r -> {
-            if (request.getDevices().contains(accountInfo.getDeviceId())) {
-                accountInfo.setDeviceId(null);
-                accountInfo.setAccessToken(null);
+            if (request.getDevices().contains(connectionInfo.getDeviceId())) {
+                connectionInfo.setDeviceId(null);
+                connectionInfo.setAccessToken(null);
             }
             return r;
         }).toCompletableFuture();

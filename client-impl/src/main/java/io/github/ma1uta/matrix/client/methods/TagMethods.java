@@ -17,7 +17,7 @@
 package io.github.ma1uta.matrix.client.methods;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.AccountInfo;
+import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.tag.Tags;
 import io.github.ma1uta.matrix.client.rest.TagApi;
 import io.github.ma1uta.matrix.event.nested.TagInfo;
@@ -33,11 +33,11 @@ public class TagMethods {
 
     private final TagApi tagApi;
 
-    private final AccountInfo accountInfo;
+    private final ConnectionInfo connectionInfo;
 
-    public TagMethods(RestClientBuilder restClientBuilder, AccountInfo accountInfo) {
+    public TagMethods(RestClientBuilder restClientBuilder, ConnectionInfo connectionInfo) {
         this.tagApi = restClientBuilder.build(TagApi.class);
-        this.accountInfo = accountInfo;
+        this.connectionInfo = connectionInfo;
     }
 
     /**
@@ -47,7 +47,7 @@ public class TagMethods {
      * @return The list of tags for the user for the room.
      */
     public CompletableFuture<Tags> show(String roomId) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
 
@@ -63,7 +63,7 @@ public class TagMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> add(String roomId, String tag, Long order) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(tag, "TagInfo cannot be empty.");
@@ -82,7 +82,7 @@ public class TagMethods {
      * @return The empty response.
      */
     public CompletableFuture<EmptyResponse> delete(String roomId, String tag) {
-        String userId = accountInfo.getUserId();
+        String userId = connectionInfo.getUserId();
         Objects.requireNonNull(roomId, "RoomId cannot be empty.");
         Objects.requireNonNull(userId, "UserId cannot be empty.");
         Objects.requireNonNull(tag, "TagContent cannot be empty.");

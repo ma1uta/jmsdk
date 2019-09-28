@@ -16,44 +16,31 @@
 
 package io.github.ma1uta.matrix.client.filter;
 
+import io.github.ma1uta.matrix.client.ConnectionInfo;
+
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.ext.Provider;
 
 /**
  * Filter to specify custom headers.
  */
 @Provider
-public class HeaderClientFilter implements ClientRequestFilter {
+public class UserIdClientFilter implements ClientRequestFilter {
 
-    private final Map<String, String> headers = new HashMap<>();
+    private final ConnectionInfo connectionInfo;
 
-    /**
-     * Add custom header.
-     *
-     * @param header header name.
-     * @param value  header value.
-     */
-    public void addHeader(String header, String value) {
-        headers.put(header, value);
-    }
-
-    /**
-     * Remove header.
-     *
-     * @param header header name.
-     */
-    public void removeHeader(String header) {
-        headers.remove(header);
+    public UserIdClientFilter(ConnectionInfo connectionInfo) {
+        this.connectionInfo = Objects.requireNonNull(connectionInfo, "Connection info must be specified.");
     }
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        for (Map.Entry<String, String> header : headers.entrySet()) {
-            requestContext.getHeaders().putSingle(header.getKey(), header.getValue());
+        if (connectionInfo.getUserId() != null) {
+            requestContext.setUri(UriBuilder.fromUri(requestContext.getUri()).queryParam("user_id", connectionInfo.getUserId()).build());
         }
     }
 }

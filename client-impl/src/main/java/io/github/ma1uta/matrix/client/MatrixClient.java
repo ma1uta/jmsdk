@@ -16,10 +16,11 @@
 
 package io.github.ma1uta.matrix.client;
 
+import io.github.ma1uta.matrix.client.filter.AuthorizationFilter;
 import io.github.ma1uta.matrix.client.filter.ContentTypeFilter;
 import io.github.ma1uta.matrix.client.filter.ErrorFilter;
-import io.github.ma1uta.matrix.client.filter.HeaderClientFilter;
 import io.github.ma1uta.matrix.client.filter.LoggingFilter;
+import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.AdminMethods;
 import io.github.ma1uta.matrix.client.methods.CapabilityMethods;
 import io.github.ma1uta.matrix.client.methods.ClientConfigMethods;
@@ -57,23 +58,22 @@ import java.util.function.Supplier;
 /**
  * Matrix client.
  */
-public class MatrixClient implements Closeable {
+public abstract class MatrixClient implements Closeable {
 
     private volatile URL homeserverURL;
     private volatile RestClientBuilder builder;
     private final HomeServerResolver homeServerResolver = new HomeServerResolver();
-    private final String domain;
-    private final HeaderClientFilter headerClientFilter = new HeaderClientFilter();
     private final Map<Class<?>, Object> methods = new ConcurrentHashMap<>();
-    private final AccountInfo accountInfo;
+    private final AuthorizationFilter authorizationFilter;
+    private final ConnectionInfo connectionInfo;
 
     public MatrixClient(String domain) {
-        this(domain, new AccountInfo());
+        this(new ConnectionInfo(domain));
     }
 
-    public MatrixClient(String domain, AccountInfo accountInfo) {
-        this.domain = domain;
-        this.accountInfo = accountInfo;
+    public MatrixClient(ConnectionInfo connectionInfo) {
+        this.connectionInfo = connectionInfo;
+        this.authorizationFilter = new AuthorizationFilter(this.connectionInfo);
     }
 
     /**
@@ -87,21 +87,21 @@ public class MatrixClient implements Closeable {
                 if (homeserverURL != null) {
                     return homeserverURL;
                 }
-                homeserverURL = homeServerResolver.resolve(domain);
+                homeserverURL = homeServerResolver.resolve(connectionInfo.getDomain());
             }
         }
         return homeserverURL;
     }
 
-    public AccountInfo getAccountInfo() {
-        return accountInfo;
+    public ConnectionInfo getConnectionInfo() {
+        return connectionInfo;
     }
 
     protected RestClientBuilder newClientBuilder() {
         return RestClientBuilder.newBuilder()
             .register(new ErrorFilter())
             .register(new LoggingFilter())
-            .register(headerClientFilter)
+            .register(authorizationFilter)
             .register(new ContentTypeFilter())
             .baseUrl(getHomeserverUrl());
     }
@@ -119,10 +119,6 @@ public class MatrixClient implements Closeable {
         return builder;
     }
 
-    protected HeaderClientFilter getHeaderClientFilter() {
-        return headerClientFilter;
-    }
-
     protected <T> T getMethod(Class<T> clazz, Supplier<T> creator) {
         return clazz.cast(methods.computeIfAbsent(clazz, key -> creator.get()));
     }
@@ -133,7 +129,7 @@ public class MatrixClient implements Closeable {
      * @return The homeserver domain.
      */
     public String getDomain() {
-        return domain;
+        return getConnectionInfo().getDomain();
     }
 
     /**
@@ -142,12 +138,19 @@ public class MatrixClient implements Closeable {
      * @return The access token.
      */
     public String getAccessToken() {
-        return getAccountInfo().getAccessToken();
+        return getConnectionInfo().getAccessToken();
     }
 
     @Override
     public void close() {
     }
+
+    /**
+     * Account methods.
+     *
+     * @return account methods.
+     */
+    public abstract AccountMethods account();
 
     /**
      * Admin methods.
@@ -164,7 +167,7 @@ public class MatrixClient implements Closeable {
      * @return client config methods.
      */
     public ClientConfigMethods clientConfig() {
-        return getMethod(ClientConfigMethods.class, () -> new ClientConfigMethods(getClientBuilder(), getAccountInfo()));
+        return getMethod(ClientConfigMethods.class, () -> new ClientConfigMethods(getClientBuilder(), getConnectionInfo()));
     }
 
     /**
@@ -182,7 +185,7 @@ public class MatrixClient implements Closeable {
      * @return device methods.
      */
     public DeviceMethods device() {
-        return getMethod(DeviceMethods.class, () -> new DeviceMethods(getClientBuilder(), getAccountInfo()));
+        return getMethod(DeviceMethods.class, () -> new DeviceMethods(getClientBuilder(), getConnectionInfo()));
     }
 
     /**
@@ -209,7 +212,7 @@ public class MatrixClient implements Closeable {
      * @return presence methods.
      */
     public PresenceMethods presence() {
-        return getMethod(PresenceMethods.class, () -> new PresenceMethods(getClientBuilder(), getAccountInfo()));
+        return getMethod(PresenceMethods.class, () -> new PresenceMethods(getClientBuilder(), getConnectionInfo()));
     }
 
     /**
@@ -218,7 +221,7 @@ public class MatrixClient implements Closeable {
      * @return profile methods.
      */
     public ProfileMethods profile() {
-        return getMethod(ProfileMethods.class, () -> new ProfileMethods(getClientBuilder(), getAccountInfo()));
+        return getMethod(ProfileMethods.class, () -> new ProfileMethods(getClientBuilder(), getConnectionInfo()));
     }
 
     /**
@@ -281,7 +284,7 @@ public class MatrixClient implements Closeable {
      * @return filter methods.
      */
     public FilterMethods filter() {
-        return getMethod(FilterMethods.class, () -> new FilterMethods(getClientBuilder(), getAccountInfo()));
+        return getMethod(FilterMethods.class, () -> new FilterMethods(getClientBuilder(), getConnectionInfo()));
     }
 
     /**
@@ -299,7 +302,7 @@ public class MatrixClient implements Closeable {
      * @return tag methods.
      */
     public TagMethods tag() {
-        return getMethod(TagMethods.class, () -> new TagMethods(getClientBuilder(), getAccountInfo()));
+        return getMethod(TagMethods.class, () -> new TagMethods(getClientBuilder(), getConnectionInfo()));
     }
 
     /**
@@ -308,7 +311,7 @@ public class MatrixClient implements Closeable {
      * @return typing methods.
      */
     public TypingMethods typing() {
-        return getMethod(TypingMethods.class, () -> new TypingMethods(getClientBuilder(), getAccountInfo()));
+        return getMethod(TypingMethods.class, () -> new TypingMethods(getClientBuilder(), getConnectionInfo()));
     }
 
     /**
@@ -371,17 +374,6 @@ public class MatrixClient implements Closeable {
      * @return the user MXID.
      */
     public String getUserId() {
-        return getAccountInfo().getUserId();
-    }
-
-    /**
-     * Matrix client builder.
-     */
-    public static class Builder extends AbstractClientBuilder<MatrixClient> {
-
-        @Override
-        public MatrixClient newInstance() {
-            return new MatrixClient(domain, accountInfo);
-        }
+        return getConnectionInfo().getUserId();
     }
 }

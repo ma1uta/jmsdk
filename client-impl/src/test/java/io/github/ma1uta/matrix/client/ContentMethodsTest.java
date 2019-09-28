@@ -42,7 +42,7 @@ class ContentMethodsTest extends MockServer {
         );
 
         try (InputStream inputStream = getClass().getResourceAsStream("/content.txt")) {
-            getMatrixClient().setAccessToken(ACCESS_TOKEN);
+            getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
             String uri = getMatrixClient().content().upload(inputStream, "content.txt", "text/plain").thenApply(ContentUri::getContentUri)
                 .get(1000, TimeUnit.MILLISECONDS);
             assertEquals("mxc://example.com/AQwafuaFswefuhsfAFAgsw", uri);
