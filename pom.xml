@@ -88,7 +88,7 @@
 
         <!-- dependencies -->
         <version.lib.slf4j-api>1.7.26</version.lib.slf4j-api>
-        <version.lib.jackson-databind>2.9.10</version.lib.jackson-databind>
+        <version.lib.jackson-databind>2.9.10.1</version.lib.jackson-databind>
         <version.lib.jackson-module-jaxb-annotations>2.9.10</version.lib.jackson-module-jaxb-annotations>
         <version.lib.jackson-jaxrs-json-provider>2.9.10</version.lib.jackson-jaxrs-json-provider>
         <version.lib.jakarta.persistence-api>2.2.2</version.lib.jakarta.persistence-api>
