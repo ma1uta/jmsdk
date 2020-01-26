@@ -45,11 +45,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.ws.rs.client.Client;
@@ -352,7 +348,10 @@ public class JaxRsRequestFactory implements RequestFactory {
      */
     protected <R> void invokeAction(Supplier<CompletionStage<Response>> action, Function<Response, R> extractor,
                                     CompletableFuture<R> result, long delay) {
-        action.get().thenAccept(response -> {
+        action.get().handle((response, throwable) -> {
+            if (throwable != null)
+                throw new CompletionException(throwable);
+
             try {
                 int status = response.getStatus();
                 LOGGER.debug("Response status: {}", status);
@@ -386,6 +385,8 @@ public class JaxRsRequestFactory implements RequestFactory {
                 LOGGER.debug("Cancelled: {}", result.isCancelled());
                 LOGGER.debug("Exception: {}", result.isCompletedExceptionally());
             }
+
+            return null;
         });
     }
 
