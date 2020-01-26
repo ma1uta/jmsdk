@@ -349,8 +349,10 @@ public class JaxRsRequestFactory implements RequestFactory {
     protected <R> void invokeAction(Supplier<CompletionStage<Response>> action, Function<Response, R> extractor,
                                     CompletableFuture<R> result, long delay) {
         action.get().handle((response, throwable) -> {
-            if (throwable != null)
-                throw new CompletionException(throwable);
+            if (throwable != null) {
+                result.completeExceptionally(throwable);
+                return null;
+            }
 
             try {
                 int status = response.getStatus();
