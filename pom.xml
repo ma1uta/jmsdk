@@ -84,7 +84,7 @@
         <version.plugin.maven-enforcer-plugin>3.0.0-M2</version.plugin.maven-enforcer-plugin>
 
         <!-- plugin dependencies -->
-        <version.lib.checkstyle>8.23</version.lib.checkstyle>
+        <version.lib.checkstyle>8.29</version.lib.checkstyle>
 
         <!-- dependencies -->
         <version.lib.slf4j-api>1.7.26</version.lib.slf4j-api>
