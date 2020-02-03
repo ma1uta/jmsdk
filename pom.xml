@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright sablintolya@gmail.com
+  ~ Copyright Anatoliy Sablin tolya@sablin.xyz
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@
         <developer>
             <id>ma1uta</id>
             <name>Anatoly</name>
-            <email>sablintolya@gmail.com</email>
+            <email>Anatoliy Sablin tolya@sablin.xyz</email>
         </developer>
     </developers>
 
