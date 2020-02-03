@@ -105,15 +105,14 @@ public class ErrorFilter implements ClientResponseFilter {
     private Deserializer getDeserializer() {
         if (deserializer == null) {
             synchronized (this) {
-                if (deserializer != null) {
-                    return deserializer;
-                }
-                Iterator<Deserializer> iterator = ServiceLoader.load(Deserializer.class).iterator();
-                if (iterator.hasNext()) {
-                    deserializer = iterator.next();
-                } else {
-                    throw new IllegalStateException(
-                        "Unable to found the object serializer. Check that jackson-support or jsonb-support packages included.");
+                if (deserializer == null) {
+                    Iterator<Deserializer> iterator = ServiceLoader.load(Deserializer.class).iterator();
+                    if (iterator.hasNext()) {
+                        deserializer = iterator.next();
+                    } else {
+                        throw new IllegalStateException(
+                            "Unable to found the object serializer. Check jackson-support or jsonb-support packages included.");
+                    }
                 }
             }
         }

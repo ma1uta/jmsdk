@@ -51,17 +51,20 @@ import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import java.io.Closeable;
 import java.net.URL;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import javax.net.ssl.HostnameVerifier;
 
 /**
  * Matrix client.
  */
 public abstract class MatrixClient implements Closeable {
 
-    private volatile URL homeserverURL;
-    private volatile RestClientBuilder builder;
+    private volatile URL homeserverURL = null;
+    private volatile RestClientBuilder builder = null;
+    private volatile HostnameVerifier hostnameVerifier = null;
     private final HomeServerResolver homeServerResolver = new HomeServerResolver();
     private final Map<Class<?>, Object> methods = new ConcurrentHashMap<>();
     private final AuthorizationFilter authorizationFilter;
@@ -82,14 +85,7 @@ public abstract class MatrixClient implements Closeable {
      * @return homeserver URL.
      */
     public URL getHomeserverUrl() {
-        if (homeserverURL == null) {
-            synchronized (this) {
-                if (homeserverURL != null) {
-                    return homeserverURL;
-                }
-                homeserverURL = homeServerResolver.resolve(connectionInfo.getDomain());
-            }
-        }
+        resolveHomeserver();
         return homeserverURL;
     }
 
@@ -97,13 +93,31 @@ public abstract class MatrixClient implements Closeable {
         return connectionInfo;
     }
 
+    protected synchronized void resolveHomeserver() {
+        if (homeserverURL == null) {
+            Optional<ResolvedHomeserver> optionalResolvedHomeserver = homeServerResolver.resolve(connectionInfo.getDomain());
+            if (optionalResolvedHomeserver.isPresent()) {
+                ResolvedHomeserver homeserver = optionalResolvedHomeserver.get();
+                homeserverURL = homeserver.getUrl();
+                hostnameVerifier = homeserver.getOptionalHostnameVerifier().orElse(null);
+            } else {
+                throw new IllegalStateException("Unable to resolve homeserver url: " + connectionInfo.getDomain());
+            }
+        }
+    }
+
     protected RestClientBuilder newClientBuilder() {
-        return RestClientBuilder.newBuilder()
+        resolveHomeserver();
+        RestClientBuilder builder = RestClientBuilder.newBuilder()
             .register(new ErrorFilter())
             .register(new LoggingFilter())
             .register(authorizationFilter)
             .register(new ContentTypeFilter())
             .baseUrl(getHomeserverUrl());
+        if (hostnameVerifier != null) {
+            builder.hostnameVerifier(hostnameVerifier);
+        }
+        return builder;
     }
 
     protected RestClientBuilder getClientBuilder() {

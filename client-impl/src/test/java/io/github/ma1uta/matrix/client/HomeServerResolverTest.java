@@ -17,24 +17,32 @@
 package io.github.ma1uta.matrix.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
+import java.util.Optional;
 
 public class HomeServerResolverTest {
 
     @Test
-    public void wllKnownTest() {
+    public void wellKnownTest() {
         HomeServerResolver resolver = new HomeServerResolver();
 
-        URL url = resolver.resolve("ru-matrix.org");
+        Optional<ResolvedHomeserver> resolvedHomeserver = resolver.resolve("ru-matrix.org");
+        assertTrue(resolvedHomeserver.isPresent());
+        URL url = resolvedHomeserver.get().getUrl();
         assertEquals("https://ru-matrix.org:8448", url.toString());
 
-        url = resolver.resolve("matrix.org");
-        assertEquals("https://matrix.org", url.toString());
+        resolvedHomeserver = resolver.resolve("matrix.org");
+        assertTrue(resolvedHomeserver.isPresent());
+        url = resolvedHomeserver.get().getUrl();
+        assertEquals("https://matrix-client.matrix.org", url.toString());
 
-        url = resolver.resolve("sibnsk.net");
+        resolvedHomeserver = resolver.resolve("sibnsk.net");
+        assertTrue(resolvedHomeserver.isPresent());
+        url = resolvedHomeserver.get().getUrl();
         assertEquals("https://matrix.sibnsk.net", url.toString());
     }
 }
