@@ -36,7 +36,7 @@ public class MockServer {
 
     @BeforeEach
     public void setUp() {
-        System.setProperty("jmsdk.resolver.disable", "true");
+        System.setProperty("jmsdk.resolver.homeserver.verification.disable", "true");
         matrixClient = new StandaloneClient("http://localhost:8089");
         wireMockServer = new WireMockServer(options().port(8089).notifier(new ConsoleNotifier(true)));
         wireMockServer.start();
@@ -44,6 +44,7 @@ public class MockServer {
 
     @AfterEach
     public void shutdown() {
+        matrixClient.close();
         wireMockServer.stop();
     }
 }

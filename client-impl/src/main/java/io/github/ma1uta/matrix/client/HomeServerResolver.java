@@ -62,7 +62,7 @@ public class HomeServerResolver {
     /**
      * Option to disable addition check correctness of the homeserver url.
      */
-    public static final String DISABLE_HOMESERVER_URL = "jmsdk.homeserver.resolver.disable";
+    public static final String DISABLE_HOMESERVER_URL_VERIFICATION = "jmsdk.resolver.homeserver.verification.disable";
 
     private static final Pattern IPv4_PATTERN = Pattern.compile(
         "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])(:\\d{2,5})?$");
@@ -73,19 +73,20 @@ public class HomeServerResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerResolver.class);
 
     private final Deserializer deserializer;
-    private final boolean homeserverVerificationDisabled;
+    private final Boolean homeserverVerificationDisabled;
 
     public HomeServerResolver() {
-        this(false);
+        this(null);
     }
 
-    public HomeServerResolver(boolean homeserverVerificationDisabled) {
+    public HomeServerResolver(Boolean homeserverVerificationDisabled) {
         this.deserializer = ServiceLoader.load(Deserializer.class).iterator().next();
         this.homeserverVerificationDisabled = homeserverVerificationDisabled;
     }
 
     protected boolean isHomeserverVerificationDisabled() {
-        return homeserverVerificationDisabled || Objects.equals(System.getProperty(DISABLE_HOMESERVER_URL), Boolean.FALSE.toString());
+        return (homeserverVerificationDisabled != null && homeserverVerificationDisabled)
+            || Objects.equals(System.getProperty(DISABLE_HOMESERVER_URL_VERIFICATION), Boolean.TRUE.toString());
     }
 
     /**
