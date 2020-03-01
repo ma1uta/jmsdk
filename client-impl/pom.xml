@@ -23,7 +23,7 @@
     <parent>
         <groupId>io.github.ma1uta.matrix</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.10.0</version>
+        <version>0.10.1</version>
     </parent>
     <artifactId>client-impl</artifactId>
 
