@@ -7,5 +7,6 @@ module matrix.support.jsonb {
     requires transitive matrix.common.impl;
     requires transitive java.json;
     requires org.mapstruct;
+    requires java.annotation;
     requires java.sql;
 }
