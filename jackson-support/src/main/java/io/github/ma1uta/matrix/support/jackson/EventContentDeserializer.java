@@ -32,6 +32,9 @@ import io.github.ma1uta.matrix.event.KeyVerificationKey;
 import io.github.ma1uta.matrix.event.KeyVerificationMac;
 import io.github.ma1uta.matrix.event.KeyVerificationRequest;
 import io.github.ma1uta.matrix.event.KeyVerificationStart;
+import io.github.ma1uta.matrix.event.PolicyRuleRoom;
+import io.github.ma1uta.matrix.event.PolicyRuleServer;
+import io.github.ma1uta.matrix.event.PolicyRuleUser;
 import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.Receipt;
@@ -76,6 +79,9 @@ import io.github.ma1uta.matrix.event.content.KeyVerificationKeyContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationMacContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationRequestContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationStartContent;
+import io.github.ma1uta.matrix.event.content.PolicyRuleRoomContent;
+import io.github.ma1uta.matrix.event.content.PolicyRuleServerContent;
+import io.github.ma1uta.matrix.event.content.PolicyRuleUserContent;
 import io.github.ma1uta.matrix.event.content.PresenceContent;
 import io.github.ma1uta.matrix.event.content.PushRulesContent;
 import io.github.ma1uta.matrix.event.content.RawEventContent;
@@ -211,6 +217,12 @@ public class EventContentDeserializer {
                 return mapper.readValue(content, TombstoneContent.class);
             case RoomServerAcl.TYPE:
                 return mapper.readValue(content, RoomServerAclContent.class);
+            case PolicyRuleUser.TYPE:
+                return mapper.readValue(content, PolicyRuleUserContent.class);
+            case PolicyRuleRoom.TYPE:
+                return mapper.readValue(content, PolicyRuleRoomContent.class);
+            case PolicyRuleServer.TYPE:
+                return mapper.readValue(content, PolicyRuleServerContent.class);
             default:
                 return parse(content, mapper);
         }

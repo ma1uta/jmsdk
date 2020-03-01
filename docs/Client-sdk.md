@@ -10,7 +10,7 @@ You can find implemented API [here](https://github.com/ma1uta/jeon/tree/master/c
 ### Usage
 
 ```$java
-MatrixClient mxClient = new MatrixClient("matrix.homeserver.tld");
+StandaloneClient mxClient = new StandaloneClient("matrix.homeserver.tld");
 
 // login
 mxClient.auth().login("username", "password");

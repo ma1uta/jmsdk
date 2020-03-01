@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright Anatoliy Sablin tolya@sablin.xyz
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>jmsdk</artifactId>
+        <groupId>io.github.ma1uta.matrix</groupId>
+        <version>0.11.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>jmsdk-bom</artifactId>
+    <packaging>pom</packaging>
+
+    <name>Jeon BOM</name>
+    <description>Java-based Matrix server. All dependencies.</description>
+
+    <properties>
+        <version.lib.jeon>0.11.0</version.lib.jeon>
+        <version.lib.commons-beanutils>1.9.4</version.lib.commons-beanutils>
+        <version.lib.logback-classic>1.2.3</version.lib.logback-classic>
+        <version.lib.slf4j-api>1.7.30</version.lib.slf4j-api>
+        <version.lib.jackson-annotations>2.10.2</version.lib.jackson-annotations>
+        <version.lib.jackson-databind>2.10.2</version.lib.jackson-databind>
+        <version.lib.jackson-module-jaxb-annotations>2.10.2</version.lib.jackson-module-jaxb-annotations>
+        <version.lib.jackson-jaxrs-json-provider>2.10.2.1</version.lib.jackson-jaxrs-json-provider>
+        <version.lib.jakarta.json-api>1.1.6</version.lib.jakarta.json-api>
+        <version.lib.jakarta.persistence-api>2.2.3</version.lib.jakarta.persistence-api>
+        <version.lib.junit-bom>5.6.0</version.lib.junit-bom>
+        <version.lib.jersey-client>2.30</version.lib.jersey-client>
+        <version.lib.jersey.hk2>2.30</version.lib.jersey.hk2>
+        <version.lib.jersey-media-json-jackson>2.30</version.lib.jersey-media-json-jackson>
+        <version.lib.microprofile>3.2</version.lib.microprofile>
+        <version.lib.mapstruct>1.3.1.Final</version.lib.mapstruct>
+        <version.lib.yasson>1.0.6</version.lib.yasson>
+        <version.lib.jaxb-api>2.3.1</version.lib.jaxb-api>
+        <version.lib.resteasy>4.4.2.Final</version.lib.resteasy>
+        <version.lib.wiremock>2.26.0</version.lib.wiremock>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.eclipse.microprofile</groupId>
+                <artifactId>microprofile</artifactId>
+                <version>${version.lib.microprofile}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.github.ma1uta.matrix</groupId>
+                <artifactId>common-api</artifactId>
+                <version>${version.lib.jeon}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.ma1uta.matrix</groupId>
+                <artifactId>client-api</artifactId>
+                <version>${version.lib.jeon}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${version.lib.slf4j-api}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>${version.lib.jackson-jaxrs-json-provider}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${version.lib.jackson-annotations}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${version.lib.jackson-databind}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${version.lib.jackson-module-jaxb-annotations}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-client</artifactId>
+                <version>${version.lib.jersey-client}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-json-jackson</artifactId>
+                <version>${version.lib.jersey-media-json-jackson}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-client-microprofile</artifactId>
+                <version>${version.lib.resteasy}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jackson2-provider</artifactId>
+                <version>${version.lib.resteasy}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${version.lib.logback-classic}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock</artifactId>
+                <version>${version.lib.wiremock}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>${version.lib.jakarta.persistence-api}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${version.lib.jaxb-api}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>jakarta.json</artifactId>
+                <version>${version.lib.jakarta.json-api}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse</groupId>
+                <artifactId>yasson</artifactId>
+                <version>${version.lib.yasson}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${version.lib.mapstruct}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${version.lib.commons-beanutils}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${version.lib.junit-bom}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

@@ -23,9 +23,21 @@
     <parent>
         <groupId>io.github.ma1uta.matrix</groupId>
         <artifactId>jmsdk</artifactId>
-        <version>0.10.1</version>
+        <version>0.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>bot-impl</artifactId>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.ma1uta.matrix</groupId>
+                <artifactId>jmsdk-bom</artifactId>
+                <version>0.11.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -37,7 +49,6 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
-            <version>${version.lib.jakarta.persistence-api}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

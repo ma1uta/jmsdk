@@ -33,6 +33,9 @@ import io.github.ma1uta.matrix.event.KeyVerificationKey;
 import io.github.ma1uta.matrix.event.KeyVerificationMac;
 import io.github.ma1uta.matrix.event.KeyVerificationRequest;
 import io.github.ma1uta.matrix.event.KeyVerificationStart;
+import io.github.ma1uta.matrix.event.PolicyRuleRoom;
+import io.github.ma1uta.matrix.event.PolicyRuleServer;
+import io.github.ma1uta.matrix.event.PolicyRuleUser;
 import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.RawEvent;
@@ -81,6 +84,9 @@ import io.github.ma1uta.matrix.event.content.KeyVerificationKeyContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationMacContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationRequestContent;
 import io.github.ma1uta.matrix.event.content.KeyVerificationStartContent;
+import io.github.ma1uta.matrix.event.content.PolicyRuleRoomContent;
+import io.github.ma1uta.matrix.event.content.PolicyRuleServerContent;
+import io.github.ma1uta.matrix.event.content.PolicyRuleUserContent;
 import io.github.ma1uta.matrix.event.content.PresenceContent;
 import io.github.ma1uta.matrix.event.content.PushRulesContent;
 import io.github.ma1uta.matrix.event.content.RawEventContent;
@@ -275,6 +281,12 @@ public interface EventMapper {
                 return roomTombstone(jsonObject);
             case RoomTopic.TYPE:
                 return roomTopic(jsonObject);
+            case PolicyRuleUser.TYPE:
+                return policyRuleUser(jsonObject);
+            case PolicyRuleRoom.TYPE:
+                return policyRuleRoom(jsonObject);
+            case PolicyRuleServer.TYPE:
+                return policyRuleServer(jsonObject);
 
             default:
                 return UTIL.parse(jsonObject);
@@ -778,6 +790,18 @@ public interface EventMapper {
     @Mapping(expression = "java(roomTopicContent(jsonObject.getJsonObject(\"content\")))", target = "content")
     @Mapping(expression = "java(roomTopicContent(jsonObject.getJsonObject(\"prev_content\")))", target = "prevContent")
     RoomTopic roomTopic(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(policyRuleUserContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    PolicyRuleUser policyRuleUser(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(policyRuleRoomContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    PolicyRuleRoom policyRuleRoom(JsonObject jsonObject);
+
+    @InheritConfiguration(name = "stateEvent")
+    @Mapping(expression = "java(policyRuleServerContent(jsonObject.getJsonObject(\"content\")))", target = "content")
+    PolicyRuleServer policyRuleServer(JsonObject jsonObject);
 
     // Event contents.
 
@@ -1361,4 +1385,19 @@ public interface EventMapper {
 
     @Mapping(expression = "java(toString(jsonObject, \"topic\"))", target = "topic")
     RoomTopicContent roomTopicContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"entity\"))", target = "entity")
+    @Mapping(expression = "java(toString(jsonObject, \"recommendation\"))", target = "recommendation")
+    @Mapping(expression = "java(toString(jsonObject, \"reason\"))", target = "reason")
+    PolicyRuleUserContent policyRuleUserContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"entity\"))", target = "entity")
+    @Mapping(expression = "java(toString(jsonObject, \"recommendation\"))", target = "recommendation")
+    @Mapping(expression = "java(toString(jsonObject, \"reason\"))", target = "reason")
+    PolicyRuleRoomContent policyRuleRoomContent(JsonObject jsonObject);
+
+    @Mapping(expression = "java(toString(jsonObject, \"entity\"))", target = "entity")
+    @Mapping(expression = "java(toString(jsonObject, \"recommendation\"))", target = "recommendation")
+    @Mapping(expression = "java(toString(jsonObject, \"reason\"))", target = "reason")
+    PolicyRuleServerContent policyRuleServerContent(JsonObject jsonObject);
 }

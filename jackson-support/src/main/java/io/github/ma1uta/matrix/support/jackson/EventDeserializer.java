@@ -38,6 +38,9 @@ import io.github.ma1uta.matrix.event.KeyVerificationKey;
 import io.github.ma1uta.matrix.event.KeyVerificationMac;
 import io.github.ma1uta.matrix.event.KeyVerificationRequest;
 import io.github.ma1uta.matrix.event.KeyVerificationStart;
+import io.github.ma1uta.matrix.event.PolicyRuleRoom;
+import io.github.ma1uta.matrix.event.PolicyRuleServer;
+import io.github.ma1uta.matrix.event.PolicyRuleUser;
 import io.github.ma1uta.matrix.event.Presence;
 import io.github.ma1uta.matrix.event.PushRules;
 import io.github.ma1uta.matrix.event.RawEvent;
@@ -173,6 +176,12 @@ public class EventDeserializer extends JsonDeserializer<Event> {
                 return codec.treeToValue(node, KeyVerificationRequest.class);
             case KeyVerificationStart.TYPE:
                 return codec.treeToValue(node, KeyVerificationStart.class);
+            case PolicyRuleRoom.TYPE:
+                return codec.treeToValue(node, PolicyRuleRoom.class);
+            case PolicyRuleUser.TYPE:
+                return codec.treeToValue(node, PolicyRuleUser.class);
+            case PolicyRuleServer.TYPE:
+                return codec.treeToValue(node, PolicyRuleServer.class);
             default:
                 return parse(node, codec, ctxt, type.asText());
         }
