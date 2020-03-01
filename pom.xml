@@ -15,13 +15,11 @@
   ~ limitations under the License.
   -->
 
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.ma1uta.matrix</groupId>
     <artifactId>jmsdk</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>0.11.0</version>
     <packaging>pom</packaging>
     <licenses>
         <license>
@@ -39,7 +37,8 @@
         <url>https://github.com/ma1uta/jmsdk</url>
         <developerConnection>scm:git:ssh://github.com/ma1uta/jmsdk</developerConnection>
         <connection>scm:git:git://github.com/ma1uta/jmsdk</connection>
-    </scm>
+      <tag>0.11.0</tag>
+  </scm>
 
     <developers>
         <developer>
@@ -161,7 +160,7 @@
                                     <requireMavenVersion>
                                         <version>3.6.0</version>
                                     </requireMavenVersion>
-                                    <DependencyConvergence/>
+                                    <DependencyConvergence />
                                 </rules>
                             </configuration>
                         </execution>
