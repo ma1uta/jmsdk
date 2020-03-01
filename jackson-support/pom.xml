@@ -19,30 +19,24 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>io.github.ma1uta.matrix</groupId>
         <artifactId>jmsdk</artifactId>
         <version>0.10.0</version>
     </parent>
     <artifactId>jackson-support</artifactId>
-    <version>0.10.0</version>
-
-    <properties>
-        <version.lib.common-api>0.9.2-SNAPSHOT</version.lib.common-api>
-        <version.lib.common-impl>0.9.2-SNAPSHOT</version.lib.common-impl>
-        <version.lib.jaxb-api>2.3.1</version.lib.jaxb-api>
-    </properties>
 
     <dependencies>
         <dependency>
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>common-api</artifactId>
-            <version>${version.lib.common-api}</version>
+            <version>${version.lib.jeon}</version>
         </dependency>
         <dependency>
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>common-impl</artifactId>
-            <version>${version.lib.common-impl}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

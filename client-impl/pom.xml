@@ -26,16 +26,6 @@
         <version>0.10.0</version>
     </parent>
     <artifactId>client-impl</artifactId>
-    <version>0.10.0</version>
-
-    <properties>
-        <version.lib.client-api>0.9.2-SNAPSHOT</version.lib.client-api>
-        <version.lib.common-impl>0.9.2-SNAPSHOT</version.lib.common-impl>
-        <version.lib.jackson-support>0.9.2-SNAPSHOT</version.lib.jackson-support>
-        <version.lib.logback-classic>1.2.3</version.lib.logback-classic>
-        <version.lib.resteasy>4.4.2.Final</version.lib.resteasy>
-        <version.lib.wiremock>2.26.0</version.lib.wiremock>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -45,12 +35,12 @@
         <dependency>
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>client-api</artifactId>
-            <version>${version.lib.client-api}</version>
+            <version>${version.lib.jeon}</version>
         </dependency>
         <dependency>
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>common-impl</artifactId>
-            <version>${version.lib.common-impl}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -83,7 +73,7 @@
         <dependency>
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>jackson-support</artifactId>
-            <version>${version.lib.jackson-support}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
