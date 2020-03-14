@@ -9,6 +9,8 @@ You can find implemented API [here](https://github.com/ma1uta/jeon/tree/master/c
 
 ### Usage
 
+Complete example with minimal configuration: https://github.com/ma1uta/matrix-client-example
+
 ```$java
 StandaloneClient mxClient = new StandaloneClient.Builder().domain("matrix.homeserver.tld").build();
 
@@ -19,13 +21,13 @@ mxClient.auth().login("username", "password").join();
 mxCLient.profile().setDisplayName("my new display name").join();
 
 // retrieve all joined rooms
-List<String> rooms = mxClient.room().joinedRooms().join();
+List<String> rooms = mxClient.room().joinedRooms().join().getJoinedRooms();
 String roomId = rooms.get(0);
 // or join to the room
-String roomId = mxClient.room().joinByIdOrAlias("#test:matrix.org", null, null).join();
+String roomId = mxClient.room().joinByIdOrAlias("#test:matrix.org", null, null).join().getRoomId();
 
 // send message to the room
-mxCLient.event().sendMessage(roomId, "Hello, World!").join();
+mxClient.event().sendMessage(roomId, "Hello, World!").join();
 
 // logout
 mxClient.auth().logout().join();
