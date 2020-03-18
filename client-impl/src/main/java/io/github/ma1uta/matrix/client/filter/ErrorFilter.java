@@ -76,8 +76,8 @@ public class ErrorFilter implements ClientResponseFilter {
                 rateLimitedResponse.getRetryAfterMs());
         } catch (Exception e) {
             LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));
-            LOGGER.error("Unable to parse response content", e);
-            throw new RuntimeException(e);
+            LOGGER.error("Unable to invoke request", e);
+            throw (RuntimeException) (e instanceof MatrixException ? e : new RuntimeException(e));
         }
     }
 
@@ -97,8 +97,8 @@ public class ErrorFilter implements ClientResponseFilter {
             throw new MatrixException(errorResponse.getErrcode(), errorResponse.getError());
         } catch (Exception e) {
             LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));
-            LOGGER.error("Unable to parse response content", e);
-            throw new RuntimeException(e);
+            LOGGER.error("Unable to invoke request", e);
+            throw (RuntimeException) (e instanceof MatrixException ? e : new RuntimeException(e));
         }
     }
 
