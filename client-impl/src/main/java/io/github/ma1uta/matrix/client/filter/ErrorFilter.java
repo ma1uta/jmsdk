@@ -18,9 +18,9 @@ package io.github.ma1uta.matrix.client.filter;
 
 import io.github.ma1uta.matrix.ErrorResponse;
 import io.github.ma1uta.matrix.RateLimitedErrorResponse;
+import io.github.ma1uta.matrix.UserInteractiveResponse;
 import io.github.ma1uta.matrix.impl.Deserializer;
 import io.github.ma1uta.matrix.impl.exception.MatrixException;
-import io.github.ma1uta.matrix.impl.exception.RateLimitedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.ServiceLoader;
+import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
@@ -55,11 +56,31 @@ public class ErrorFilter implements ClientResponseFilter {
             case HttpURLConnection.HTTP_OK:
                 LOGGER.trace("OK.");
                 break;
+            case HttpURLConnection.HTTP_UNAUTHORIZED:
+                throwUserInteractiveException(responseContext);
+                break;
             case RATE_LIMIT_RESPONSE_STATUS:
                 throwRateLimitException(responseContext);
                 return;
             default:
                 throwException(responseContext, status);
+        }
+    }
+
+    private void throwUserInteractiveException(ClientResponseContext responseContext) throws IOException {
+        byte[] response = StreamHelper.toByteArray(responseContext.getEntityStream());
+        try {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));
+            }
+            UserInteractiveResponse userInteractiveResponse = getDeserializer().deserialize(response, UserInteractiveResponse.class);
+            LOGGER.error("User-interactive response, session: {}", userInteractiveResponse.getSession());
+            throw new MatrixException(String.format("User-interactive response \"%s\"", userInteractiveResponse.getSession()),
+                userInteractiveResponse, HttpsURLConnection.HTTP_UNAUTHORIZED);
+        } catch (Exception e) {
+            LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));
+            LOGGER.error("Unable to invoke request", e);
+            throw (RuntimeException) (e instanceof MatrixException ? e : new RuntimeException(e));
         }
     }
 
@@ -72,8 +93,7 @@ public class ErrorFilter implements ClientResponseFilter {
             RateLimitedErrorResponse rateLimitedResponse = getDeserializer().deserialize(response, RateLimitedErrorResponse.class);
             LOGGER.error("Rate limited response, error code: '{}', error: '{}', retry after {} milliseconds",
                 rateLimitedResponse.getErrcode(), rateLimitedResponse.getError(), rateLimitedResponse.getRetryAfterMs());
-            throw new RateLimitedException(rateLimitedResponse.getErrcode(), rateLimitedResponse.getError(),
-                rateLimitedResponse.getRetryAfterMs());
+            throw new MatrixException(rateLimitedResponse.getError(), rateLimitedResponse, RATE_LIMIT_RESPONSE_STATUS);
         } catch (Exception e) {
             LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));
             LOGGER.error("Unable to invoke request", e);
@@ -94,7 +114,7 @@ public class ErrorFilter implements ClientResponseFilter {
             }
             ErrorResponse errorResponse = getDeserializer().deserialize(response, ErrorResponse.class);
             LOGGER.error("Error response, error code: '{}', error: '{}'", errorResponse.getErrcode(), errorResponse.getError());
-            throw new MatrixException(errorResponse.getErrcode(), errorResponse.getError());
+            throw new MatrixException(errorResponse.getError(), errorResponse, status);
         } catch (Exception e) {
             LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));
             LOGGER.error("Unable to invoke request", e);

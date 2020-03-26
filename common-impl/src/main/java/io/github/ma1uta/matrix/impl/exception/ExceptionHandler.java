@@ -17,11 +17,11 @@
 package io.github.ma1uta.matrix.impl.exception;
 
 import io.github.ma1uta.matrix.ErrorResponse;
-import io.github.ma1uta.matrix.RateLimitedErrorResponse;
+import io.github.ma1uta.matrix.ExceptionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.HttpURLConnection;
+import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -37,22 +37,18 @@ public class ExceptionHandler implements ExceptionMapper<Throwable> {
 
         LOGGER.error("Exception:", exception);
 
-        ErrorResponse message;
-        Integer status = null;
-        if (exception instanceof RateLimitedException) {
-            RateLimitedException rateLimitedException = (RateLimitedException) exception;
-            message = new RateLimitedErrorResponse(rateLimitedException.getErrcode(), rateLimitedException.getMessage(),
-                rateLimitedException.getRetryAfterMs());
-            status = rateLimitedException.getStatus();
-        } else if (exception instanceof MatrixException) {
+        ExceptionResponse message;
+        Integer status;
+        if (exception instanceof MatrixException) {
             MatrixException matrixException = (MatrixException) exception;
-            message = new ErrorResponse(matrixException.getErrcode(), matrixException.getMessage());
+            message = matrixException.getResponse();
             status = matrixException.getStatus();
         } else {
             message = message(exception);
+            status = HttpsURLConnection.HTTP_INTERNAL_ERROR;
         }
 
-        return Response.status(status != null ? status : HttpURLConnection.HTTP_INTERNAL_ERROR).entity(message).build();
+        return Response.status(status).entity(message).build();
     }
 
     protected ErrorResponse message(Throwable throwable) {

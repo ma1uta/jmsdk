@@ -16,6 +16,8 @@
 
 package io.github.ma1uta.matrix.impl.exception;
 
+import io.github.ma1uta.matrix.ExceptionResponse;
+
 import java.net.HttpURLConnection;
 
 /**
@@ -29,31 +31,28 @@ public class MatrixException extends RuntimeException {
     public static final String M_INTERNAL = "M_INTERNAL";
 
     /**
-     * Error code.
-     */
-    private String errcode;
-
-    /**
      * Response status.
      */
     private Integer status = HttpURLConnection.HTTP_INTERNAL_ERROR;
 
-    public MatrixException(String errcode, String error) {
+    private ExceptionResponse response;
+
+    public MatrixException(String error, ExceptionResponse response) {
         super(error);
-        this.errcode = errcode;
+        this.response = response;
     }
 
-    public MatrixException(String errcode, String error, Integer status) {
-        this(errcode, error);
+    public MatrixException(String error, ExceptionResponse response, Integer status) {
+        this(error, response);
         this.status = status;
     }
 
-    public String getErrcode() {
-        return errcode;
+    public ExceptionResponse getResponse() {
+        return response;
     }
 
-    public void setErrcode(String errcode) {
-        this.errcode = errcode;
+    public void setResponse(ExceptionResponse response) {
+        this.response = response;
     }
 
     public Integer getStatus() {
