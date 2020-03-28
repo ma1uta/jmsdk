@@ -29,7 +29,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import io.github.ma1uta.matrix.ExceptionResponse;
+import io.github.ma1uta.matrix.UserInteractiveResponse;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
@@ -43,6 +46,7 @@ import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import io.github.ma1uta.matrix.impl.exception.MatrixException;
 import io.github.ma1uta.matrix.thirdpid.SessionResponse;
 import org.junit.jupiter.api.Test;
 
@@ -71,6 +75,64 @@ public class AccountMethodsTest extends MockServer {
         assertEquals("@cheeky_monkey:matrix.org", getMatrixClient().getUserId());
         assertNull(loginResponse.getDeviceId());
         assertNull(loginResponse.getAccessToken());
+    }
+
+    @Test
+    public void userInteractiveAPI() throws Exception {
+        wireMockServer.stubFor(
+            post(urlPathMatching("/_matrix/client/r0/register/?"))
+                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON))
+                .willReturn(unauthorized().withHeader("Content-Type", MediaType.APPLICATION_JSON).withBody("{\n" +
+                    "  \"flows\": [\n" +
+                    "    {\n" +
+                    "      \"stages\": [ \"example.type.foo\", \"example.type.bar\" ]\n" +
+                    "    },\n" +
+                    "    {\n" +
+                    "      \"stages\": [ \"example.type.foo\", \"example.type.baz\" ]\n" +
+                    "    }\n" +
+                    "  ],\n" +
+                    "  \"params\": {\n" +
+                    "      \"example.type.baz\": {\n" +
+                    "          \"example_key\": \"foobar\"\n" +
+                    "      },\n" +
+                    "      \"example.type.foo\": {\n" +
+                    "          \"key\": {\n" +
+                    "             \"fa\":\"asd\"" +
+                    "          }\n" +
+                    "      }\n" +
+                    "  },\n" +
+                    "  \"session\": \"123\"\n" +
+                    "}\n")
+                )
+        );
+
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("cheeky_monkey");
+        request.setDeviceId("GHTYAJCE");
+        request.setPassword("ilovebananas".toCharArray());
+        request.setInitialDeviceDisplayName("Jungle Phone");
+        request.setBindEmail(false);
+
+        try {
+            getMatrixClient().account().register(request).get(1000, TimeUnit.MILLISECONDS);
+            fail("Missing User-interactive API");
+        } catch (Exception e) {
+            Throwable throwable = e;
+            while (!(throwable instanceof MatrixException) && throwable.getCause() != null) {
+                throwable = throwable.getCause();
+            }
+            assertTrue(throwable instanceof MatrixException, "Exception must be a MatrixException");
+            MatrixException matrixException = (MatrixException) throwable;
+            ExceptionResponse exceptionResponse = matrixException.getResponse();
+            assertTrue(exceptionResponse instanceof UserInteractiveResponse, "Response must be a User-interactive response");
+            UserInteractiveResponse userInteractiveResponse = (UserInteractiveResponse) exceptionResponse;
+
+            assertEquals("123", userInteractiveResponse.getSession(), "Wrong session name");
+            assertNotNull(userInteractiveResponse.getFlows(), "Missing flows");
+            assertEquals(2, userInteractiveResponse.getFlows().size(), "Wrong flow number");
+            assertNotNull(userInteractiveResponse.getParams(), "Missing params");
+            assertEquals(2, userInteractiveResponse.getParams().size(), "Wrong param size");
+        }
     }
 
     @Test
