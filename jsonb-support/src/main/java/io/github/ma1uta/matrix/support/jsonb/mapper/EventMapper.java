@@ -161,6 +161,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -172,14 +174,20 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
 @SuppressWarnings( {"javadocType", "javadocMethod", "javadocVariable", "InterfaceIsType"})
 @Mapper(unmappedSourcePolicy = ReportingPolicy.IGNORE, imports = JsonValue.class)
 public interface EventMapper {
 
+    Logger LOGGER = LoggerFactory.getLogger(EventMapper.class);
+
     EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
 
     Util UTIL = new Util();
+
+    Jsonb JSONB = JsonbBuilder.create();
 
     default Event deserialize(JsonObject jsonObject) {
         if (isNull(jsonObject)) {
@@ -192,104 +200,109 @@ public interface EventMapper {
 
         String type = jsonObject.getString("type");
 
-        switch (type) {
-            case Direct.TYPE:
-                return direct(jsonObject);
-            case Dummy.TYPE:
-                return dummy(jsonObject);
-            case ForwardedRoomKey.TYPE:
-                return forwardedRoomKey(jsonObject);
-            case FullyRead.TYPE:
-                return fullyRead(jsonObject);
-            case IgnoredUserList.TYPE:
-                return ignoredUserList(jsonObject);
-            case KeyVerificationAccept.TYPE:
-                return keyVerificationAccept(jsonObject);
-            case KeyVerificationCancel.TYPE:
-                return keyVerificationCancel(jsonObject);
-            case KeyVerificationKey.TYPE:
-                return keyVerificationKey(jsonObject);
-            case KeyVerificationMac.TYPE:
-                return keyVerificationMac(jsonObject);
-            case KeyVerificationRequest.TYPE:
-                return keyVerificationRequest(jsonObject);
-            case KeyVerificationStart.TYPE:
-                return keyVerificationStart(jsonObject);
-            case Presence.TYPE:
-                return presence(jsonObject);
-            case PushRules.TYPE:
-                return pushRules(jsonObject);
-            case Receipt.TYPE:
-                return receipt(jsonObject);
-            case RoomKey.TYPE:
-                return roomKey(jsonObject);
-            case RoomKeyRequest.TYPE:
-                return roomKeyRequest(jsonObject);
-            case Tag.TYPE:
-                return tag(jsonObject);
-            case Typing.TYPE:
-                return typing(jsonObject);
+        try {
+            switch (type) {
+                case Direct.TYPE:
+                    return direct(jsonObject);
+                case Dummy.TYPE:
+                    return dummy(jsonObject);
+                case ForwardedRoomKey.TYPE:
+                    return forwardedRoomKey(jsonObject);
+                case FullyRead.TYPE:
+                    return fullyRead(jsonObject);
+                case IgnoredUserList.TYPE:
+                    return ignoredUserList(jsonObject);
+                case KeyVerificationAccept.TYPE:
+                    return keyVerificationAccept(jsonObject);
+                case KeyVerificationCancel.TYPE:
+                    return keyVerificationCancel(jsonObject);
+                case KeyVerificationKey.TYPE:
+                    return keyVerificationKey(jsonObject);
+                case KeyVerificationMac.TYPE:
+                    return keyVerificationMac(jsonObject);
+                case KeyVerificationRequest.TYPE:
+                    return keyVerificationRequest(jsonObject);
+                case KeyVerificationStart.TYPE:
+                    return keyVerificationStart(jsonObject);
+                case Presence.TYPE:
+                    return presence(jsonObject);
+                case PushRules.TYPE:
+                    return pushRules(jsonObject);
+                case Receipt.TYPE:
+                    return receipt(jsonObject);
+                case RoomKey.TYPE:
+                    return roomKey(jsonObject);
+                case RoomKeyRequest.TYPE:
+                    return roomKeyRequest(jsonObject);
+                case Tag.TYPE:
+                    return tag(jsonObject);
+                case Typing.TYPE:
+                    return typing(jsonObject);
 
-            case CallAnswer.TYPE:
-                return callAnswer(jsonObject);
-            case CallCandidates.TYPE:
-                return callCandidates(jsonObject);
-            case CallHangup.TYPE:
-                return callHangup(jsonObject);
-            case CallInvite.TYPE:
-                return callInvite(jsonObject);
-            case RoomEncrypted.TYPE:
-                return roomEncrypted(jsonObject);
-            case RoomMessage.TYPE:
-                return roomMessage(jsonObject);
-            case RoomMessageFeedback.TYPE:
-                return roomMessageFeedback(jsonObject);
-            case RoomRedaction.TYPE:
-                return roomRedaction(jsonObject);
-            case Sticker.TYPE:
-                return sticker(jsonObject);
+                case CallAnswer.TYPE:
+                    return callAnswer(jsonObject);
+                case CallCandidates.TYPE:
+                    return callCandidates(jsonObject);
+                case CallHangup.TYPE:
+                    return callHangup(jsonObject);
+                case CallInvite.TYPE:
+                    return callInvite(jsonObject);
+                case RoomEncrypted.TYPE:
+                    return roomEncrypted(jsonObject);
+                case RoomMessage.TYPE:
+                    return roomMessage(jsonObject);
+                case RoomMessageFeedback.TYPE:
+                    return roomMessageFeedback(jsonObject);
+                case RoomRedaction.TYPE:
+                    return roomRedaction(jsonObject);
+                case Sticker.TYPE:
+                    return sticker(jsonObject);
 
-            case RoomAliases.TYPE:
-                return roomAliases(jsonObject);
-            case RoomAvatar.TYPE:
-                return roomAvatar(jsonObject);
-            case RoomCanonicalAlias.TYPE:
-                return roomCanonicalAlias(jsonObject);
-            case RoomCreate.TYPE:
-                return roomCreate(jsonObject);
-            case RoomEncryption.TYPE:
-                return roomEncryption(jsonObject);
-            case RoomGuestAccess.TYPE:
-                return roomGuestAccess(jsonObject);
-            case RoomHistoryVisibility.TYPE:
-                return roomHistoryVisibility(jsonObject);
-            case RoomJoinRules.TYPE:
-                return roomJoinRules(jsonObject);
-            case RoomMember.TYPE:
-                return roomMember(jsonObject);
-            case RoomName.TYPE:
-                return roomName(jsonObject);
-            case RoomPinned.TYPE:
-                return roomPinned(jsonObject);
-            case RoomPowerLevels.TYPE:
-                return roomPowerLevels(jsonObject);
-            case RoomServerAcl.TYPE:
-                return roomServerAcl(jsonObject);
-            case RoomThirdPartyInvite.TYPE:
-                return roomThirdPartyInvite(jsonObject);
-            case RoomTombstone.TYPE:
-                return roomTombstone(jsonObject);
-            case RoomTopic.TYPE:
-                return roomTopic(jsonObject);
-            case PolicyRuleUser.TYPE:
-                return policyRuleUser(jsonObject);
-            case PolicyRuleRoom.TYPE:
-                return policyRuleRoom(jsonObject);
-            case PolicyRuleServer.TYPE:
-                return policyRuleServer(jsonObject);
+                case RoomAliases.TYPE:
+                    return roomAliases(jsonObject);
+                case RoomAvatar.TYPE:
+                    return roomAvatar(jsonObject);
+                case RoomCanonicalAlias.TYPE:
+                    return roomCanonicalAlias(jsonObject);
+                case RoomCreate.TYPE:
+                    return roomCreate(jsonObject);
+                case RoomEncryption.TYPE:
+                    return roomEncryption(jsonObject);
+                case RoomGuestAccess.TYPE:
+                    return roomGuestAccess(jsonObject);
+                case RoomHistoryVisibility.TYPE:
+                    return roomHistoryVisibility(jsonObject);
+                case RoomJoinRules.TYPE:
+                    return roomJoinRules(jsonObject);
+                case RoomMember.TYPE:
+                    return roomMember(jsonObject);
+                case RoomName.TYPE:
+                    return roomName(jsonObject);
+                case RoomPinned.TYPE:
+                    return roomPinned(jsonObject);
+                case RoomPowerLevels.TYPE:
+                    return roomPowerLevels(jsonObject);
+                case RoomServerAcl.TYPE:
+                    return roomServerAcl(jsonObject);
+                case RoomThirdPartyInvite.TYPE:
+                    return roomThirdPartyInvite(jsonObject);
+                case RoomTombstone.TYPE:
+                    return roomTombstone(jsonObject);
+                case RoomTopic.TYPE:
+                    return roomTopic(jsonObject);
+                case PolicyRuleUser.TYPE:
+                    return policyRuleUser(jsonObject);
+                case PolicyRuleRoom.TYPE:
+                    return policyRuleRoom(jsonObject);
+                case PolicyRuleServer.TYPE:
+                    return policyRuleServer(jsonObject);
 
-            default:
-                return UTIL.parse(jsonObject);
+                default:
+                    return UTIL.parse(jsonObject);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Unable to parse event", e);
+            return UTIL.parse(jsonObject);
         }
     }
 
@@ -966,10 +979,20 @@ public interface EventMapper {
 
         ReceiptInfo receiptInfo = new ReceiptInfo();
 
-        if (!isNull(jsonObject, "read")) {
+        if (!isNull(jsonObject, "m.read")) {
             Map<String, ReceiptTs> read = new HashMap<>();
-            for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("read").entrySet()) {
-                read.put(entry.getKey(), receiptTs(entry.getValue().asJsonObject()));
+            for (Map.Entry<String, JsonValue> entry : jsonObject.getJsonObject("m.read").entrySet()) {
+                JsonValue entryValue = entry.getValue();
+                ReceiptTs receiptTs;
+                if (entryValue.getValueType() == JsonValue.ValueType.STRING) {
+                    // workaround for https://github.com/matrix-org/synapse/issues/4898
+                    String serializedObject = entryValue.toString();
+                    String preparedString = serializedObject.substring(1, serializedObject.length() - 1).replaceAll("\\\\", "");
+                    receiptTs = JSONB.fromJson(preparedString, ReceiptTs.class);
+                } else {
+                    receiptTs = receiptTs(entryValue.asJsonObject());
+                }
+                read.put(entry.getKey(), receiptTs);
             }
             receiptInfo.setRead(read);
         }

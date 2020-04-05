@@ -29,6 +29,7 @@ module matrix.support.jackson {
     requires transitive com.fasterxml.jackson.core;
     requires transitive com.fasterxml.jackson.databind;
     requires transitive com.fasterxml.jackson.jaxrs.json;
+    requires org.slf4j;
 
     provides Deserializer with JacksonDeserializer;
     provides RestClientBuilderConfigurer with JacksonRestClientBuilderConfigurer;

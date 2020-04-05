@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.content.RoomEncryptedContent;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
+import io.github.ma1uta.matrix.event.nested.ReceiptTs;
+import io.github.ma1uta.matrix.support.jackson.workaround.ReceiptTsDeserialized4898;
 
 /**
  * Default implementation.
@@ -42,6 +44,7 @@ public class DefaultObjectMapperProvider implements ObjectMapperProvider {
         eventModule.addDeserializer(Event.class, new EventDeserializer());
         eventModule.addDeserializer(RoomEncryptedContent.class, new RoomEncryptedContentDeserializer());
         eventModule.addDeserializer(RoomMessageContent.class, new RoomMessageContentDeserializer());
+        eventModule.addDeserializer(ReceiptTs.class, new ReceiptTsDeserialized4898());
 
         mapper.registerModule(eventModule);
     }
