@@ -19,7 +19,7 @@
     <parent>
         <artifactId>jmsdk</artifactId>
         <groupId>io.github.ma1uta.matrix</groupId>
-        <version>0.12.0-SNAPSHOT</version>
+        <version>0.11.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>jmsdk-bom</artifactId>
