@@ -38,7 +38,6 @@ import io.github.ma1uta.matrix.client.model.auth.UserIdentifier;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.MediaType;
@@ -59,7 +58,7 @@ class AuthMethodsTest extends MockServer {
                 )
         );
 
-        List<LoginType> loginTypes = getMatrixClient().auth().loginTypes().thenApply(SupportedLoginResponse::getFlows)
+        List<LoginType> loginTypes = getMatrixClient().authAsync().loginTypes().thenApply(SupportedLoginResponse::getFlows)
             .get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(loginTypes);
         assertEquals(1, loginTypes.size());
@@ -91,7 +90,7 @@ class AuthMethodsTest extends MockServer {
         UserIdentifier identifier = new UserIdentifier();
         identifier.setUser("cheeky_monkey");
         loginRequest.setIdentifier(identifier);
-        LoginResponse loginResponse = getMatrixClient().auth().login(loginRequest).get(1000, TimeUnit.MILLISECONDS);
+        LoginResponse loginResponse = getMatrixClient().authAsync().login(loginRequest).get(1000, TimeUnit.MILLISECONDS);
 
         assertNotNull(loginResponse);
         assertEquals("@cheeky_monkey:matrix.org", loginResponse.getUserId());
@@ -119,7 +118,7 @@ class AuthMethodsTest extends MockServer {
         if (withToken) {
             getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
-        EmptyResponse res = getMatrixClient().auth().logout().get(1000, TimeUnit.MILLISECONDS);
+        EmptyResponse res = getMatrixClient().authAsync().logout().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(res);
     }
 
@@ -148,7 +147,7 @@ class AuthMethodsTest extends MockServer {
         if (withToken) {
             getMatrixClient().getConnectionInfo().setAccessToken(ACCESS_TOKEN);
         }
-        EmptyResponse res = getMatrixClient().auth().logoutAll().get(1000, TimeUnit.MILLISECONDS);
+        EmptyResponse res = getMatrixClient().authAsync().logoutAll().get(1000, TimeUnit.MILLISECONDS);
         assertNotNull(res);
     }
 }

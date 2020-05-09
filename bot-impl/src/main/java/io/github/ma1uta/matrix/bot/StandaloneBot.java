@@ -92,14 +92,14 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
     protected LoopState loop(Function<SyncResponse, LoopState> loopAction) {
         C config = getContext().getConfig();
         MatrixClient matrixClient = getContext().getMatrixClient();
-        SyncResponse sync = matrixClient.sync().sync(config.getFilterId(), config.getNextBatch(), false, null, null).join();
+        SyncResponse sync = matrixClient.sync().sync(config.getFilterId(), config.getNextBatch(), false, null, null);
 
         String initialBatch = sync.getNextBatch();
         if (config.getNextBatch() == null && config.getSkipInitialSync() != null && config.getSkipInitialSync()) {
             getContext().runInTransaction((context, dao) -> {
                 context.getConfig().setNextBatch(initialBatch);
             });
-            sync = matrixClient.sync().sync(config.getFilterId(), initialBatch, false, null, config.getTimeout()).join();
+            sync = matrixClient.sync().sync(config.getFilterId(), initialBatch, false, null, config.getTimeout());
         }
 
         while (true) {
@@ -119,7 +119,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
                     return LoopState.EXIT;
                 }
 
-                sync = matrixClient.sync().sync(config.getFilterId(), nextBatch, false, null, config.getTimeout()).join();
+                sync = matrixClient.sync().sync(config.getFilterId(), nextBatch, false, null, config.getTimeout());
             } catch (Exception e) {
                 LOGGER.error("Exception: ", e);
             }
@@ -152,7 +152,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
             Rooms rooms = sync.getRooms();
 
             MatrixClient matrixClient = getContext().getMatrixClient();
-            List<String> joinedRooms = matrixClient.room().joinedRooms().join().getJoinedRooms();
+            List<String> joinedRooms = matrixClient.room().joinedRooms().getJoinedRooms();
             for (Map.Entry<String, LeftRoom> roomEntry : rooms.getLeave().entrySet()) {
                 String leftRoom = roomEntry.getKey();
                 if (joinedRooms.contains(leftRoom)) {
@@ -179,7 +179,7 @@ public class StandaloneBot<C extends BotConfig, D extends BotDao<C>, S extends P
                 }
             }
 
-            if (getContext().getMatrixClient().room().joinedRooms().join().getJoinedRooms().isEmpty()) {
+            if (getContext().getMatrixClient().room().joinedRooms().getJoinedRooms().isEmpty()) {
                 getContext().runInTransaction((context, dao) -> {
                     context.getConfig().setState(isExitOnEmptyRooms() ? BotState.DELETED : BotState.REGISTERED);
                 });

@@ -43,9 +43,7 @@ public class FederationHomeServerResolver extends AbstractHomeServerResolver {
      * @return homeserver url.
      */
     @Override
-    public Optional<ResolvedHomeserver> resolve(String domain) {
-        LOGGER.trace("Resolve: {}", domain);
-
+    public Optional<ResolvedHomeserver> resolveDomain(String domain) {
         Optional<ResolvedHomeserver> resolvedHomeserver = tryParseIPAddresses(domain);
         if (!resolvedHomeserver.isPresent()) {
             resolvedHomeserver = tryWellKnown(domain);
@@ -56,23 +54,6 @@ public class FederationHomeServerResolver extends AbstractHomeServerResolver {
         if (!resolvedHomeserver.isPresent()) {
             resolvedHomeserver = tryDirectUrl(domain);
         }
-        if (!resolvedHomeserver.isPresent()) {
-            LOGGER.error("Unable to resolve homeserver url of the domain: {}", domain);
-            return Optional.empty();
-        }
-
-        ResolvedHomeserver homeserver = resolvedHomeserver.get();
-        if (isHomeserverVerificationDisabled()) {
-            LOGGER.trace("Checking homeserver url disabled.");
-        } else {
-            LOGGER.trace("Check homeserver url: {}", homeserver);
-            boolean valid = isValidHomeserverUrl(homeserver);
-            if (!valid) {
-                LOGGER.error("Unable to check the homeserver url: {}", homeserver);
-                return Optional.empty();
-            }
-        }
-        LOGGER.info("Resolved: {} => {}", domain, homeserver.toString());
         return resolvedHomeserver;
     }
 }

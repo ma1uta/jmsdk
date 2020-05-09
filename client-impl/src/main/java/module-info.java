@@ -3,7 +3,8 @@ module matrix.client.impl {
     uses io.github.ma1uta.matrix.impl.RestClientBuilderConfigurer;
 
     exports io.github.ma1uta.matrix.client;
-    exports io.github.ma1uta.matrix.client.methods;
+    exports io.github.ma1uta.matrix.client.methods.blocked;
+    exports io.github.ma1uta.matrix.client.methods.async;
     exports io.github.ma1uta.matrix.client.sync;
 
     requires transitive matrix.client.api;

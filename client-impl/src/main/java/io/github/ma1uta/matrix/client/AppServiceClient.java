@@ -17,7 +17,8 @@
 package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.client.filter.UserIdClientFilter;
-import io.github.ma1uta.matrix.client.methods.AccountMethods;
+import io.github.ma1uta.matrix.client.methods.async.AccountAsyncMethods;
+import io.github.ma1uta.matrix.client.methods.blocked.AccountMethods;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
@@ -64,6 +65,16 @@ public class AppServiceClient extends MatrixClient {
         ConnectionInfo newConnectionInfo = new ConnectionInfo(getConnectionInfo());
         newConnectionInfo.setUserId(userId);
         return new AppServiceClient(newConnectionInfo, getExecutorService());
+    }
+
+    /**
+     * Account methods.
+     *
+     * @return account methods.
+     */
+    @Override
+    public AccountAsyncMethods accountAsync() {
+        return getMethod(AccountAsyncMethods.class, () -> new AccountAsyncMethods(getClientBuilder(), Function.identity()));
     }
 
     /**

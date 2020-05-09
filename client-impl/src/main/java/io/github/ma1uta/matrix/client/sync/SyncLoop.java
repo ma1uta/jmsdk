@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.client.sync;
 
-import io.github.ma1uta.matrix.client.methods.SyncMethods;
+import io.github.ma1uta.matrix.client.methods.async.SyncAsyncMethods;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,17 +34,17 @@ public class SyncLoop implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncLoop.class);
 
-    private final SyncMethods syncMethods;
+    private final SyncAsyncMethods syncAsyncMethods;
     private BiFunction<SyncResponse, SyncParams, SyncParams> inboundListener;
     private SyncParams init = new SyncParams();
     private final SyncParams current = new SyncParams();
 
-    public SyncLoop(SyncMethods syncMethods) {
-        this.syncMethods = syncMethods;
+    public SyncLoop(SyncAsyncMethods syncAsyncMethods) {
+        this.syncAsyncMethods = syncAsyncMethods;
     }
 
-    protected SyncMethods getSyncMethods() {
-        return syncMethods;
+    protected SyncAsyncMethods getSyncAsyncMethods() {
+        return syncAsyncMethods;
     }
 
     public BiFunction<SyncResponse, SyncParams, SyncParams> getInboundListener() {
@@ -82,7 +82,7 @@ public class SyncLoop implements Runnable {
 
     @Override
     public void run() {
-        Objects.requireNonNull(getSyncMethods(), "The Matrix client must be specified.");
+        Objects.requireNonNull(getSyncAsyncMethods(), "The Matrix client must be specified.");
         Objects.requireNonNull(getInboundListener(), "Not found inbound listeners, the sync will erase the response.");
 
         setCurrent(getInit());
@@ -91,7 +91,7 @@ public class SyncLoop implements Runnable {
             try {
                 CompletableFuture<SyncResponse> future;
                 synchronized (current) {
-                    future = getSyncMethods().sync(
+                    future = getSyncAsyncMethods().sync(
                         current.getFilter(),
                         current.getNextBatch(),
                         current.isFullState(),

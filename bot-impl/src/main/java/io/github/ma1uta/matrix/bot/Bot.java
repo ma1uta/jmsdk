@@ -100,7 +100,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
         C config = context.getConfig();
         MatrixClient matrixClient = context.getMatrixClient();
         if (matrixClient instanceof StandaloneClient) {
-            ((StandaloneClient) matrixClient).auth().login(config.getUserId(), config.getPassword()).join();
+            ((StandaloneClient) matrixClient).authAsync().login(config.getUserId(), config.getPassword()).join();
         }
 
         if (getInitAction() != null) {
@@ -153,9 +153,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             registerRequest.setDeviceId(config.getDeviceId());
 
             MatrixClient matrixClient = context.getMatrixClient();
-            if (matrixClient instanceof StandaloneClient) {
-                ((StandaloneClient) matrixClient).account().register(registerRequest);
-            }
+            matrixClient.account().register(registerRequest);
             LOGGER.debug("Set new display name: {}", config.getDisplayName());
             matrixClient.profile().setDisplayName(config.getDisplayName());
 
@@ -165,7 +163,7 @@ public class Bot<C extends BotConfig, D extends BotDao<C>, S extends PersistentS
             roomFilter.setTimeline(roomEventFilter);
             FilterData filter = new FilterData();
             filter.setRoom(roomFilter);
-            config.setFilterId(matrixClient.filter().uploadFilter(filter).join().getFilterId());
+            config.setFilterId(matrixClient.filter().uploadFilter(filter).getFilterId());
             LOGGER.debug("Set new filter: {}", config.getFilterId());
 
             config.setState(BotState.REGISTERED);

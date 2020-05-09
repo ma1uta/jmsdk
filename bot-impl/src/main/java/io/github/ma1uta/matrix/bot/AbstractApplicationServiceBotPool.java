@@ -69,7 +69,7 @@ public abstract class AbstractApplicationServiceBotPool<C extends BotConfig, D e
                 }
                 List<String> joinedRooms;
                 try {
-                    joinedRooms = context.getMatrixClient().room().joinedRooms().join().getJoinedRooms();
+                    joinedRooms = context.getMatrixClient().room().joinedRooms().getJoinedRooms();
                 } catch (Exception e) {
                     LOGGER.error("Cannot retrieve joined rooms.", e);
                     return false;

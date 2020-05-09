@@ -17,8 +17,10 @@
 package io.github.ma1uta.matrix.client;
 
 import io.github.ma1uta.matrix.EmptyResponse;
-import io.github.ma1uta.matrix.client.methods.AccountMethods;
-import io.github.ma1uta.matrix.client.methods.AuthMethods;
+import io.github.ma1uta.matrix.client.methods.async.AccountAsyncMethods;
+import io.github.ma1uta.matrix.client.methods.async.AuthAsyncMethods;
+import io.github.ma1uta.matrix.client.methods.blocked.AccountMethods;
+import io.github.ma1uta.matrix.client.methods.blocked.AuthMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 
 import java.util.concurrent.ExecutorService;
@@ -45,8 +47,27 @@ public class StandaloneClient extends MatrixClient {
      *
      * @return auth methods.
      */
+    public AuthAsyncMethods authAsync() {
+        return getMethod(AuthAsyncMethods.class, () -> new AuthAsyncMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
+    }
+
+    /**
+     * Auth methods.
+     *
+     * @return auth methods.
+     */
     public AuthMethods auth() {
         return getMethod(AuthMethods.class, () -> new AuthMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
+    }
+
+    /**
+     * Account methods.
+     *
+     * @return account methods.
+     */
+    @Override
+    public AccountAsyncMethods accountAsync() {
+        return getMethod(AccountAsyncMethods.class, () -> new AccountAsyncMethods(getClientBuilder(), this::afterLogin));
     }
 
     /**
@@ -61,7 +82,7 @@ public class StandaloneClient extends MatrixClient {
 
     @Override
     public void close() {
-        auth().logout();
+        authAsync().logout();
     }
 
     /**
