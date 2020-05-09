@@ -16,16 +16,13 @@
 
 package io.github.ma1uta.matrix.client.sync;
 
-import io.github.ma1uta.matrix.client.methods.async.SyncAsyncMethods;
+import io.github.ma1uta.matrix.client.methods.blocked.SyncMethods;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
+import java.util.function.BiConsumer;
 
 /**
  * Runnable to receive events and other data from the server.
@@ -34,24 +31,13 @@ public class SyncLoop implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncLoop.class);
 
-    private final SyncAsyncMethods syncAsyncMethods;
-    private BiFunction<SyncResponse, SyncParams, SyncParams> inboundListener;
-    private SyncParams init = new SyncParams();
-    private final SyncParams current = new SyncParams();
+    private final SyncMethods syncMethods;
+    private final BiConsumer<SyncResponse, SyncParams> inboundListener;
+    private final SyncParams state = new SyncParams();
+    private SyncParams init = null;
 
-    public SyncLoop(SyncAsyncMethods syncAsyncMethods) {
-        this.syncAsyncMethods = syncAsyncMethods;
-    }
-
-    protected SyncAsyncMethods getSyncAsyncMethods() {
-        return syncAsyncMethods;
-    }
-
-    public BiFunction<SyncResponse, SyncParams, SyncParams> getInboundListener() {
-        return inboundListener;
-    }
-
-    public void setInboundListener(BiFunction<SyncResponse, SyncParams, SyncParams> inboundListener) {
+    public SyncLoop(SyncMethods syncMethods, BiConsumer<SyncResponse, SyncParams> inboundListener) {
+        this.syncMethods = syncMethods;
         this.inboundListener = inboundListener;
     }
 
@@ -63,57 +49,31 @@ public class SyncLoop implements Runnable {
         this.init = init;
     }
 
-    public SyncParams getCurrent() {
-        return new SyncParams(current);
-    }
-
-    /**
-     * Set a new sync params.
-     *
-     * @param newParams The new sync params.
-     */
-    public void setCurrent(SyncParams newParams) {
-        if (newParams != null) {
-            synchronized (current) {
-                current.from(newParams);
-            }
-        }
-    }
-
     @Override
     public void run() {
-        Objects.requireNonNull(getSyncAsyncMethods(), "The Matrix client must be specified.");
-        Objects.requireNonNull(getInboundListener(), "Not found inbound listeners, the sync will erase the response.");
+        Objects.requireNonNull(syncMethods, "The Matrix client must be specified.");
+        Objects.requireNonNull(inboundListener, "Not found inbound listeners, the sync will erase the response.");
 
-        setCurrent(getInit());
+        if (getInit() != null) {
+            state.from(getInit());
+        }
 
-        while (!Thread.interrupted()) {
+        LOGGER.info("SyncLoop started");
+        while (!(Thread.interrupted() && state.isTerminate())) {
             try {
-                CompletableFuture<SyncResponse> future;
-                synchronized (current) {
-                    future = getSyncAsyncMethods().sync(
-                        current.getFilter(),
-                        current.getNextBatch(),
-                        current.isFullState(),
-                        current.getPresence(),
-                        current.getTimeout()
-                    );
-                }
-                SyncResponse sync = future.get(2 * current.getTimeout(), TimeUnit.MILLISECONDS);
-
-                synchronized (current) {
-                    current.setNextBatch(sync.getNextBatch());
-                }
-
-                setCurrent(getInboundListener().apply(sync, getCurrent()));
-            } catch (TimeoutException e) {
-                LOGGER.error("Timeout exceeded", e);
-            } catch (InterruptedException e) {
-                LOGGER.warn("Interrupted", e);
-                return;
+                SyncResponse sync = syncMethods.sync(
+                    state.getFilter(),
+                    state.getNextBatch(),
+                    state.isFullState(),
+                    state.getPresence(),
+                    state.getTimeout()
+                );
+                state.setNextBatch(sync.getNextBatch());
+                inboundListener.accept(sync, state);
             } catch (Exception e) {
                 LOGGER.error("Exception: ", e);
             }
         }
+        LOGGER.info("SyncLoop stopped");
     }
 }

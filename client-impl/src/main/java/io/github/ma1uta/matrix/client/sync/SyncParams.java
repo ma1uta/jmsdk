@@ -25,11 +25,13 @@ public class SyncParams {
 
     private String nextBatch;
 
-    private boolean fullState;
+    private boolean fullState = false;
 
     private Long timeout;
 
     private String presence;
+
+    private boolean terminate = false;
 
     public SyncParams() {
     }
@@ -103,6 +105,14 @@ public class SyncParams {
         this.presence = presence;
     }
 
+    public boolean isTerminate() {
+        return terminate;
+    }
+
+    public void setTerminate(boolean terminate) {
+        this.terminate = terminate;
+    }
+
     /**
      * Create a new builder.
      *
@@ -112,7 +122,7 @@ public class SyncParams {
         return new Builder();
     }
 
-    private static class Builder {
+    public static class Builder {
 
         private String filter;
 

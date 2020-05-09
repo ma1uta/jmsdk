@@ -15,50 +15,48 @@ Complete example with minimal configuration: https://github.com/ma1uta/matrix-cl
 StandaloneClient mxClient = new StandaloneClient.Builder().domain("matrix.homeserver.tld").build();
 
 // login
-mxClient.auth().login("username", "password").join();
+mxClient.auth().login("username", "password");
 
 // set display name via profile api
-mxCLient.profile().setDisplayName("my new display name").join();
+mxCLient.profile().setDisplayName("my new display name");
 
 // retrieve all joined rooms
-List<String> rooms = mxClient.room().joinedRooms().join().getJoinedRooms();
+List<String> rooms = mxClient.room().joinedRooms().getJoinedRooms();
 String roomId = rooms.get(0);
 // or join to the room
-String roomId = mxClient.room().joinByIdOrAlias("#test:matrix.org", null, null).join().getRoomId();
+String roomId = mxClient.room().joinByIdOrAlias("#test:matrix.org", null, null).getRoomId();
 
 // send message to the room
-mxClient.event().sendMessage(roomId, "Hello, World!").join();
+mxClient.event().sendMessage(roomId, "Hello, World!");
 
 // logout
-mxClient.auth().logout().join();
+mxClient.auth().logout();
 ```
 
 There are two ways to receive events from the server:
 1. invoke api
     ```$java
-    CompletableFuture<SyncResponse> response = mxClient.sync().sync(filterId, nextBatch, fullState, presence, delay);
+    SyncResponse response = mxClient.sync().sync(filterId, nextBatch, fullState, presence, delay);
     ```
-    Also it should organize loop to cycle `sync`-method.
 2. run `SyncLoop` in the separate thread.
     ```$java
-    SyncLoop syncLoop = new SyncLoop(mxClient.sync());
-    syncLoop.setInboundListener((SyncResponse) -> {
-       // parse events from the server.
-       return null; // or a new sync params.
+    SyncLoop syncLoop = new SyncLoop(mxClient.sync(), (syncResponse, syncParams) -> {
+       // inbound listener to parse incoming events.
+       ...
+
+       syncParams.setFullState(false);
+       
+       // syncParams.setTerminate(true); // to stop SyncLoop.
     });
     
-    // Set initial parameters.
-    SyncParams params = new SyncParams();
-    // set initial batch_token (optional)
-    params.setNextBatch("s123");
-    // retrieve full state or not
-    params.setFullState(true);
-    // filter the received events (optional)
-    params.setFilter("myFilter");
-    // set presence "offline" or null (optional)
-    params.setPresence(null);
-    // set long-polling delay in milliseconds (recommended to set bigger than 0 to avoid spam server)
-    params.setTimeout(10 * 1000);
+    // Set initial parameters (Optional).
+    SyncParams params = SyncParams.builder()
+        .nextBatch("s123")   // set initial batch_token (optional)
+        .fullState(true)     // retrieve full state or not
+        .filter("myFilter")  // filter the received events (optional)
+        .presence(null)      // set presence "offline" or null (optional)
+        .timeout(10 * 1000)  // set long-polling delay in milliseconds (recommended to set bigger than 0 to avoid spam server)
+        .build();
     
     syncLoop.setInit(params);
     
