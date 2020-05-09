@@ -28,7 +28,7 @@ public class HomeServerResolverTest {
 
     @Test
     public void wellKnownTest() {
-        HomeServerResolver resolver = new HomeServerResolver();
+        ClientHomeServerResolver resolver = new ClientHomeServerResolver();
 
         Optional<ResolvedHomeserver> resolvedHomeserver = resolver.resolve("ru-matrix.org");
         assertTrue(resolvedHomeserver.isPresent());

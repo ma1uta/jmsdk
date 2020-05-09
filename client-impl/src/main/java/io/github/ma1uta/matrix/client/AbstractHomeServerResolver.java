@@ -47,7 +47,7 @@ import javax.net.ssl.HttpsURLConnection;
 /**
  * Home server resolver.
  */
-public class HomeServerResolver {
+public abstract class AbstractHomeServerResolver {
 
     private static final int SRV_RECORD_PARAMETER_COUNT = 4;
 
@@ -70,16 +70,16 @@ public class HomeServerResolver {
     private static final Pattern IPv6_PATTERN = Pattern
         .compile("^([0-9a-f]{1,4}:){7}([0-9a-f]){1,4}$|^\\[([0-9a-f]{1,4}:){7}([0-9a-f]){1,4}]:\\d{2,5}$");
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerResolver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHomeServerResolver.class);
 
     private final Deserializer deserializer;
     private final Boolean homeserverVerificationDisabled;
 
-    public HomeServerResolver() {
+    public AbstractHomeServerResolver() {
         this(null);
     }
 
-    public HomeServerResolver(Boolean homeserverVerificationDisabled) {
+    public AbstractHomeServerResolver(Boolean homeserverVerificationDisabled) {
         this.deserializer = ServiceLoader.load(Deserializer.class).iterator().next();
         this.homeserverVerificationDisabled = homeserverVerificationDisabled;
     }
@@ -95,40 +95,9 @@ public class HomeServerResolver {
      * @param domain homeserver domain.
      * @return homeserver url.
      */
-    public Optional<ResolvedHomeserver> resolve(String domain) {
-        LOGGER.trace("Resolve: {}", domain);
+    public abstract Optional<ResolvedHomeserver> resolve(String domain);
 
-        Optional<ResolvedHomeserver> resolvedHomeserver = tryParseIPAddresses(domain);
-        if (!resolvedHomeserver.isPresent()) {
-            resolvedHomeserver = tryWellKnown(domain);
-        }
-        if (!resolvedHomeserver.isPresent()) {
-            resolvedHomeserver = trySrvRecord(domain);
-        }
-        if (!resolvedHomeserver.isPresent()) {
-            resolvedHomeserver = tryDirectUrl(domain);
-        }
-        if (!resolvedHomeserver.isPresent()) {
-            LOGGER.error("Unable to resolve homeserver url of the domain: {}", domain);
-            return Optional.empty();
-        }
-
-        ResolvedHomeserver homeserver = resolvedHomeserver.get();
-        if (isHomeserverVerificationDisabled()) {
-            LOGGER.trace("Checking homeserver url disabled.");
-        } else {
-            LOGGER.trace("Check homeserver url: {}", homeserver);
-            boolean valid = isValidHomeserverUrl(homeserver);
-            if (!valid) {
-                LOGGER.error("Unable to check the homeserver url: {}", homeserver);
-                return Optional.empty();
-            }
-        }
-        LOGGER.info("Resolved: {} => {}", domain, homeserver.toString());
-        return resolvedHomeserver;
-    }
-
-    private boolean isValidHomeserverUrl(ResolvedHomeserver homeserver) {
+    protected boolean isValidHomeserverUrl(ResolvedHomeserver homeserver) {
         String version = homeserver.getUrl().toString() + "/_matrix/client/versions";
         try {
             VersionsResponse response;
@@ -163,7 +132,7 @@ public class HomeServerResolver {
         return true;
     }
 
-    private Optional<ResolvedHomeserver> tryParseIPAddresses(String domain) {
+    protected Optional<ResolvedHomeserver> tryParseIPAddresses(String domain) {
         LOGGER.trace("Try resolve as ip addresses");
 
         Matcher matcher = IPv4_PATTERN.matcher(domain);
@@ -188,7 +157,7 @@ public class HomeServerResolver {
         return Optional.empty();
     }
 
-    private Optional<ResolvedHomeserver> tryDirectUrl(String domain) {
+    protected Optional<ResolvedHomeserver> tryDirectUrl(String domain) {
         LOGGER.trace("Try resolve via direct url.");
 
         int portIndex = domain.lastIndexOf(":");
@@ -203,7 +172,7 @@ public class HomeServerResolver {
         return Optional.empty();
     }
 
-    private Optional<ResolvedHomeserver> trySrvRecord(String domain) {
+    protected Optional<ResolvedHomeserver> trySrvRecord(String domain) {
         LOGGER.trace("Try resolve via SRV record.");
 
         String srvRecord = String.format("_matrix._tcp.%s", domain);
@@ -220,7 +189,7 @@ public class HomeServerResolver {
                 if (nextValue instanceof String) {
                     URL homeserverUrl = parseSrvRecord((String) nextValue);
                     if (homeserverUrl != null) {
-                        return Optional.of(new ResolvedHomeserver(homeserverUrl, new HomeserverVerifier(domain)));
+                        return Optional.of(new ResolvedHomeserver(homeserverUrl, new HomeServerVerifier(domain)));
                     }
                 } else {
                     LOGGER.warn("Unrecognized SRV record: {}", nextValue.getClass());
@@ -233,7 +202,7 @@ public class HomeServerResolver {
         return Optional.empty();
     }
 
-    private InitialDirContext prepareContext() {
+    protected InitialDirContext prepareContext() {
         Hashtable<String, String> env = new Hashtable<>();
         env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
         env.put("java.naming.provider.url", "dns:");
@@ -248,7 +217,7 @@ public class HomeServerResolver {
     }
 
     @SuppressWarnings("checkstyle:RegexpSingleLine")
-    private URL parseSrvRecord(String record) {
+    protected URL parseSrvRecord(String record) {
         LOGGER.trace("SRV record: {}", record);
         String[] params = record.split(" ");
         if (params.length == SRV_RECORD_PARAMETER_COUNT) {
@@ -267,7 +236,7 @@ public class HomeServerResolver {
         return null;
     }
 
-    private Optional<ResolvedHomeserver> tryWellKnown(String domain) {
+    protected Optional<ResolvedHomeserver> tryWellKnown(String domain) {
         LOGGER.trace("Try resolve via well-known");
         String homeserverUrl = SCHEMA_PREFIX + domain;
         ServerDiscoveryResponse response = null;

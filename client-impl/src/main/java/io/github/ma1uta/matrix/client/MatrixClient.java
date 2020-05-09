@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import javax.net.ssl.HostnameVerifier;
 
@@ -63,20 +64,25 @@ import javax.net.ssl.HostnameVerifier;
 public abstract class MatrixClient implements Closeable {
 
     private volatile URL homeserverURL = null;
-    private volatile RestClientBuilder builder = null;
     private volatile HostnameVerifier hostnameVerifier = null;
-    private final HomeServerResolver homeServerResolver = new HomeServerResolver();
+    private final ClientHomeServerResolver homeServerResolver = new ClientHomeServerResolver();
     private final Map<Class<?>, Object> methods = new ConcurrentHashMap<>();
     private final AuthorizationFilter authorizationFilter;
     private final ConnectionInfo connectionInfo;
+    private final ExecutorService executorService;
 
     public MatrixClient(String domain) {
         this(new ConnectionInfo(domain));
     }
 
     public MatrixClient(ConnectionInfo connectionInfo) {
+        this(connectionInfo, null);
+    }
+
+    public MatrixClient(ConnectionInfo connectionInfo, ExecutorService executorService) {
         this.connectionInfo = connectionInfo;
         this.authorizationFilter = new AuthorizationFilter(this.connectionInfo);
+        this.executorService = executorService;
     }
 
     /**
@@ -106,6 +112,10 @@ public abstract class MatrixClient implements Closeable {
         }
     }
 
+    protected ExecutorService getExecutorService() {
+        return executorService;
+    }
+
     protected RestClientBuilder newClientBuilder() {
         resolveHomeserver();
         RestClientBuilder builder = RestClientBuilder.newBuilder()
@@ -117,19 +127,15 @@ public abstract class MatrixClient implements Closeable {
         if (hostnameVerifier != null) {
             builder.hostnameVerifier(hostnameVerifier);
         }
+        if (getExecutorService() != null) {
+            builder.executorService(executorService);
+        }
         return builder;
     }
 
     protected RestClientBuilder getClientBuilder() {
-        if (builder == null) {
-            synchronized (this) {
-                if (builder != null) {
-                    return builder;
-                }
-                builder = newClientBuilder();
-                ServiceLoader.load(RestClientBuilderConfigurer.class).iterator().forEachRemaining(c -> c.configure(builder));
-            }
-        }
+        RestClientBuilder builder = newClientBuilder();
+        ServiceLoader.load(RestClientBuilderConfigurer.class).iterator().forEachRemaining(c -> c.configure(builder));
         return builder;
     }
 

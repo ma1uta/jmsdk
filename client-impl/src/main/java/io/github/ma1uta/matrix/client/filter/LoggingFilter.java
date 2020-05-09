@@ -60,11 +60,12 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
         if (!LOGGER.isInfoEnabled()) {
             return;
         }
-        StringBuilder builder = new StringBuilder("Request:\n");
-        builder.append("URI: ").append(requestContext.getUri()).append("\nParams:\n");
-        builder.append("Headers:\n");
+        StringBuilder builder = new StringBuilder("\n------------- Request -------------\n");
+        builder.append("  Method: ").append(requestContext.getMethod()).append("\n");
+        builder.append("  URI: ").append(requestContext.getUri()).append("\n");
+        builder.append("  Headers:\n");
         for (Map.Entry<String, List<Object>> header : requestContext.getHeaders().entrySet()) {
-            builder.append(header.getKey()).append(": ");
+            builder.append("    ").append(header.getKey()).append(": ");
             for (Object headerValue : header.getValue()) {
                 builder.append(maskValue(header.getKey(), headerValue.toString()));
             }
@@ -73,6 +74,7 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
         if (MediaType.APPLICATION_JSON_TYPE.equals(requestContext.getMediaType())) {
             requestContext.setEntityStream(new LoggingStream(requestContext.getEntityStream()));
         }
+        builder.append("------------- End Request -------------\n");
         LOGGER.info(builder.toString());
     }
 
@@ -84,16 +86,17 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
         if (!LOGGER.isInfoEnabled()) {
             return;
         }
-        StringBuilder builder = new StringBuilder("Response:\n");
-        builder.append("Status: ").append(responseContext.getStatus()).append("\n");
-        builder.append("Headers:\n");
+        StringBuilder builder = new StringBuilder("\n---------- Response ----------\n");
+        builder.append("  Status: ").append(responseContext.getStatus()).append("\n");
+        builder.append("  Headers:\n");
         for (Map.Entry<String, List<String>> header : responseContext.getHeaders().entrySet()) {
-            builder.append(header.getKey()).append(": ");
+            builder.append("    ").append(header.getKey()).append(": ");
             for (Object headerValue : header.getValue()) {
                 builder.append(headerValue.toString()).append(",");
             }
             builder.append("\n");
         }
+        builder.append("------------- End Response -------------\n");
         LOGGER.info(builder.toString());
         if (requestContext.getUri().toString().contains("/_matrix/media/r0")) {
             return;

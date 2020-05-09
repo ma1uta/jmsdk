@@ -21,6 +21,8 @@ import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.AuthMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 
+import java.util.concurrent.ExecutorService;
+
 /**
  * Application Service Client.
  */
@@ -31,7 +33,11 @@ public class StandaloneClient extends MatrixClient {
     }
 
     public StandaloneClient(ConnectionInfo connectionInfo) {
-        super(connectionInfo);
+        this(connectionInfo, null);
+    }
+
+    public StandaloneClient(ConnectionInfo connectionInfo, ExecutorService executorService) {
+        super(connectionInfo, executorService);
     }
 
     /**

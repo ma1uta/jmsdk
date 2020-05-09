@@ -27,15 +27,15 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 
-public class HomeserverVerifier implements HostnameVerifier {
+public class HomeServerVerifier implements HostnameVerifier {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeserverVerifier.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerVerifier.class);
     private static final String ALT_DNS_NAME_TYPE = "2";
     private static final String ALT_IP_ADDRESS_TYPE = "7";
 
     private final String domain;
 
-    public HomeserverVerifier(String domain) {
+    public HomeServerVerifier(String domain) {
         this.domain = domain;
     }
 

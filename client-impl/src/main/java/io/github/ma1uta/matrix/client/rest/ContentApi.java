@@ -33,6 +33,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * This module allows users to upload content to their homeserver which is retrievable from other homeservers.
@@ -113,7 +114,7 @@ public interface ContentApi {
      */
     @GET
     @Path("/download/{serverName}/{mediaId}")
-    CompletionStage<InputStream> download(
+    CompletionStage<Response> download(
         @PathParam("serverName") String serverName,
         @PathParam("mediaId") String mediaId,
         @QueryParam("allow_remote") Boolean allowRemote
@@ -155,7 +156,7 @@ public interface ContentApi {
      */
     @GET
     @Path("/download/{serverName}/{mediaId}/{fileName}")
-    CompletionStage<InputStream> downloadFile(
+    CompletionStage<Response> downloadFile(
         @PathParam("serverName") String serverName,
         @PathParam("mediaId") String mediaId,
         @PathParam("fileName") String filename,
@@ -195,7 +196,7 @@ public interface ContentApi {
      */
     @GET
     @Path("/thumbnail/{serverName}/{mediaId}")
-    CompletionStage<InputStream> thumbnail(
+    CompletionStage<Response> thumbnail(
         @PathParam("serverName") String serverName,
         @PathParam("mediaId") String mediaId,
         @QueryParam("width") Long width,

@@ -21,6 +21,7 @@ import io.github.ma1uta.matrix.client.methods.AccountMethods;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
 /**
@@ -35,7 +36,11 @@ public class AppServiceClient extends MatrixClient {
     }
 
     public AppServiceClient(ConnectionInfo connectionInfo) {
-        super(connectionInfo);
+        this(connectionInfo, null);
+    }
+
+    public AppServiceClient(ConnectionInfo connectionInfo, ExecutorService executorService) {
+        super(connectionInfo, executorService);
         String userId = connectionInfo.getUserId();
         Objects.requireNonNull(userId, "UserId must be configured.");
         String accessToken = connectionInfo.getAccessToken();
@@ -58,7 +63,7 @@ public class AppServiceClient extends MatrixClient {
     public AppServiceClient userId(String userId) {
         ConnectionInfo newConnectionInfo = new ConnectionInfo(getConnectionInfo());
         newConnectionInfo.setUserId(userId);
-        return new AppServiceClient(newConnectionInfo);
+        return new AppServiceClient(newConnectionInfo, getExecutorService());
     }
 
     /**

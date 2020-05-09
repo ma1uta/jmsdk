@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.matrix.client.methods;
 
+import io.github.ma1uta.matrix.client.ContentUriModel;
 import io.github.ma1uta.matrix.client.model.content.ContentConfig;
 import io.github.ma1uta.matrix.client.model.content.ContentUri;
 import io.github.ma1uta.matrix.client.rest.ContentApi;
@@ -25,6 +26,10 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 
 /**
  * Content methods.
@@ -32,6 +37,7 @@ import java.util.concurrent.CompletableFuture;
 public class ContentMethods {
 
     private final ContentApi contentApi;
+    private static final Pattern CONTENT_DISPOSITION = Pattern.compile("filename=\"?(.*)\"?");
 
     public ContentMethods(RestClientBuilder restClientBuilder) {
         this.contentApi = restClientBuilder.build(ContentApi.class);
@@ -52,17 +58,87 @@ public class ContentMethods {
     /**
      * Download content from the content repository.
      *
+     * @param contentUri  Content URI.
+     * @param allowRemote Indicates to the server that it should not attempt to fetch the media if it is deemed remote.
+     *                    This is to prevent routing loops where the server contacts itself. Defaults to true if not provided.
+     * @return The content that was previously uploaded.
+     */
+    public CompletableFuture<Content> download(String contentUri, Boolean allowRemote) {
+        Objects.requireNonNull(contentUri, "ContentUri cannot be empty.");
+
+        ContentUriModel uriModel = ContentUriModel.valueOf(contentUri);
+        return download(uriModel.getServer(), uriModel.getMediaId(), allowRemote).toCompletableFuture();
+    }
+
+    /**
+     * Download content from the content repository.
+     *
      * @param serverName  The server name from the mxc:// URI (the authoritory component).
      * @param mediaId     The media ID from the mxc:// URI (the path component).
      * @param allowRemote Indicates to the server that it should not attempt to fetch the media if it is deemed remote.
      *                    This is to prevent routing loops where the server contacts itself. Defaults to true if not provided.
      * @return The content that was previously uploaded.
      */
-    public CompletableFuture<InputStream> download(String serverName, String mediaId, Boolean allowRemote) {
+    public CompletableFuture<Content> download(String serverName, String mediaId, Boolean allowRemote) {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
 
-        return contentApi.download(serverName, mediaId, allowRemote).toCompletableFuture();
+        return contentApi.download(serverName, mediaId, allowRemote).toCompletableFuture()
+            .thenApply(ContentMethods::toContent);
+    }
+
+    /**
+     * Download content from the content repository.
+     *
+     * @param contentUri  Content URI.
+     * @param allowRemote Indicates to the server that it should not attempt to fetch the media if it is deemed remote.
+     *                    This is to prevent routing loops where the server contacts itself. Defaults to true if not provided.
+     * @param filename    Required. The filename to give in the Content-Disposition.
+     * @return The content that was previously uploaded.
+     */
+    public CompletableFuture<Content> downloadFile(String contentUri, String filename, Boolean allowRemote) {
+        Objects.requireNonNull(contentUri, "ContentUri cannot be empty.");
+
+        ContentUriModel uriModel = ContentUriModel.valueOf(contentUri);
+        return downloadFile(uriModel.getServer(), uriModel.getMediaId(), filename, allowRemote);
+    }
+
+    /**
+     * Download content from the content repository.
+     *
+     * @param serverName  The server name from the mxc:// URI (the authoritory component).
+     * @param mediaId     The media ID from the mxc:// URI (the path component).
+     * @param allowRemote Indicates to the server that it should not attempt to fetch the media if it is deemed remote.
+     *                    This is to prevent routing loops where the server contacts itself. Defaults to true if not provided.
+     * @param filename    Required. The filename to give in the Content-Disposition.
+     * @return The content that was previously uploaded.
+     */
+    public CompletableFuture<Content> downloadFile(String serverName, String mediaId, String filename, Boolean allowRemote) {
+        Objects.requireNonNull(serverName, "ServerName cannot be empty.");
+        Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
+
+        return contentApi.downloadFile(serverName, mediaId, filename, allowRemote).toCompletableFuture()
+            .thenApply(ContentMethods::toContent);
+    }
+
+    /**
+     * Download a thumbnail of the content from the content repository.
+     *
+     * @param contentUri  Content URI.
+     * @param width       The desired width of the thumbnail. The actual thumbnail may not match the size specified.
+     * @param height      The desired height of the thumbnail. The actual thumbnail may not match the size specified.
+     * @param method      The desired resizing method. One of: ["crop", "scale"].
+     * @param allowRemote Indicates to the server that it should not attempt to fetch the media if it is deemed remote.
+     *                    This is to prevent routing loops where the server contacts itself. Defaults to true if not provided.
+     * @return The content that was previously uploaded.
+     */
+    public CompletableFuture<Thumbnail> thumbnail(String contentUri, Long width, Long height, String method,
+                                                  Boolean allowRemote) {
+        Objects.requireNonNull(contentUri, "ContentUri cannot be empty.");
+
+        ContentUriModel uriModel = ContentUriModel.valueOf(contentUri);
+        return contentApi.thumbnail(uriModel.getServer(), uriModel.getMediaId(), width, height, method, allowRemote).toCompletableFuture()
+            .thenApply(ContentMethods::toThumbnail);
     }
 
     /**
@@ -77,12 +153,13 @@ public class ContentMethods {
      *                    This is to prevent routing loops where the server contacts itself. Defaults to true if not provided.
      * @return The content that was previously uploaded.
      */
-    public CompletableFuture<InputStream> thumbnail(String serverName, String mediaId, Long width, Long height, String method,
-                                                    Boolean allowRemote) {
+    public CompletableFuture<Thumbnail> thumbnail(String serverName, String mediaId, Long width, Long height, String method,
+                                                  Boolean allowRemote) {
         Objects.requireNonNull(serverName, "ServerName cannot be empty.");
         Objects.requireNonNull(mediaId, "MediaId cannot be empty.");
 
-        return contentApi.thumbnail(serverName, mediaId, width, height, method, allowRemote).toCompletableFuture();
+        return contentApi.thumbnail(serverName, mediaId, width, height, method, allowRemote).toCompletableFuture()
+            .thenApply(ContentMethods::toThumbnail);
     }
 
     /**
@@ -106,5 +183,67 @@ public class ContentMethods {
      */
     public CompletableFuture<ContentConfig> getUploadSize() {
         return contentApi.config().toCompletableFuture();
+    }
+
+    public static Content toContent(Response response) {
+        String contentDisposition = response.getHeaderString(HttpHeaders.CONTENT_DISPOSITION);
+        Matcher matcher = CONTENT_DISPOSITION.matcher(contentDisposition);
+        String filename;
+        if (matcher.find()) {
+            filename = matcher.group(1);
+        } else {
+            filename = contentDisposition;
+        }
+        String contentType = response.getHeaderString(HttpHeaders.CONTENT_TYPE);
+        return new Content(response.readEntity(InputStream.class), filename, contentType);
+    }
+
+    public static Thumbnail toThumbnail(Response response) {
+        String contentType = response.getHeaderString(HttpHeaders.CONTENT_TYPE);
+        return new Thumbnail(response.readEntity(InputStream.class), contentType);
+    }
+
+    public static class Content {
+
+        private final InputStream inputStream;
+        private final String filename;
+        private final String contentType;
+
+        public Content(InputStream inputStream, String filename, String contentType) {
+            this.inputStream = inputStream;
+            this.filename = filename;
+            this.contentType = contentType;
+        }
+
+        public InputStream getInputStream() {
+            return inputStream;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public String getContentType() {
+            return contentType;
+        }
+    }
+
+    public static class Thumbnail {
+
+        private final InputStream inputStream;
+        private final String contentType;
+
+        public Thumbnail(InputStream inputStream, String contentType) {
+            this.inputStream = inputStream;
+            this.contentType = contentType;
+        }
+
+        public InputStream getInputStream() {
+            return inputStream;
+        }
+
+        public String getContentType() {
+            return contentType;
+        }
     }
 }
