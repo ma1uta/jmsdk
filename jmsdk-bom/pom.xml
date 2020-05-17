@@ -29,7 +29,7 @@
     <description>Java-based Matrix server. All dependencies.</description>
 
     <properties>
-        <version.lib.jeon>0.11.3</version.lib.jeon>
+        <version.lib.jeon>0.12.0</version.lib.jeon>
         <version.lib.commons-beanutils>1.9.4</version.lib.commons-beanutils>
         <version.lib.logback-classic>1.2.3</version.lib.logback-classic>
         <version.lib.slf4j-api>1.7.30</version.lib.slf4j-api>

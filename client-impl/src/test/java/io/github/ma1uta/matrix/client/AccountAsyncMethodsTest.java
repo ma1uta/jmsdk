@@ -273,6 +273,7 @@ public class AccountAsyncMethodsTest extends MockServer {
                 post(urlPathMatching("/_matrix/client/r0/account/password/?"))
                     .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON))
                     .withRequestBody(equalToJson("{\n" +
+                        "  \"logout_devices\": true,\n" +
                         "  \"new_password\": \"ihatebananas\",\n" +
                         "  \"auth\": {\n" +
                         "    \"type\": \"m.login.password\",\n" +
