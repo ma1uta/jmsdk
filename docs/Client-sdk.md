@@ -44,7 +44,7 @@ There are two ways to receive events from the server:
        // parse events from the server.
        return null; // or a new sync params.
     });
-    
+
     // Set initial parameters.
     SyncParams params = new SyncParams();
     // set initial batch_token (optional)
@@ -57,14 +57,14 @@ There are two ways to receive events from the server:
     params.setPresence(null);
     // set long-polling timeout in milliseconds (recommended to set bigger than 0 to avoid spam server)
     params.setTimeout(10 * 1000);
-    
+
     syncLoop.setInit(params);
-    
+
     // run the syncLoop
     ExecutorService service = Executors.newFixedThreadPool(1);
     service.submit(syncLoop);
-    
+
     // stop loop
     service.shutdown();
-    
+    service.awaitTermination(10 * 1000, TimeUnit.MILLISECONDS);
     ```

@@ -23,12 +23,15 @@ import io.github.ma1uta.matrix.client.methods.blocked.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.blocked.AuthMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Application Service Client.
  */
 public class StandaloneClient extends MatrixClient {
+    private final AtomicBoolean isLoggedIn = new AtomicBoolean(false);
 
     public StandaloneClient(String domain) {
         super(domain);
@@ -48,7 +51,8 @@ public class StandaloneClient extends MatrixClient {
      * @return auth methods.
      */
     public AuthAsyncMethods authAsync() {
-        return getMethod(AuthAsyncMethods.class, () -> new AuthAsyncMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
+        return getMethod(AuthAsyncMethods.class,
+                () -> new AuthAsyncMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
     }
 
     /**
@@ -57,7 +61,8 @@ public class StandaloneClient extends MatrixClient {
      * @return auth methods.
      */
     public AuthMethods auth() {
-        return getMethod(AuthMethods.class, () -> new AuthMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
+        return getMethod(AuthMethods.class,
+                () -> new AuthMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
     }
 
     /**
@@ -67,7 +72,8 @@ public class StandaloneClient extends MatrixClient {
      */
     @Override
     public AccountAsyncMethods accountAsync() {
-        return getMethod(AccountAsyncMethods.class, () -> new AccountAsyncMethods(getClientBuilder(), this::afterLogin));
+        return getMethod(AccountAsyncMethods.class,
+                () -> new AccountAsyncMethods(getClientBuilder(), this::afterLogin));
     }
 
     /**
@@ -82,7 +88,7 @@ public class StandaloneClient extends MatrixClient {
 
     @Override
     public void close() {
-        authAsync().logout();
+        auth().logout();
     }
 
     /**
@@ -99,6 +105,7 @@ public class StandaloneClient extends MatrixClient {
             getConnectionInfo().setAccessToken(loginResponse.getAccessToken());
             getConnectionInfo().setDeviceId(loginResponse.getDeviceId());
             getConnectionInfo().setServerInfo(loginResponse.getWellKnown());
+            isLoggedIn.set(true);
         }
         return loginResponse;
     }
@@ -112,7 +119,17 @@ public class StandaloneClient extends MatrixClient {
     public EmptyResponse afterLogout(EmptyResponse response) {
         getConnectionInfo().setAccessToken(null);
         getConnectionInfo().setDeviceId(null);
+        isLoggedIn.set(false);
         return response;
+    }
+
+    /**
+     * Check if the client is currently authenticated.
+     *
+     * @return true if afterLogin was executed more recently than afterLogout.
+     */
+    public boolean isLoggedIn() {
+        return isLoggedIn.get();
     }
 
     /**
