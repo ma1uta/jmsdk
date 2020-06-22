@@ -59,7 +59,7 @@ public class SyncLoop implements Runnable {
         }
 
         LOGGER.info("SyncLoop started");
-        while (!(Thread.interrupted() && state.isTerminate())) {
+        while (!(Thread.interrupted() || state.isTerminate())) {
             try {
                 SyncResponse sync = syncMethods.sync(
                     state.getFilter(),
