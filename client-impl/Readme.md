@@ -18,7 +18,7 @@ StandaloneClient mxClient = new StandaloneClient.Builder().domain("matrix.homese
 mxClient.auth().login("username", "password");
 
 // set display name via profile api
-mxCLient.profile().setDisplayName("my new display name");
+mxClient.profile().setDisplayName("my new display name");
 
 // retrieve all joined rooms
 List<String> rooms = mxClient.room().joinedRooms().getJoinedRooms();
