@@ -57,7 +57,7 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
      */
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        if (!LOGGER.isInfoEnabled()) {
+        if (!LOGGER.isDebugEnabled()) {
             return;
         }
         StringBuilder builder = new StringBuilder("\n------------- Request -------------\n");
@@ -75,7 +75,7 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
             requestContext.setEntityStream(new LoggingStream(requestContext.getEntityStream()));
         }
         builder.append("------------- End Request -------------\n");
-        LOGGER.info(builder.toString());
+        LOGGER.debug(builder.toString());
     }
 
     /**
@@ -83,7 +83,7 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
      */
     @Override
     public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-        if (!LOGGER.isInfoEnabled()) {
+        if (!LOGGER.isDebugEnabled()) {
             return;
         }
         StringBuilder builder = new StringBuilder("\n---------- Response ----------\n");
@@ -97,13 +97,13 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
             builder.append("\n");
         }
         builder.append("------------- End Response -------------\n");
-        LOGGER.info(builder.toString());
+        LOGGER.debug(builder.toString());
         if (requestContext.getUri().toString().contains("/_matrix/media/r0")) {
             return;
         }
         if (MediaType.APPLICATION_JSON_TYPE.equals(responseContext.getMediaType())) {
             byte[] content = StreamHelper.toByteArray(responseContext.getEntityStream());
-            LOGGER.info("Body:\n" + new String(content, StandardCharsets.UTF_8));
+            LOGGER.debug("Body:\n" + new String(content, StandardCharsets.UTF_8));
             responseContext.setEntityStream(new ByteArrayInputStream(content));
         }
     }
@@ -132,7 +132,7 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
             super.write(b, off, len);
-            LOGGER.info("Body:\n" + baos.toString(StandardCharsets.UTF_8.name()));
+            LOGGER.debug("Body:\n" + baos.toString(StandardCharsets.UTF_8.name()));
         }
     }
 }
