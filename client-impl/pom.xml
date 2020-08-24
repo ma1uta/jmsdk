@@ -81,7 +81,6 @@
             <groupId>io.github.ma1uta.matrix</groupId>
             <artifactId>jackson-support</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
