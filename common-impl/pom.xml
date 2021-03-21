@@ -78,6 +78,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <Export-Package>io.github.ma1uta.matrix.*</Export-Package>
                         <Automatic-Module-Name>matrix.common.impl</Automatic-Module-Name>
                     </instructions>
                 </configuration>
