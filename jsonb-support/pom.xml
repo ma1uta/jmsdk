@@ -98,6 +98,14 @@
                 <configuration>
                     <instructions>
                         <Automatic-Module-Name>matrix.support.jsonb</Automatic-Module-Name>
+                        <Require-Capability>
+                            osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)",
+                            osgi.serviceloader; filter:="(osgi.serviceloader=io.github.ma1uta.matrix.support.jsonb.JsonbProvider)"; resolution:=optional
+                        </Require-Capability>
+                        <Provide-Capability>
+                            osgi.serviceloader; osgi.serviceloader=io.github.ma1uta.matrix.impl.Deserializer,
+                            osgi.serviceloader; osgi.serviceloader=io.github.ma1uta.matrix.impl.RestClientBuilderConfigurer
+                        </Provide-Capability>
                     </instructions>
                 </configuration>
             </plugin>

@@ -108,6 +108,11 @@
                 <configuration>
                     <instructions>
                         <Automatic-Module-Name>matrix.client.impl</Automatic-Module-Name>
+                        <Require-Capability>
+                            osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
+                            osgi.serviceloader; filter:="(osgi.serviceloader=io.github.ma1uta.matrix.impl.Deserializer)",
+                            osgi.serviceloader; filter:="(osgi.serviceloader=io.github.ma1uta.matrix.impl.RestClientBuilderConfigurer)"
+                        </Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>
