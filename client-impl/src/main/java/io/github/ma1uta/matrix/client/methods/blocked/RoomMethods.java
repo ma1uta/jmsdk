@@ -113,11 +113,16 @@ public class RoomMethods {
      * @return The empty response.
      */
     public EmptyResponse invite(String roomId, InviteRequest request) {
-        Objects.requireNonNull(roomId, "RoomId cannot be empty.");
-        Objects.requireNonNull(request.getIdServer(), "IdServer cannot be empty.");
-        Objects.requireNonNull(request.getAddress(), "Address cannot be empty.");
-        Objects.requireNonNull(request.getMedium(), "Medium cannot be empty.");
-        Objects.requireNonNull(request.getUserId(), "UserId cannot be empty.");
+        boolean emptyRoomId = roomId == null;
+        boolean emptyThirdPartyId = request == null
+            || request.getIdServer() == null
+            || request.getAddress() == null
+            || request.getMedium() == null
+            || request.getUserId() == null;
+
+        if (emptyRoomId && emptyThirdPartyId) {
+            throw new NullPointerException("Either roomId or third party request should be specified");
+        }
 
         return roomApi.invite(roomId, request);
     }
