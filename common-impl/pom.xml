@@ -65,10 +65,6 @@
             <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.github.ma1uta.matrix</groupId>
-            <artifactId>common-api</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
