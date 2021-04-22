@@ -23,7 +23,6 @@ import io.github.ma1uta.matrix.client.methods.blocked.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.blocked.AuthMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -52,7 +51,7 @@ public class StandaloneClient extends MatrixClient {
      */
     public AuthAsyncMethods authAsync() {
         return getMethod(AuthAsyncMethods.class,
-                () -> new AuthAsyncMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
+            () -> new AuthAsyncMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
     }
 
     /**
@@ -62,7 +61,7 @@ public class StandaloneClient extends MatrixClient {
      */
     public AuthMethods auth() {
         return getMethod(AuthMethods.class,
-                () -> new AuthMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
+            () -> new AuthMethods(getClientBuilder(), this::afterLogin, this::afterLogout));
     }
 
     /**
@@ -73,7 +72,7 @@ public class StandaloneClient extends MatrixClient {
     @Override
     public AccountAsyncMethods accountAsync() {
         return getMethod(AccountAsyncMethods.class,
-                () -> new AccountAsyncMethods(getClientBuilder(), this::afterLogin));
+            () -> new AccountAsyncMethods(getClientBuilder(), this::afterLogin));
     }
 
     /**
