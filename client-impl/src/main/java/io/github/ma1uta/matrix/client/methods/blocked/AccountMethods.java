@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client.methods.blocked;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
 import io.github.ma1uta.matrix.client.model.account.DeactivateRequest;
@@ -31,6 +30,7 @@ import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.rest.blocked.AccountApi;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import io.github.ma1uta.matrix.thirdpid.SessionResponse;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 

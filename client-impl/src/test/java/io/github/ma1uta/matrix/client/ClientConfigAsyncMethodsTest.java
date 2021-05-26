@@ -24,7 +24,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

@@ -16,10 +16,10 @@
 
 package io.github.ma1uta.matrix.client.methods.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.tag.Tags;
 import io.github.ma1uta.matrix.client.rest.async.TagApi;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import io.github.ma1uta.matrix.event.nested.TagInfo;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 

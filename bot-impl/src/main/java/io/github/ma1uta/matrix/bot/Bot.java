@@ -16,13 +16,13 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.MatrixClient;
 import io.github.ma1uta.matrix.client.StandaloneClient;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.filter.FilterData;
 import io.github.ma1uta.matrix.client.model.filter.RoomEventFilter;
 import io.github.ma1uta.matrix.client.model.filter.RoomFilter;
+import io.github.ma1uta.matrix.common.Id;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
 import io.github.ma1uta.matrix.event.RoomMember;

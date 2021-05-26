@@ -16,12 +16,12 @@
 
 package io.github.ma1uta.matrix.client;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.methods.async.AccountAsyncMethods;
 import io.github.ma1uta.matrix.client.methods.async.AuthAsyncMethods;
 import io.github.ma1uta.matrix.client.methods.blocked.AccountMethods;
 import io.github.ma1uta.matrix.client.methods.blocked.AuthMethods;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -16,12 +16,12 @@
 
 package io.github.ma1uta.matrix.client.methods.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.SupportedLoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.UserIdentifier;
 import io.github.ma1uta.matrix.client.rest.async.AuthApi;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

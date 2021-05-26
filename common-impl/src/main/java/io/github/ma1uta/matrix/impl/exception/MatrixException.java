@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.impl.exception;
 
-import io.github.ma1uta.matrix.ExceptionResponse;
+import io.github.ma1uta.matrix.common.ExceptionResponse;
 
 import java.net.HttpURLConnection;
 

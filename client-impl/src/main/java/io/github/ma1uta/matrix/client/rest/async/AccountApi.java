@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client.rest.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;
 import io.github.ma1uta.matrix.client.model.account.DeactivateRequest;
 import io.github.ma1uta.matrix.client.model.account.DeactivateResponse;
@@ -29,6 +28,7 @@ import io.github.ma1uta.matrix.client.model.account.ThreePidRequest;
 import io.github.ma1uta.matrix.client.model.account.ThreePidResponse;
 import io.github.ma1uta.matrix.client.model.account.WhoamiResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import io.github.ma1uta.matrix.thirdpid.SessionResponse;
 
 import java.util.concurrent.CompletionStage;

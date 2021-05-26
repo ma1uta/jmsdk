@@ -16,12 +16,12 @@
 
 package io.github.ma1uta.matrix.client.methods.blocked;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.profile.AvatarUrl;
 import io.github.ma1uta.matrix.client.model.profile.DisplayName;
 import io.github.ma1uta.matrix.client.model.profile.Profile;
 import io.github.ma1uta.matrix.client.rest.blocked.ProfileApi;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;

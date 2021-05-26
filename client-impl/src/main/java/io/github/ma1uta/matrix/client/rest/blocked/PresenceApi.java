@@ -16,9 +16,9 @@
 
 package io.github.ma1uta.matrix.client.rest.blocked;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.presence.PresenceRequest;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

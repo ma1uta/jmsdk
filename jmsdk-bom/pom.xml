@@ -19,7 +19,7 @@
     <parent>
         <artifactId>jmsdk</artifactId>
         <groupId>io.github.ma1uta.matrix</groupId>
-        <version>0.13.0-SNAPSHOT</version>
+        <version>0.13.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>jmsdk-bom</artifactId>
@@ -29,14 +29,11 @@
     <description>Java-based Matrix server. All dependencies.</description>
 
     <properties>
-        <version.lib.jeon>0.13.0</version.lib.jeon>
+        <version.lib.jeon>0.13.1-SNAPSHOT</version.lib.jeon>
         <version.lib.commons-beanutils>1.9.4</version.lib.commons-beanutils>
         <version.lib.logback-classic>1.2.3</version.lib.logback-classic>
         <version.lib.slf4j-api>1.7.30</version.lib.slf4j-api>
-        <version.lib.jackson-annotations>2.12.3</version.lib.jackson-annotations>
-        <version.lib.jackson-databind>2.12.3</version.lib.jackson-databind>
-        <version.lib.jackson-module-jaxb-annotations>2.12.3</version.lib.jackson-module-jaxb-annotations>
-        <version.lib.jackson-jaxrs-json-provider>2.12.3</version.lib.jackson-jaxrs-json-provider>
+        <version.lib.jackson-bom>2.11.4</version.lib.jackson-bom>
         <version.lib.jakarta.json-api>2.0.0</version.lib.jakarta.json-api>
         <version.lib.jakarta.persistence-api>3.0.0</version.lib.jakarta.persistence-api>
         <version.lib.junit-bom>5.8.0-M1</version.lib.junit-bom>
@@ -79,32 +76,12 @@
                 <version>${version.lib.slf4j-api}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>${version.lib.jackson-jaxrs-json-provider}</version>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${version.lib.jackson-bom}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${version.lib.jackson-annotations}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${version.lib.jackson-databind}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-annotations</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-jaxb-annotations</artifactId>
-                <version>${version.lib.jackson-module-jaxb-annotations}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
                 <artifactId>jersey-client</artifactId>

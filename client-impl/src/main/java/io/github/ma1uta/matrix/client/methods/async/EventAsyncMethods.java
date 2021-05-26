@@ -16,12 +16,12 @@
 
 package io.github.ma1uta.matrix.client.methods.async;
 
-import io.github.ma1uta.matrix.Page;
 import io.github.ma1uta.matrix.client.model.event.JoinedMembersResponse;
 import io.github.ma1uta.matrix.client.model.event.MembersResponse;
 import io.github.ma1uta.matrix.client.model.event.RedactRequest;
 import io.github.ma1uta.matrix.client.model.event.SendEventResponse;
 import io.github.ma1uta.matrix.client.rest.async.EventApi;
+import io.github.ma1uta.matrix.common.Page;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.content.EventContent;

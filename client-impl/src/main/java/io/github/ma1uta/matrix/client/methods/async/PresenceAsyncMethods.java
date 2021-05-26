@@ -16,11 +16,11 @@
 
 package io.github.ma1uta.matrix.client.methods.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.ConnectionInfo;
 import io.github.ma1uta.matrix.client.model.presence.PresenceRequest;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
 import io.github.ma1uta.matrix.client.rest.async.PresenceApi;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;

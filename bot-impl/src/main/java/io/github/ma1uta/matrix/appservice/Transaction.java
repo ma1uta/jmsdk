@@ -16,10 +16,11 @@
 
 package io.github.ma1uta.matrix.appservice;
 
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 
 /**
  * Transaction info.

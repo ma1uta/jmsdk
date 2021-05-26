@@ -16,9 +16,9 @@
 
 package io.github.ma1uta.matrix.client.filter;
 
-import io.github.ma1uta.matrix.ErrorResponse;
-import io.github.ma1uta.matrix.RateLimitedErrorResponse;
-import io.github.ma1uta.matrix.UserInteractiveResponse;
+import io.github.ma1uta.matrix.common.ErrorResponse;
+import io.github.ma1uta.matrix.common.RateLimitedErrorResponse;
+import io.github.ma1uta.matrix.common.UserInteractiveResponse;
 import io.github.ma1uta.matrix.impl.Deserializer;
 import io.github.ma1uta.matrix.impl.exception.MatrixException;
 import org.slf4j.Logger;

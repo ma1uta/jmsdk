@@ -16,9 +16,9 @@
 
 package io.github.ma1uta.matrix.client.methods.async;
 
-import io.github.ma1uta.matrix.Page;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
 import io.github.ma1uta.matrix.client.rest.async.SyncApi;
+import io.github.ma1uta.matrix.common.Page;
 import io.github.ma1uta.matrix.event.Event;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 

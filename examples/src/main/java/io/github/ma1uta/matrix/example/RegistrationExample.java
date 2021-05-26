@@ -18,11 +18,11 @@ package io.github.ma1uta.matrix.example;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.ma1uta.matrix.ExceptionResponse;
-import io.github.ma1uta.matrix.UserInteractiveResponse;
 import io.github.ma1uta.matrix.client.StandaloneClient;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
+import io.github.ma1uta.matrix.common.ExceptionResponse;
+import io.github.ma1uta.matrix.common.UserInteractiveResponse;
 import io.github.ma1uta.matrix.impl.exception.MatrixException;
 
 public class RegistrationExample {

@@ -16,10 +16,10 @@
 
 package io.github.ma1uta.matrix.client.rest.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.profile.AvatarUrl;
 import io.github.ma1uta.matrix.client.model.profile.DisplayName;
 import io.github.ma1uta.matrix.client.model.profile.Profile;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 
 import java.util.concurrent.CompletionStage;
 import javax.ws.rs.Consumes;

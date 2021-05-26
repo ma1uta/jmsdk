@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.ma1uta.matrix</groupId>
     <artifactId>jmsdk</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>0.13.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <licenses>
         <license>
@@ -84,7 +84,7 @@
         <version.plugin.maven-release-plugin>3.0.0-M1</version.plugin.maven-release-plugin>
 
         <!-- plugin dependencies -->
-        <version.lib.checkstyle>8.35</version.lib.checkstyle>
+        <version.lib.checkstyle>8.42</version.lib.checkstyle>
         <version.lib.asm>9.1</version.lib.asm>
 
         <version.lib.mapstruct>1.4.2.Final</version.lib.mapstruct>

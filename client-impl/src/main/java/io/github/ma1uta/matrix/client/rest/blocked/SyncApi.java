@@ -16,8 +16,8 @@
 
 package io.github.ma1uta.matrix.client.rest.blocked;
 
-import io.github.ma1uta.matrix.Page;
 import io.github.ma1uta.matrix.client.model.sync.SyncResponse;
+import io.github.ma1uta.matrix.common.Page;
 import io.github.ma1uta.matrix.event.Event;
 
 import javax.ws.rs.Consumes;

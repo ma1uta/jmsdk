@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;

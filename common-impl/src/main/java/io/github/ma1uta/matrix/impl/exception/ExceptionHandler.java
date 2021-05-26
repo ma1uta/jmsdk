@@ -16,8 +16,8 @@
 
 package io.github.ma1uta.matrix.impl.exception;
 
-import io.github.ma1uta.matrix.ErrorResponse;
-import io.github.ma1uta.matrix.ExceptionResponse;
+import io.github.ma1uta.matrix.common.ErrorResponse;
+import io.github.ma1uta.matrix.common.ExceptionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

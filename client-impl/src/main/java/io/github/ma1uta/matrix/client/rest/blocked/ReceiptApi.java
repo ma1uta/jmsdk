@@ -16,8 +16,8 @@
 
 package io.github.ma1uta.matrix.client.rest.blocked;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.receipt.ReadMarkersRequest;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;

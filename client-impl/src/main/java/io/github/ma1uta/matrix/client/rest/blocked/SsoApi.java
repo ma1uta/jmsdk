@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.client.rest.blocked;
 
-import io.github.ma1uta.matrix.EmptyResponse;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -78,7 +78,7 @@ public interface SsoApi {
                         implementation = EmptyResponse.class
                     )
                 )
-            )
+                )
         },
         tags = {
             "Session management"

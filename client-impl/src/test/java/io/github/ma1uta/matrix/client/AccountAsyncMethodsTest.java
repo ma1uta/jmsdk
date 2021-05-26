@@ -31,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import io.github.ma1uta.matrix.ExceptionResponse;
-import io.github.ma1uta.matrix.UserInteractiveResponse;
+import io.github.ma1uta.matrix.common.ExceptionResponse;
+import io.github.ma1uta.matrix.common.UserInteractiveResponse;
 import io.github.ma1uta.matrix.client.api.AuthApi;
 import io.github.ma1uta.matrix.client.model.account.AuthenticationData;
 import io.github.ma1uta.matrix.client.model.account.AvailableResponse;

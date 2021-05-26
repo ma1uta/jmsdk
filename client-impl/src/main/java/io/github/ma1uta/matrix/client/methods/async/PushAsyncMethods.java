@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client.methods.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.push.NotificationResponse;
 import io.github.ma1uta.matrix.client.model.push.PushActions;
 import io.github.ma1uta.matrix.client.model.push.PushEnable;
@@ -25,6 +24,7 @@ import io.github.ma1uta.matrix.client.model.push.PushUpdateRequest;
 import io.github.ma1uta.matrix.client.model.push.PushersRequest;
 import io.github.ma1uta.matrix.client.model.push.PushersResponse;
 import io.github.ma1uta.matrix.client.rest.async.PushApi;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import io.github.ma1uta.matrix.event.nested.PushRule;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 

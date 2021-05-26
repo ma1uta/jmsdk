@@ -16,10 +16,10 @@
 
 package io.github.ma1uta.matrix.client.rest.blocked;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.auth.LoginRequest;
 import io.github.ma1uta.matrix.client.model.auth.LoginResponse;
 import io.github.ma1uta.matrix.client.model.auth.SupportedLoginResponse;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

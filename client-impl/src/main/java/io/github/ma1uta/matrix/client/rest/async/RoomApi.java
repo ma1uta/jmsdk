@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client.rest.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.room.CreateRoomRequest;
 import io.github.ma1uta.matrix.client.model.room.InviteRequest;
 import io.github.ma1uta.matrix.client.model.room.JoinRequest;
@@ -30,6 +29,7 @@ import io.github.ma1uta.matrix.client.model.room.RoomId;
 import io.github.ma1uta.matrix.client.model.room.RoomResolveResponse;
 import io.github.ma1uta.matrix.client.model.room.RoomVisibility;
 import io.github.ma1uta.matrix.client.model.room.UnbanRequest;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 
 import java.util.List;
 import java.util.concurrent.CompletionStage;

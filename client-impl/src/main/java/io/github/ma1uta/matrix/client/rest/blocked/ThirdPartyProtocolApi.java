@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.client.rest.blocked;
 
-import io.github.ma1uta.matrix.Secured;
+import io.github.ma1uta.matrix.common.Secured;
 import io.github.ma1uta.matrix.protocol.Protocol;
 import io.github.ma1uta.matrix.protocol.ProtocolLocation;
 import io.github.ma1uta.matrix.protocol.ProtocolUser;

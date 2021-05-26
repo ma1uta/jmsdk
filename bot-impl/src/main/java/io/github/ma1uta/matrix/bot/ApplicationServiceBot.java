@@ -16,8 +16,8 @@
 
 package io.github.ma1uta.matrix.bot;
 
-import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.AppServiceClient;
+import io.github.ma1uta.matrix.common.Id;
 import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.matrix.event.RoomEvent;
 import org.slf4j.Logger;

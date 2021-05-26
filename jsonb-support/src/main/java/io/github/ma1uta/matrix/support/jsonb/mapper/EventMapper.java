@@ -16,7 +16,7 @@
 
 package io.github.ma1uta.matrix.support.jsonb.mapper;
 
-import io.github.ma1uta.matrix.Signed;
+import io.github.ma1uta.matrix.common.Signed;
 import io.github.ma1uta.matrix.event.CallAnswer;
 import io.github.ma1uta.matrix.event.CallCandidates;
 import io.github.ma1uta.matrix.event.CallHangup;

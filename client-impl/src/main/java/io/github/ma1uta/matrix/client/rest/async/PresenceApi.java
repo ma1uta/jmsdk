@@ -16,9 +16,9 @@
 
 package io.github.ma1uta.matrix.client.rest.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.presence.PresenceRequest;
 import io.github.ma1uta.matrix.client.model.presence.PresenceStatus;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 
 import java.util.concurrent.CompletionStage;
 import javax.ws.rs.Consumes;

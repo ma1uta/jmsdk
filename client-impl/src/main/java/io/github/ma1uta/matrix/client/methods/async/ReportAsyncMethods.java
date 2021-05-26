@@ -16,9 +16,9 @@
 
 package io.github.ma1uta.matrix.client.methods.async;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.report.ReportRequest;
 import io.github.ma1uta.matrix.client.rest.async.ReportApi;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;

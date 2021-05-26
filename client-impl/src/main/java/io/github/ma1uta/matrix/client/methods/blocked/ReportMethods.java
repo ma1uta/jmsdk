@@ -16,9 +16,9 @@
 
 package io.github.ma1uta.matrix.client.methods.blocked;
 
-import io.github.ma1uta.matrix.EmptyResponse;
 import io.github.ma1uta.matrix.client.model.report.ReportRequest;
 import io.github.ma1uta.matrix.client.rest.blocked.ReportApi;
+import io.github.ma1uta.matrix.common.EmptyResponse;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import java.util.Objects;
