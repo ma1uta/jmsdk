@@ -44,7 +44,7 @@
         <version.lib.mapstruct>1.4.2.Final</version.lib.mapstruct>
         <version.lib.yasson>2.0.2</version.lib.yasson>
         <version.lib.jaxb-api>2.4.0-b180830.0359</version.lib.jaxb-api>
-        <version.lib.resteasy>4.6.0.Final</version.lib.resteasy>
+        <version.lib.resteasy>4.5.12.Final</version.lib.resteasy>
         <version.lib.wiremock>2.27.2</version.lib.wiremock>
         <version.lib.javax-annotation-api>1.3.2</version.lib.javax-annotation-api>
     </properties>
