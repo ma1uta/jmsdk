@@ -271,10 +271,14 @@ public abstract class AbstractHomeServerResolver {
         }
         HomeserverInfo homeserver = response.getHomeserver();
         if (homeserver != null && homeserver.getBaseUrl() != null && !homeserver.getBaseUrl().trim().isEmpty()) {
+            String baseUrl = homeserver.getBaseUrl();
+            if (baseUrl.endsWith("/")) {
+                baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+            }
             try {
-                return Optional.of(new ResolvedHomeserver(new URL(homeserver.getBaseUrl())));
+                return Optional.of(new ResolvedHomeserver(new URL(baseUrl)));
             } catch (MalformedURLException e) {
-                LOGGER.warn("Malformed homeserver url: " + homeserver.getBaseUrl(), e);
+                LOGGER.warn("Malformed homeserver url: " + baseUrl, e);
             }
         }
         LOGGER.trace("Unable to get homeserver url of the domain '{}' via well-known, try other way.", domain);
