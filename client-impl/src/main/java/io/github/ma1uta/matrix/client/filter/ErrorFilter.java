@@ -68,7 +68,7 @@ public class ErrorFilter implements ClientResponseFilter {
     }
 
     private void throwUserInteractiveException(ClientResponseContext responseContext) throws IOException {
-        byte[] response = StreamHelper.toByteArray(responseContext.getEntityStream());
+        byte[] response = responseContext.getEntityStream().readAllBytes();
         try {
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));
@@ -85,7 +85,7 @@ public class ErrorFilter implements ClientResponseFilter {
     }
 
     private void throwRateLimitException(ClientResponseContext responseContext) throws IOException {
-        byte[] response = StreamHelper.toByteArray(responseContext.getEntityStream());
+        byte[] response = responseContext.getEntityStream().readAllBytes();
         try {
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));
@@ -107,7 +107,7 @@ public class ErrorFilter implements ClientResponseFilter {
             LOGGER.error(message);
             throw new RuntimeException(message);
         }
-        byte[] response = StreamHelper.toByteArray(responseContext.getEntityStream());
+        byte[] response = responseContext.getEntityStream().readAllBytes();
         try {
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.error("Response: {}", new String(response, StandardCharsets.UTF_8));

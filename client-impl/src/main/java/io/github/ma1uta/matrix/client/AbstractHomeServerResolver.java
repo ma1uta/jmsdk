@@ -16,7 +16,6 @@
 
 package io.github.ma1uta.matrix.client;
 
-import io.github.ma1uta.matrix.client.filter.StreamHelper;
 import io.github.ma1uta.matrix.client.model.serverdiscovery.HomeserverInfo;
 import io.github.ma1uta.matrix.client.model.serverdiscovery.ServerDiscoveryResponse;
 import io.github.ma1uta.matrix.client.model.version.VersionsResponse;
@@ -117,7 +116,7 @@ public abstract class AbstractHomeServerResolver {
                 ((HttpsURLConnection) connection).setHostnameVerifier(homeserver.getOptionalHostnameVerifier().get());
             }
             try (InputStream inputStream = connection.getInputStream()) {
-                byte[] content = StreamHelper.toByteArray(inputStream);
+                byte[] content = inputStream.readAllBytes();
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Content from {}: {}", version, new String(content, StandardCharsets.UTF_8));
                 }
@@ -254,7 +253,7 @@ public abstract class AbstractHomeServerResolver {
         try {
             String wellKnownUrl = homeserverUrl + "/.well-known/matrix/client";
             try (InputStream inputStream = new URL(wellKnownUrl).openStream()) {
-                byte[] content = StreamHelper.toByteArray(inputStream);
+                byte[] content = inputStream.readAllBytes();
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Content from {}: {}", wellKnownUrl, new String(content, StandardCharsets.UTF_8));
                 }

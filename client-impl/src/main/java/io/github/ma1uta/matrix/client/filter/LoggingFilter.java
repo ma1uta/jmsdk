@@ -102,7 +102,7 @@ public class LoggingFilter implements ClientRequestFilter, ClientResponseFilter 
             return;
         }
         if (MediaType.APPLICATION_JSON_TYPE.equals(responseContext.getMediaType())) {
-            byte[] content = StreamHelper.toByteArray(responseContext.getEntityStream());
+            byte[] content = responseContext.getEntityStream().readAllBytes();
             LOGGER.debug("Body:\n" + new String(content, StandardCharsets.UTF_8));
             responseContext.setEntityStream(new ByteArrayInputStream(content));
         }
