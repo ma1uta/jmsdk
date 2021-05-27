@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.ma1uta.matrix</groupId>
     <artifactId>jmsdk</artifactId>
-    <version>0.13.2-SNAPSHOT</version>
+    <version>0.14.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <licenses>
         <license>
@@ -37,7 +37,7 @@
         <url>https://github.com/ma1uta/jmsdk</url>
         <developerConnection>scm:git:ssh://github.com/ma1uta/jmsdk</developerConnection>
         <connection>scm:git:git://github.com/ma1uta/jmsdk</connection>
-      <tag>0.13.1</tag>
+        <tag>0.14.0</tag>
   </scm>
 
     <developers>
@@ -63,7 +63,7 @@
         <!-- common properties -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
 
         <!-- plugins versions -->
         <version.plugin.maven-compiler-plugin>3.8.1</version.plugin.maven-compiler-plugin>
@@ -97,6 +97,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${version.plugin.maven-compiler-plugin}</version>
+                    <configuration>
+                        <release>${java.version}</release>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <!-- This plugin generates the buildNumber property used in maven-bundle-plugin -->
@@ -256,9 +259,6 @@
                             </goals>
                         </execution>
                     </executions>
-                    <configuration>
-                        <source>8</source>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -317,10 +317,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
             </plugin>
             <plugin>
@@ -342,6 +338,42 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>--illegal-access=permit</argLine>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>${version.lib.asm}</version> <!-- Use newer version of ASM -->
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <argLine>--illegal-access=permit</argLine>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -381,115 +413,6 @@
                         </configuration>
                     </plugin>
                 </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>jdk9+</id>
-            <activation>
-                <jdk>[9,)</jdk>
-            </activation>
-            <properties>
-                <packaging.type>bundle</packaging.type>
-            </properties>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-compiler-plugin</artifactId>
-                            <version>${version.plugin.maven-compiler-plugin}</version>
-                            <executions>
-                                <execution>
-                                    <id>default-compile</id>
-                                    <configuration>
-                                        <!-- compile everything to ensure module-info contains right entries -->
-                                        <release>9</release>
-                                    </configuration>
-                                </execution>
-                                <execution>
-                                    <id>base-compile</id>
-                                    <goals>
-                                        <goal>compile</goal>
-                                    </goals>
-                                    <!-- recompile everything for target VM except the module-info.java -->
-                                    <configuration>
-                                        <excludes>
-                                            <exclude>module-info.java</exclude>
-                                        </excludes>
-                                        <source>${java.version}</source>
-                                        <target>${java.version}</target>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <source>${java.version}</source>
-                                <target>${java.version}</target>
-                            </configuration>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-surefire-plugin</artifactId>
-                            <configuration>
-                                <argLine>--illegal-access=permit</argLine>
-                            </configuration>
-                            <dependencies>
-                                <dependency>
-                                    <groupId>org.ow2.asm</groupId>
-                                    <artifactId>asm</artifactId>
-                                    <version>${version.lib.asm}</version> <!-- Use newer version of ASM -->
-                                </dependency>
-                            </dependencies>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-failsafe-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <goals>
-                                        <goal>integration-test</goal>
-                                        <goal>verify</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <argLine>--illegal-access=permit</argLine>
-                                <includes>
-                                    <include>**/*Test.java</include>
-                                </includes>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-
-        </profile>
-
-        <profile>
-            <id>jdk8-</id>
-            <activation>
-                <jdk>(,9)</jdk>
-            </activation>
-            <properties>
-                <packaging.type>bundle</packaging.type>
-            </properties>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-compiler-plugin</artifactId>
-                            <version>${version.plugin.maven-compiler-plugin}</version>
-                            <configuration>
-                                <source>${java.version}</source>
-                                <target>${java.version}</target>
-                                <excludes>
-                                    <exclude>module-info.java</exclude>
-                                </excludes>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
             </build>
         </profile>
     </profiles>
