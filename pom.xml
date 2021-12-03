@@ -78,7 +78,7 @@
         <version.plugin.maven-site-plugin>3.7.1</version.plugin.maven-site-plugin>
         <version.plugin.maven-project-info-plugin>3.0.0</version.plugin.maven-project-info-plugin>
         <version.plugin.maven-jar-plugin>3.1.0</version.plugin.maven-jar-plugin>
-        <version.plugin.maven-bundle-plugin>4.1.0</version.plugin.maven-bundle-plugin>
+        <version.plugin.maven-bundle-plugin>5.1.2</version.plugin.maven-bundle-plugin>
         <version.plugin.buildnumber-maven-plugin>1.4</version.plugin.buildnumber-maven-plugin>
         <version.plugin.maven-enforcer-plugin>3.0.0-M2</version.plugin.maven-enforcer-plugin>
         <version.plugin.maven-release-plugin>3.0.0-M1</version.plugin.maven-release-plugin>
